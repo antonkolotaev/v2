@@ -37,7 +37,7 @@ namespace {
    typedef boost::intrusive_ptr<LimitBuy>   LimitBuyPtr;
    typedef boost::intrusive_ptr<LimitSell>  LimitSellPtr;
 
-   typedef OrderBook<LimitBuyPtr, LimitSellPtr>    OrderBook;
+   typedef OrderBook<OrderQueue<LimitBuyPtr>, OrderQueue<LimitSellPtr> >    OrderBook;
 
 
    // !!! TODO: Extract object_pool<Order> to PrivatePool<> and SharedPool<>

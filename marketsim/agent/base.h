@@ -5,10 +5,6 @@
 
 namespace marketsim
 {
-    struct Dummy {};
-
-    __declspec(selectany)  Dummy dummy;
-
     template <class Derived>
         struct AgentBase 
     {
@@ -31,8 +27,7 @@ namespace marketsim
             void onOrderCancelled(T x) 
         {}
 
-        template <class T> void getHistory(T) const;
-        template <class T> void recordHistory(T,bool);  // to be defined in derived classes if used
+		void getHandler() const; // to be defined in derived classes if used
     };
 }
 

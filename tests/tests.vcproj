@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\&quot;;d:\boost_1_44_0"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\&quot;;&quot;$(ProjectDir)..\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -207,6 +207,10 @@
 			</File>
 			<File
 				RelativePath=".\order_book.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\order_book_history.cpp"
 				>
 			</File>
 			<File

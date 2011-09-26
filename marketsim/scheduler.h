@@ -80,11 +80,6 @@ namespace marketsim
             currentTime_ = t;
         }
 
-        struct Session
-        {
-            ~Session();
-        };
-
         void reset() 
         {
             while (!eventQueue_.empty())
@@ -102,15 +97,16 @@ namespace marketsim
         Time     currentTime_;
     };
 
+	template <int> struct SchedulerHolderT
+	{
+		static Scheduler instance;
+	};
+
+	template <int N> Scheduler SchedulerHolderT<N>::instance;
+
     inline Scheduler& scheduler() 
     {
-        static Scheduler instance;
-        return instance;   
-    }
-
-    inline Scheduler::Session::~Session()
-    {
-        scheduler().reset();
+		return SchedulerHolderT<1>::instance;   
     }
 
     struct EventHandler : IEventHandler

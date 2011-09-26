@@ -39,7 +39,7 @@ namespace {
    typedef boost::intrusive_ptr<LimitBuy>   LimitBuyPtr;
    typedef boost::intrusive_ptr<LimitSell>  LimitSellPtr;
 
-   typedef OrderBook<LimitBuyPtr, LimitSellPtr>    OrderBook;
+   typedef OrderBook<OrderQueue<LimitBuyPtr>, OrderQueue<LimitSellPtr> >    OrderBook;
 
    struct always_0
    {
@@ -50,13 +50,13 @@ namespace {
 
    template <Side SIDE>
     struct AgentT :
-        OrderCanceller<rng::constant<Time>, boost::intrusive_ptr<LimitT<SIDE> >, 
+		OrderCanceller<rng::Generator<Time>, boost::intrusive_ptr<LimitT<SIDE> >, 
             LinkToOrderBook<OrderBook*, 
                 PrivateOrderPool<LimitT<SIDE>, 
                     AgentBase<AgentT<SIDE> > > >, always_0>
     {
         AgentT() 
-            : base(boost::make_tuple(dummy, rng::constant<Time>(1.))) 
+			: base(boost::make_tuple(dummy, new rng::constant<Time, rng::IGenerator<Time> >(1.))) 
         {}
 
         LimitT<SIDE> * sendOrder(Price p, Volume v)

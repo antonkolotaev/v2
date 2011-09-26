@@ -3,39 +3,30 @@
 
 namespace marketsim
 {
-    template <class TAG, class HistoryFunc, class Base>
-        struct OnPartiallyFilled : TAG::base<Base>::type
+    template <class Handler, class Base>
+        struct OnPartiallyFilled : Base
     {
-        typedef typename TAG::base<Base>::type          RealBase;
-        typedef typename HistoryFunc::apply<TAG>::type  History;
-
         template <class T>
             OnPartiallyFilled(T const & x)
-                :   RealBase(x) {}
+				:   Base    (boost::get<0>(x)) 
+				,	Handler_(boost::get<1>(x))
+			{}
 
         typedef OnPartiallyFilled base; // for derived classes
 
-        typename History::HistoryStorage const & getHistory(TAG)
-        {
-            return history_.getHistory();
-        }
+		Handler & getHandler(Handler*) { return Handler_; }
+		Handler const & getHandler(Handler*) const { return Handler_; }
 
-        void recordHistory(TAG)
-        {
-            history_.recordHistory();
-        }
-
-        using TAG::base<Base>::type::getHistory; 
-        using TAG::base<Base>::type::recordHistory; 
+		using Base::getHandler;
 
         template <class Order>
             void onOrderPartiallyFilled(Order order, PriceVolume const & x)
         {
-            RealBase::onOrderPartiallyFilled(order, x);
-            history_.update(self());            
+            Base::onOrderPartiallyFilled(order, x);
+            Handler_(self());            
         }
     private:
-        History     history_;
+        Handler     Handler_;
     };
 
 }

@@ -24,7 +24,7 @@ namespace {
 
             void process()
             {
-                Base::onCancelled();
+                self()->onCancelled();
             }
         };
 
@@ -39,13 +39,19 @@ namespace {
                             LimitT<SIDE> >
                     > > >
         {
-            LimitT(PriceVolume const & x, TimeInterval life_time, object_pool<LimitT> * h)
-                :   base(boost::make_tuple(boost::make_tuple(x, life_time), h))
+            LimitT(PriceVolume const & x, TimeInterval life_time, object_pool<LimitT> * h, OrderQueue<boost::intrusive_ptr<LimitT> >  * queue)
+                :   base(boost::make_tuple(boost::make_tuple(x, life_time), h)), queue_(queue)
             {
                 ++g_counter;
 //                 std::cout 
 //                     << "[" << scheduler().currentTime() << "]\t"
 //                     << "Created " << x.volume << "@" << x.price << " to be destroyed at " << this->getActionTime() << std::endl;
+            }
+
+            void onCancelled()
+            {
+                base::onCancelled();
+                queue_->onOrderCancelled(this);
             }
 
             ~LimitT()
@@ -55,6 +61,8 @@ namespace {
 //                     << "[" << scheduler().currentTime() << "]\t"
 //                     << "Destroyed " << volume << "@" << price << " with killtime at " << this->getActionTime() << std::endl;
             }
+        private:
+            OrderQueue<boost::intrusive_ptr<LimitT> >  * queue_;
         };
                     
     typedef LimitT<Sell>    LimitSell;
@@ -70,30 +78,29 @@ namespace {
 
         LimitSell * ls;
 
-        sell_orders.push(ls = new (pool.alloc()) LimitSell(pv(100, 123), 15., &pool));
-        sell_orders.push(ls = new (pool.alloc()) LimitSell(pv(90, 978), 3., &pool));
+        sell_orders.push(ls = new (pool.alloc()) LimitSell(pv(100, 123), 15., &pool, &sell_orders));
+        sell_orders.push(ls = new (pool.alloc()) LimitSell(pv(90, 978), 3., &pool, &sell_orders));
 
         scheduler().workTill(1.);
 
-        REQUIRE(!sell_orders.empty());
         REQUIRE(sell_orders.top()->volume == 978);
         REQUIRE(g_counter == 2);
+        REQUIRE(!sell_orders.empty());
         scheduler().workTill(10.);
 
-        sell_orders.push(ls = new (pool.alloc()) LimitSell(pv(91, 555), 1., &pool));
-        REQUIRE(g_counter == 3);
-        REQUIRE(!sell_orders.empty());
+        sell_orders.push(ls = new (pool.alloc()) LimitSell(pv(91, 555), 1., &pool, &sell_orders));
         REQUIRE(g_counter == 2);
+        REQUIRE(!sell_orders.empty());
         REQUIRE(sell_orders.top()->volume == 555);
 
         scheduler().workTill(12.);
-        REQUIRE(!sell_orders.empty());
         REQUIRE(g_counter == 1);
+        REQUIRE(!sell_orders.empty());
         REQUIRE(sell_orders.top()->volume == 123);
 
         scheduler().workTill(20.);
-        REQUIRE(sell_orders.empty());
         REQUIRE(g_counter == 0);
+        REQUIRE(sell_orders.empty());
 
         scheduler().reset();
     }

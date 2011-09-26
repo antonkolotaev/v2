@@ -21,6 +21,13 @@ namespace marketsim
                 order_book_->processOrder(x);
             }
 
+        template <class T>
+            void onOrderCancelled(T x) 
+        {
+            order_book_->onOrderCancelled(x);
+        }
+
+
     private:
         BookPtr    order_book_;
     };

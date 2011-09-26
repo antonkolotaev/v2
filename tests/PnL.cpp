@@ -48,17 +48,50 @@ namespace {
    typedef boost::intrusive_ptr<LimitBuy>   LimitBuyPtr;
    typedef boost::intrusive_ptr<LimitSell>  LimitSellPtr;
 
-   typedef OrderBook<LimitBuyPtr, LimitSellPtr>    OrderBook;
+   struct BestPriceAndVolume 
+   {
+	   typedef PriceVolume	ValueType;
+
+	   template <class T> 
+			static ValueType getValue(T x) 
+			{
+				return PriceVolume(x->top()->price, x->getBestVolume());
+			}
+   };
+
+   struct OrderBook : marketsim::OrderBook<
+	   OrderQueue<LimitBuyPtr>, 
+	   OnQueueTopChanged<history::Collector<BestPriceAndVolume, history::InDeque<PriceVolume> >, 
+			OrderQueue<LimitSellPtr> 
+	   > 
+   >    
+   {
+	   std::deque<std::pair<Time, PriceVolume> > const & getHistory() 
+	   {
+		   orderQueue(sell_tag()).getHandler((history::Collector<BestPriceAndVolume, history::InDeque<PriceVolume> >*)0).flush();
+		   return orderQueue(sell_tag()).getHandler((history::Collector<BestPriceAndVolume, history::InDeque<PriceVolume> >*)0).getHistory();
+	   }
+   };
 
    template <Side SIDE>
     struct AgentT :
-        OnPartiallyFilled<PnL, History,
-            OnPartiallyFilled<Quantity, History,
-                LinkToOrderBook<OrderBook*, 
-                    PrivateOrderPool<LimitT<SIDE>, 
-                        AgentBase<AgentT<SIDE> > > > > > 
+		OnPartiallyFilled<history::Collector<PnL, history::InDeque<Price> >,
+			OnPartiallyFilled<history::Collector<Quantity, history::InDeque<Volume> >,
+				OnPartiallyFilled<history::Collector<PnL, history::InFile>,  
+					PnL_Holder<
+						Quantity_Holder<
+							LinkToOrderBook<OrderBook*, 
+								PrivateOrderPool<LimitT<SIDE>, 
+									AgentBase<AgentT<SIDE> > > > > > > > > 
     {
-        AgentT() : base(dummy) {}
+		AgentT() : base(boost::make_tuple(boost::make_tuple(boost::make_tuple(dummy, "history.log"), dummy), dummy)) {}
+
+		template <class TAG>
+			std::deque<std::pair<Time, typename TAG::ValueType> > const & getHistory() 
+			{
+				getHandler((history::Collector<TAG, history::InDeque<typename TAG::ValueType> >*)0).flush();
+				return getHandler((history::Collector<TAG, history::InDeque<typename TAG::ValueType> >*)0).getHistory();
+			}
 
         LimitT<SIDE> * sendOrder(Price p, Volume v)
         {
@@ -87,32 +120,50 @@ namespace {
         trader.sendOrder(102, 5);
         trader.sendOrder(105, 7);
 
-        REQUIRE(trader.getPnL() == 0);
-        REQUIRE(trader.getHistory(PnL()).empty());
+		std::deque<std::pair<Time, PriceVolume> > book_history = book.getHistory();
+
+		REQUIRE(book_history[0].first == 0);
+		REQUIRE(book_history[0].second == PriceVolume(100, 3));
+		REQUIRE(book_history.size() == 1);
+
+		REQUIRE(trader.getPnL() == 0);
+        REQUIRE(trader.getHistory<PnL>().empty());
         REQUIRE(trader.getQuantity() == 0);
-        REQUIRE(trader.getHistory(Quantity()).empty());
+        REQUIRE(trader.getHistory<Quantity>().empty());
 
         scheduler().workTill(1.5);
 
         book.processOrder(buy(1));
 
+		book_history = book.getHistory();
+
+		REQUIRE(book_history[1].first == 1.5);
+		REQUIRE(book_history[1].second == PriceVolume(100, 2));
+		REQUIRE(book_history.size() == 2);
+
         REQUIRE(trader.getPnL() == 100);
         REQUIRE(trader.getQuantity() == -1);
-        REQUIRE(!trader.getHistory(PnL()).empty());
-        REQUIRE(!trader.getHistory(Quantity()).empty());
-        REQUIRE(trader.getHistory(PnL()).back() == PnLHistoryPiece(1.5, 100));
-        REQUIRE(trader.getHistory(Quantity()).back() == QuantityHistoryPiece(1.5, -1));
+        REQUIRE(!trader.getHistory<PnL>().empty());
+        REQUIRE(!trader.getHistory<Quantity>().empty());
+        REQUIRE(trader.getHistory<PnL>().back() == PnLHistoryPiece(1.5, 100));
+        REQUIRE(trader.getHistory<Quantity>().back() == QuantityHistoryPiece(1.5, -1));
 
         scheduler().workTill(3.5);
 
         book.processOrder(buy(3));
 
-        REQUIRE(trader.getPnL() == 100 + 200 + 102);
+		book_history = book.getHistory();
+
+		REQUIRE(book_history[2].first == 3.5);
+		REQUIRE(book_history[2].second == PriceVolume(102, 4));
+		REQUIRE(book_history.size() == 3);
+
+		REQUIRE(trader.getPnL() == 100 + 200 + 102);
         REQUIRE(trader.getQuantity() == -4);
-        REQUIRE(trader.getHistory(PnL()).size() == 2);
-        REQUIRE(trader.getHistory(PnL()).back() == PnLHistoryPiece(3.5, 100 + 200 + 102));
-        REQUIRE(trader.getHistory(Quantity()).size() == 2);
-        REQUIRE(trader.getHistory(Quantity()).back() == QuantityHistoryPiece(3.5, -4));
+        REQUIRE(trader.getHistory<PnL>().size() == 2);
+        REQUIRE(trader.getHistory<PnL>().back() == PnLHistoryPiece(3.5, 100 + 200 + 102));
+        REQUIRE(trader.getHistory<Quantity>().size() == 2);
+        REQUIRE(trader.getHistory<Quantity>().back() == QuantityHistoryPiece(3.5, -4));
 
         scheduler().reset();
     }

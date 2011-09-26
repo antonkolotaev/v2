@@ -2,58 +2,121 @@
 #define _marketsim_history_h_included_
 
 #include <queue>
+#include <boost/optional.hpp>
 #include <marketsim/scheduler.h>
 
-namespace marketsim
-{
-    template <class FieldTag>
-        struct HistoryT 
+#include <fstream>
+
+namespace marketsim {
+namespace history {
+
+	template <class FieldType>
+		struct InDeque 
+		{
+			typedef std::pair<Time,FieldType>       HistoryPiece;
+			typedef std::deque<HistoryPiece>        HistoryStorage;
+
+			InDeque() {}
+			template <class T> 
+				InDeque(T const & x) {}
+
+			HistoryStorage const & getHistory() 
+			{
+				return history_;
+			}
+
+		protected:
+			void write(Time t, FieldType const & x)
+			{
+				history_.push_back(HistoryPiece(t,x));
+			}
+			
+
+		private:
+			HistoryStorage  history_;
+		};
+
+		struct InFile 
+		{
+			InFile(const char * filename) : out_(filename) {}
+
+		protected:
+			template <class FieldType>
+				void write(Time t, FieldType const & x)
+			{
+				out_ << t << "\t" << x << "\n";
+			}			
+
+		private:
+			std::ofstream	out_;
+		};
+
+
+		template <class FieldTag, class Base = InDeque<typename FieldTag::ValueType> >
+			struct Collector : Base
         {
             typedef FieldTag                        Tag;
             typedef typename FieldTag :: ValueType  FieldType;
             typedef std::pair<Time,FieldType>       HistoryPiece;
             typedef std::deque<HistoryPiece>        HistoryStorage;
 
-            HistoryT() : recording_(true) {}
+			Collector() {}
+
+			template <class T>
+				Collector(T const & x) : Base(x), recording_(true), lastT_(-1.) {}
 
             void recordHistory(bool bRecord = true) 
             {
                 recording_ = bRecord;
             }
 
-            template <class T>
-                void update(T x)
+			template <class T>
+				void operator () (T x)
+			{
+                if (recording_)
                 {
-                    if (recording_)
-                    {
-                        Time t = scheduler().currentTime();
-                        FieldType p = FieldTag::getValue(x);
+                    Time t = scheduler().currentTime();
+                    FieldType p = FieldTag::getValue(x);
 
-                        if (history_.empty() || history_.back().first != t)
-                            history_.push_back(PnLHistoryPiece(t, p));
-                        else 
-                            history_.back().second = p; // is it reasonable?
-                    }
+					if (lastT_ != t)
+					{
+						if (last_)
+							write(lastT_, *last_);
+					}
+					last_ = p;
+					lastT_ = t;
                 }
+			}
 
-            HistoryStorage const & getHistory() const 
-            {
-                return history_;
-            }
+			void flush() 
+			{
+				if (last_)
+				{
+					write(lastT_, *last_);
+					last_.reset(); lastT_ = -1;
+				}
+			}
+
+			~Collector() 
+			{
+				flush();
+			}
 
         private:
-            HistoryStorage  history_;
-            bool            recording_;
+			Time						lastT_;
+			boost::optional<FieldType>	last_;
+            bool						recording_;
         };
 
-    struct History 
-    {
-        template <class Tag>
-            struct apply 
-            {
-                typedef HistoryT<Tag>    type;
-            };
-    };
-}
+
+	// History encapsulates:
+	//  - logic of recording: on/off
+	//  - logic of filtering out values corresponding to the same time
+	//  - (to be done) logic of filtering by time
+	// 
+	// So we may conclude that it should be parametrized by "OutputIterator"<Time, FieldType>
+
+
+}}
 
 #endif

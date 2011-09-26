@@ -54,21 +54,33 @@ namespace marketsim
         typedef typename T :: OrderedByPrice type;
     };
 
+	typedef int Price;
+	typedef int Volume;
+	typedef double Time;
+
     template <class T> struct ordered_by_price<boost::intrusive_ptr<T> > 
     {
         struct type 
         {
-            bool operator () (boost::intrusive_ptr<T> const & lhs, boost::intrusive_ptr<T> const & rhs)
-            {
-                typedef typename ordered_by_price<T>::type  X;
-                return X()(*lhs, *rhs);
-            }
+			bool operator () (boost::intrusive_ptr<T> const & lhs, boost::intrusive_ptr<T> const & rhs) const 
+			{
+				typedef typename ordered_by_price<T>::type  X;
+				return X()(*lhs, *rhs);
+			}
+			bool operator () (boost::intrusive_ptr<T> const & lhs, Price rhs) const 
+			{
+				typedef typename ordered_by_price<T>::type  X;
+				return X()(*lhs, rhs);
+			}
         };
     };
 
-    typedef int Price;
-    typedef int Volume;
-    typedef double Time;
+	struct Empty {};
+
+	struct Dummy {};
+
+	__declspec(selectany)  Dummy dummy;
+
 
     struct PriceVolume 
     {

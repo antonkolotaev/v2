@@ -57,10 +57,22 @@ namespace marketsim
 
         struct OrderedByPrice 
         {
-            bool operator () (PriceHolder const & lhs, PriceHolder const & rhs)
-            {
-                return side == Buy ? lhs.price < rhs.price : lhs.price > rhs.price;
-            }
+			bool operator () (PriceHolder const & lhs, PriceHolder const & rhs) const 
+			{
+				return operator () (lhs.price, rhs.price);
+			}
+			bool operator () (PriceHolder const & lhs, Price rhs) const
+			{
+				return operator () (lhs.price, rhs);
+			}
+			bool operator () (Price lhs, PriceHolder const & rhs) const 
+			{
+				return operator () (lhs, rhs.price);
+			}
+			bool operator () (Price lhs, Price rhs) const 
+			{
+				return side == Buy ? lhs < rhs : lhs > rhs;
+			}
         };
 
 		Price	price;  // const!!!

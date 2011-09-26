@@ -36,7 +36,7 @@ namespace {
         LimitSellPool  sell_orders;
         LimitBuyPool   buy_orders;
 
-        OrderBook<LimitOrderBuyPtr, LimitOrderSellPtr>  book;
+        OrderBook<OrderQueue<LimitOrderBuyPtr>, OrderQueue<LimitOrderSellPtr> >  book;
 
         for (int i = 0; i != 5; ++i)
         {

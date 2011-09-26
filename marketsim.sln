@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "marketsim", "marketsim\marketsim.vcproj", "{EF26B641-EC8E-4138-A921-A9656AB9038A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tests", "tests\tests.vcproj", "{626E7D9B-0754-43D7-94C3-FDCBADB07142}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EF26B641-EC8E-4138-A921-A9656AB9038A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EF26B641-EC8E-4138-A921-A9656AB9038A}.Debug|Win32.Build.0 = Debug|Win32
+		{EF26B641-EC8E-4138-A921-A9656AB9038A}.Release|Win32.ActiveCfg = Release|Win32
+		{EF26B641-EC8E-4138-A921-A9656AB9038A}.Release|Win32.Build.0 = Release|Win32
+		{626E7D9B-0754-43D7-94C3-FDCBADB07142}.Debug|Win32.ActiveCfg = Debug|Win32
+		{626E7D9B-0754-43D7-94C3-FDCBADB07142}.Debug|Win32.Build.0 = Debug|Win32
+		{626E7D9B-0754-43D7-94C3-FDCBADB07142}.Release|Win32.ActiveCfg = Release|Win32
+		{626E7D9B-0754-43D7-94C3-FDCBADB07142}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
