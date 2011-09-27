@@ -9,16 +9,16 @@ namespace marketsim
 {
     // The idea of this class is to provide non-virtual function on_released 
     // that calls 'free' method of a class indirectly defined by HolderFunc
-    template <class Holder, class Base> 
+    template <typename Holder, typename Base> 
         struct InPool : Base, RefCounted<typename Base::derived_t>
         {
-            template <class T>
+            template <typename T>
                 InPool(T const & x) 
                     : Base(boost::get<0>(x))
                     , holder_(boost::get<1>(x)) 
                 {}
 
-            typedef InPool base; // for derived class
+            typedef InPool base; // for derived typename
 
             void on_released()
             {

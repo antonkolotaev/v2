@@ -3,18 +3,18 @@
 
 namespace marketsim 
 {
-    template <class AgentPtr, class Base>
+    template <typename AgentPtr, typename Base>
         struct WithLinkToAgent : Base 
         {
-            template <class T>
+            template <typename T>
                 WithLinkToAgent(T const & x)
                     :   Base  (boost::get<0>(x))
                     ,   agent_(boost::get<1>(x))
                 {}
 
-        typedef WithLinkToAgent base; // for derived classes
+        typedef WithLinkToAgent base; // for derived typenamees
 
-        template <class OtherOrder>
+        template <typename OtherOrder>
             void onMatched(PriceVolume const & x, OtherOrder const &o)
         {
             Base::onMatched(x,o);

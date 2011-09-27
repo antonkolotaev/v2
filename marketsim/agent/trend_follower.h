@@ -7,12 +7,12 @@
 
 namespace marketsim
 {
-    template <class IntervalDistr, class VolumeDistr, class Base>
+    template <typename IntervalDistr, typename VolumeDistr, typename Base>
         struct TrendFollower : Base 
     {
-        typedef TrendFollower   base; // for derived classes
+        typedef TrendFollower   base; // for derived typenamees
 
-        template <class T>
+        template <typename T>
             TrendFollower(T const & x)
                 :   Base(boost::get<0>(x))
                 ,   timer_(*this, &TrendFollower::createOrder, boost::get<1>(x))

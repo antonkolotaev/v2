@@ -5,7 +5,7 @@
 
 namespace marketsim
 {
-    template <class IntervalDistr, class DeltaDistr, class ListenerPtr>
+    template <typename IntervalDistr, typename DeltaDistr, typename ListenerPtr>
         struct Signal 
     {
         Signal(IntervalDistr t, DeltaDistr d, ListenerPtr l)

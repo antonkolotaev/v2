@@ -5,18 +5,18 @@
 
 namespace marketsim
 {
-    template <class Base>
+    template <typename Base>
         struct PnL_Holder : Base 
         {
-            typedef PnL_Holder     base;   // for derived classes
+            typedef PnL_Holder     base;   // for derived typenamees
 
-            template <class T>
+            template <typename T>
                 PnL_Holder(T const x) 
                     :   Base(x)
                     ,   PnL_(0)
                 {}
 
-            template <class Order>
+            template <typename Order>
                 void onOrderPartiallyFilled(Order order, PriceVolume const & x)
             {
                 PnL_ += order->calculatePnL(x);
@@ -35,13 +35,13 @@ namespace marketsim
     {
         typedef Price  ValueType;
 
-        template <class T>
+        template <typename T>
             static ValueType getValue(T x)
             {
                 return x->getPnL();
             }
 
-        template <class Base>
+        template <typename Base>
             struct base 
         {
             typedef PnL_Holder<Base>   type;

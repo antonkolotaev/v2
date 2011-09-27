@@ -5,18 +5,18 @@
 
 namespace marketsim
 {
-   template <class Order, class Base>
+   template <typename Order, typename Base>
         struct PrivateOrderPool : Base 
    {
-        template <class T>
+        template <typename T>
             PrivateOrderPool(T const & x) : Base(x) {}
 
-        typedef PrivateOrderPool base; // for derived classes
+        typedef PrivateOrderPool base; // for derived typenamees
 
         typedef Order  order_type;
         typedef Order* order_ptr_t;
 
-        template <class T>
+        template <typename T>
             order_ptr_t createOrder(T const & x)
             {
                 return new (pool_.alloc()) Order(x, &pool_, self());

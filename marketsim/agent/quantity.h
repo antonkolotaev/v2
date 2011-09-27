@@ -8,18 +8,18 @@
 
 namespace marketsim
 {
-    template <class Base>       
+    template <typename Base>       
         struct Quantity_Holder : Base
     {
-        template <class T>
+        template <typename T>
             Quantity_Holder(T const & x) : Base(x), quantity_(0) {}
 
-        typedef Quantity_Holder    base; // for derived classes
+        typedef Quantity_Holder    base; // for derived typenamees
 
         void setQuantity(Volume v) { quantity_ = v; }
         Volume getQuantity() const { return quantity_; }
 
-        template <class Order>
+        template <typename Order>
             void onOrderPartiallyFilled(Order order, PriceVolume const & x)
         {
             quantity_ += order->calculateQuantity(x.volume);
@@ -34,13 +34,13 @@ namespace marketsim
     {
         typedef Volume  ValueType;
 
-        template <class T>
+        template <typename T>
             static ValueType getValue(T x)
             {
                 return x->getQuantity();
             }
 
-        template <class Base>
+        template <typename Base>
             struct base 
         {
             typedef Quantity_Holder<Base>   type;

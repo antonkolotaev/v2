@@ -3,18 +3,18 @@
 
 namespace marketsim
 {
-    template <class MarketBuy, class MarketSell, class Base>
+    template <typename MarketBuy, typename MarketSell, typename Base>
         struct MarketOrderFactory : Base 
         {
-            template <class T> MarketOrderFactory(T const x) : Base(x) {}
+            template <typename T> MarketOrderFactory(T const x) : Base(x) {}
 
-            template <class T>
+            template <typename T>
                 MarketBuy  createOrder(T const &x, buy_tag) 
                 { 
                     return MarketBuy(x, self()); 
                 }
 
-            template <class T>
+            template <typename T>
                 MarketSell createOrder(T const &x, sell_tag) 
                 { 
                     return MarketSell(x, self()); 

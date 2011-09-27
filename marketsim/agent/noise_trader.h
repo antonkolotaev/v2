@@ -7,12 +7,12 @@
 namespace marketsim
 {
     // VolumeDistr -- volume distribution. if >0 the trader sells, if <0 the trader buys
-    template <class IntervalDistr, class VolumeDistr, class Base>
+    template <typename IntervalDistr, typename VolumeDistr, typename Base>
         struct NoiseTrader : Base 
     {
         typedef NoiseTrader     base; // for derived classes
 
-        template <class T>
+        template <typename T>
             NoiseTrader(T const & x) 
                 :   Base(boost::get<0>(x))
                 ,   timer_(*self(), &NoiseTrader::createOrder, boost::get<1>(x))

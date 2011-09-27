@@ -6,12 +6,12 @@
 
 namespace marketsim 
 {
-    template <class IntervalDistr, class VolumeDistr, class Base>
+    template <typename IntervalDistr, typename VolumeDistr, typename Base>
         struct FundamentalValueTrader : Base 
     {
-        typedef FundamentalValueTrader   base; // for derived classes
+        typedef FundamentalValueTrader   base; // for derived typenamees
 
-        template <class T>
+        template <typename T>
         FundamentalValueTrader(T const & x)
             :   Base    (boost::get<0>(x))
             ,   timer_  (*this, &FundamentalValueTrader::createOrder, boost::get<1>(x))

@@ -15,7 +15,7 @@ namespace marketsim
             return volume == 0;
         }
 
-        template <class OtherOrder>
+        template <typename OtherOrder>
             void onMatched(PriceVolume const & x, OtherOrder const &)
         {
             volume -= x.volume;
@@ -78,7 +78,7 @@ namespace marketsim
 		Price	price;  // const!!!
 	};
 
-    template <Side side, class Derived>
+    template <Side side, typename Derived>
         struct LimitOrderBase : VolumeHolder, PriceHolder<side>
     {
         explicit LimitOrderBase(PriceVolume const & pv) : PriceHolder<side>(pv.price), VolumeHolder(pv.volume) {}
@@ -89,7 +89,7 @@ namespace marketsim
 
         typedef limit_order_tag category;
 
-        template <class T>
+        template <typename T>
         bool canBeMatched(LimitOrderBase<side == Buy ? Sell : Buy, T> const & best_limit, PriceVolume & matching) const 
         {
             if ((side == Buy && price >= best_limit.price)
@@ -108,13 +108,13 @@ namespace marketsim
         }
     };
 
-    template <class T>  
+    template <typename T>  
         std::ostream & operator << (std::ostream &out, boost::intrusive_ptr<T> const & p)
         {
             return out << *p;
         }
 
-    template <Side side, class Derived>    
+    template <Side side, typename Derived>    
         struct MarketOrderBase : VolumeHolder, side_is<side>
     {
         explicit MarketOrderBase(Volume v) : VolumeHolder(v) {}
@@ -127,7 +127,7 @@ namespace marketsim
 
         DECLARE_ARROW(Derived);
 
-        template <class T>
+        template <typename T>
         bool canBeMatched(LimitOrderBase<side == Buy ? Sell : Buy, T> const & best_limit, PriceVolume & matching) const 
         {
             matching.volume = std::min(volume, best_limit.volume);

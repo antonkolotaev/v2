@@ -22,15 +22,15 @@ namespace marketsim
     };
     typedef std::deque<PriceVolume> ExecutionHistoryStorage;   
 
-    template <class Base>
+    template <typename Base>
         struct ExecutionHistory : Base
     {
-        template <class T>
+        template <typename T>
             ExecutionHistory(T const & x) : Base(x), recording_(true) {}
 
-        typedef ExecutionHistory base;   // for derived classes
+        typedef ExecutionHistory base;   // for derived typenamees
 
-        template <class OtherOrder>
+        template <typename OtherOrder>
         void onMatched(PriceVolume const & pv, OtherOrder const &o)
         {
             Base::onMatched(pv,o);

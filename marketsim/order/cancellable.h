@@ -3,12 +3,12 @@
 
 namespace marketsim 
 {
-    template <class Base>
+    template <typename Base>
         struct WithCancelPosition : Base 
     {
-        template <class T> WithCancelPosition(T const & x) : Base(x), pos_(-1) {}
+        template <typename T> WithCancelPosition(T const & x) : Base(x), pos_(-1) {}
 
-        typedef WithCancelPosition  base; // for derived classes
+        typedef WithCancelPosition  base; // for derived typenamees
 
         void setCancelPosition(int p) { pos_ = p; }
         int  getCancelPosition() const { return pos_; }

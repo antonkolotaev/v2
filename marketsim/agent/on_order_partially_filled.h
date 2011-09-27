@@ -3,23 +3,23 @@
 
 namespace marketsim
 {
-    template <class Handler, class Base>
+    template <typename Handler, typename Base>
         struct OnPartiallyFilled : Base
     {
-        template <class T>
+        template <typename T>
             OnPartiallyFilled(T const & x)
 				:   Base    (boost::get<0>(x)) 
 				,	Handler_(boost::get<1>(x))
 			{}
 
-        typedef OnPartiallyFilled base; // for derived classes
+        typedef OnPartiallyFilled base; // for derived typenamees
 
 		Handler & getHandler(Handler*) { return Handler_; }
 		Handler const & getHandler(Handler*) const { return Handler_; }
 
 		using Base::getHandler;
 
-        template <class Order>
+        template <typename Order>
             void onOrderPartiallyFilled(Order order, PriceVolume const & x)
         {
             Base::onOrderPartiallyFilled(order, x);

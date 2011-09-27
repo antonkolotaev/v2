@@ -1,4 +1,4 @@
-#include "stdafx.h"
+
 #include "catch.hpp"
 
 #include <marketsim/order/in_pool.h>

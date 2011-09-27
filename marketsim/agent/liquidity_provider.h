@@ -7,10 +7,10 @@
 
 namespace marketsim
 {
-    template <class GenerationPeriod, class LagDistribution, class VolumeDistribution, class Base>
+    template <typename GenerationPeriod, typename LagDistribution, typename VolumeDistribution, typename Base>
         struct LiquidityProvider : Base
     {
-        template <class T> LiquidityProvider(T const & x) 
+        template <typename T> LiquidityProvider(T const & x) 
             : Base   (boost::get<0>(x))
             , timer_ (*self(), &LiquidityProvider::createOrder, boost::get<1>(x))
             , lag_   (boost::get<2>(x))

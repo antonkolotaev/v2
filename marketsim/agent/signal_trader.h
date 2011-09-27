@@ -3,12 +3,12 @@
 
 namespace marketsim
 {
-    template <class VolumeDistr, class Base>
+    template <typename VolumeDistr, typename Base>
         struct SignalTrader : Base
     {
-        typedef SignalTrader    base; // for derived classes
+        typedef SignalTrader    base; // for derived typenamees
 
-        template <class T>
+        template <typename T>
             SignalTrader(T const & x)
                 :   Base        (boost::get<0>(x))
                 ,   volume_     (boost::get<1>(x))

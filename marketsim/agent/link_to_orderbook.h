@@ -3,10 +3,10 @@
 
 namespace marketsim
 {
-    template <class BookPtr, class Base>
+    template <typename BookPtr, typename Base>
         struct LinkToOrderBook : Base
     {
-        template <class T>
+        template <typename T>
             LinkToOrderBook(T const & x) 
             :   Base(x)
             ,   order_book_(0)
@@ -15,13 +15,13 @@ namespace marketsim
         BookPtr getOrderBook() { return order_book_; }
         void setOrderBook(BookPtr b) { order_book_ = b; }
 
-        template <class T>
+        template <typename T>
             void processOrder(T x)
             {
                 order_book_->processOrder(x);
             }
 
-        template <class T>
+        template <typename T>
             void onOrderCancelled(T x) 
         {
             order_book_->onOrderCancelled(x);

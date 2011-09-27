@@ -7,7 +7,7 @@
 
 namespace marketsim
 {
-    template <class CancelInterval, class Order, class Base, class IndexChooser = rng::uniform_smallint >
+    template <typename CancelInterval, typename Order, typename Base, class IndexChooser = rng::uniform_smallint >
         struct OrderCanceller : Base
     {
         typedef Timer<OrderCanceller, CancelInterval>   timer_t;
@@ -20,9 +20,9 @@ namespace marketsim
 
         const static int cancelledIdx = -0xbad;
 
-        typedef OrderCanceller base;    // for derived classes
+        typedef OrderCanceller base;    // for derived typenamees
         
-        template <class Order>
+        template <typename Order>
             void processOrder(Order order)
             {
                 order->setCancelPosition(orders_issued_.size());
@@ -30,14 +30,14 @@ namespace marketsim
                 Base::processOrder(order);
             }
 
-        template <class Order>
+        template <typename Order>
             void onOrderFilled(Order order)
             {
                 removeOrder(order);
                 Base::onOrderFilled(order);
             }
 
-        template <class Order>
+        template <typename Order>
             void onOrderCancelled(Order order)
             {
                 removeOrder(order);
@@ -46,7 +46,7 @@ namespace marketsim
 
     private:
 
-        template <class Order>
+        template <typename Order>
             void removeOrder(Order order)
         {
             size_t pos = order->getCancelPosition();

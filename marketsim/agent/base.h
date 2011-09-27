@@ -5,7 +5,7 @@
 
 namespace marketsim
 {
-    template <class Derived>
+    template <typename Derived>
         struct AgentBase 
     {
         AgentBase() {}
@@ -15,15 +15,15 @@ namespace marketsim
 
         DECLARE_ARROW(Derived);
 
-        template <class T>
+        template <typename T>
             void onOrderFilled(T x) 
         {}
 
-        template <class T>
+        template <typename T>
             void onOrderPartiallyFilled(T x, PriceVolume const & y)
         {}
 
-        template <class T>
+        template <typename T>
             void onOrderCancelled(T x) 
         {}
 
