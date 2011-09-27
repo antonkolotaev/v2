@@ -10,14 +10,14 @@
 namespace marketsim {
 namespace history {
 
-	template <class FieldType>
+	template <typename FieldType>
 		struct InDeque 
 		{
 			typedef std::pair<Time,FieldType>       HistoryPiece;
 			typedef std::deque<HistoryPiece>        HistoryStorage;
 
 			InDeque() {}
-			template <class T> 
+			template <typename T> 
 				InDeque(T const & x) {}
 
 			HistoryStorage const & getHistory() 
@@ -41,7 +41,7 @@ namespace history {
 			InFile(const char * filename) : out_(filename) {}
 
 		protected:
-			template <class FieldType>
+			template <typename FieldType>
 				void write(Time t, FieldType const & x)
 			{
 				out_ << t << "\t" << x << "\n";
@@ -52,7 +52,7 @@ namespace history {
 		};
 
 
-		template <class FieldTag, class Base = InDeque<typename FieldTag::ValueType> >
+		template <typename FieldTag, typename Base = InDeque<typename FieldTag::ValueType> >
 			struct Collector : Base
         {
             typedef FieldTag                        Tag;
@@ -62,7 +62,7 @@ namespace history {
 
 			Collector() {}
 
-			template <class T>
+			template <typename T>
 				Collector(T const & x) : Base(x), recording_(true), lastT_(-1.) {}
 
             void recordHistory(bool bRecord = true) 
@@ -70,7 +70,7 @@ namespace history {
                 recording_ = bRecord;
             }
 
-			template <class T>
+			template <typename T>
 				void operator () (T x)
 			{
                 if (recording_)

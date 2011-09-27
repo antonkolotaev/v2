@@ -8,7 +8,7 @@
 
 namespace marketsim
 {
-    template <class T>
+    template <typename T>
         struct object_pool : boost::noncopyable
     {
         struct Chunk 
@@ -75,7 +75,7 @@ namespace marketsim
 
     struct PlacedInPool
     {
-        template <class T>
+        template <typename T>
             struct apply 
             {
                 typedef object_pool<T>*     type;

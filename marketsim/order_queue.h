@@ -11,7 +11,7 @@ namespace marketsim
     // requires: 
     //      Order is a pointer-like type
     //      order->cancelled() returns true iff the order is useless and thus may be removed
-    template <class Order>
+    template <typename Order>
         struct OrderQueue : protected std::priority_queue<Order, std::vector<Order>, typename ordered_by_price<Order>::type>
     {
 		typedef typename ordered_by_price<Order>::type comparer_type;
@@ -42,7 +42,7 @@ namespace marketsim
             }
         };
 
-        template <class T>
+        template <typename T>
             void onOrderCancelled(T x)
             {
                 make_valid();
@@ -85,7 +85,7 @@ namespace marketsim
             return out;
         }
 
-		template <class ValueType, class RanIt, class Predicate, class Function>
+		template <typename ValueType, typename RanIt, typename Predicate, typename Function>
 			struct ForKeysBetterThan
 		{
 			ForKeysBetterThan(ValueType const & x, RanIt const & it, size_t N, Predicate const & p, Function & F)
@@ -125,7 +125,7 @@ namespace marketsim
 
 		struct AccVolume 
 		{
-			template <class Order>
+			template <typename Order>
 				bool operator () (Order const & order)
 			{
 				result += order->volume;				
@@ -183,7 +183,7 @@ namespace marketsim
 			return result;
 		}
 
-		template <class OutputIterator>
+		template <typename OutputIterator>
 			void getBestN(int N, OutputIterator out) const 
 		{
 			PriceVolume		last(-1,-1);
@@ -232,7 +232,7 @@ namespace marketsim
 				*out++ = last;
 		}
 
-		template <class Order>
+		template <typename Order>
 			void onPartiallyFilled(Order const & order, PriceVolume const & trade)
 			{}
 
@@ -252,12 +252,12 @@ namespace marketsim
         }
     };
 
-	template <class Handler, class Base>
+	template <typename Handler, typename Base>
 		struct OnQueueTopChanged : Base
 	{
 		OnQueueTopChanged() {}
 
-		template <class T> OnQueueTopChanged(T const & x) 
+		template <typename T> OnQueueTopChanged(T const & x) 
 			: Base	  (boost::get<0>(x))
 			, handler_(boost::get<1>(x))
 		{}
@@ -266,7 +266,7 @@ namespace marketsim
 
 		using Base :: value_type;
 
-		template <class T>
+		template <typename T>
 			void push(T x)
 			{
 				Base::push(x);
@@ -274,7 +274,7 @@ namespace marketsim
 					handler_(self());
 			}
 
-		template <class T>
+		template <typename T>
 			void onOrderCancelled(T x)
 			{
 				bool better = !comp(x, top());
@@ -289,7 +289,7 @@ namespace marketsim
 			handler_(self());
 		}
 
-		template <class Order>
+		template <typename Order>
 			void onPartiallyFilled(Order const & order, PriceVolume const & trade)
 		{
 			Base::onPartiallyFilled(order, trade);

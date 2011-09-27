@@ -18,7 +18,7 @@ namespace {
     template <Side SIDE>
         struct MarketT : MarketOrderBase<SIDE, MarketT<SIDE> >
         {
-            template <class X>
+            template <typename X>
                 MarketT(Volume v, X) : base(v) {}
         };
 

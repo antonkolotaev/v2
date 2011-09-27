@@ -25,7 +25,7 @@ namespace {
                 LimitOrderBase<SIDE, 
                     LimitT<SIDE> > > 
     {
-        template <class X>
+        template <typename X>
             LimitT(PriceVolume x, object_pool<LimitT> * h, X) 
                 :   base(boost::make_tuple(x, h))
         {}

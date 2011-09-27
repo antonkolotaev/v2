@@ -35,10 +35,10 @@ namespace marketsim
         };
 
 /*
-    template <class Base>
+    template <typename Base>
         struct HasRefCounter : Base, RefCounted<typename Base::derived_t>
     {
-        template <class T>
+        template <typename T>
             HasRefCounter(T const & x) : Base(x) {}
 
         typedef HasRefCounter base;     // for derived class

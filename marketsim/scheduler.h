@@ -118,7 +118,7 @@ namespace marketsim
         }
     };
 
-    template <class T, class DelayGenerator>
+    template <typename T, typename DelayGenerator>
         struct Timer : EventHandler
     {
         typedef void (T::*Handler)();
@@ -144,7 +144,7 @@ namespace marketsim
         DelayGenerator  delay_;
     };
 
-    template <class Derived, int ID = 0>
+    template <typename Derived, int ID = 0>
         struct EventHandlerEx : EventHandler
         {
             void process()

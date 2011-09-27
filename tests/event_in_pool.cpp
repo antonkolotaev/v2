@@ -36,7 +36,7 @@ namespace {
 
     struct A 
     {
-        template <class T> void getX(T);
+        template <typename T> void getX(T);
     };
 
     struct B 
@@ -51,7 +51,7 @@ namespace {
         Tag getX(Tag) { return Tag(); }
     };
 
-    template <class Y, class Base>
+    template <typename Y, typename Base>
         struct Mix : Base, Y
     {
         using Base::getX;

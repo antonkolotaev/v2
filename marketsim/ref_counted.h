@@ -5,7 +5,7 @@
 
 namespace marketsim
 {
-    template <class Derived>   
+    template <typename Derived>   
         struct RefCounted : boost::noncopyable
     {
         RefCounted() : counter_(0) {}
@@ -31,8 +31,8 @@ namespace marketsim
         int     counter_;
     };
 
-    template <class D> void intrusive_ptr_add_ref(RefCounted<D> * p) { p->add_ref(); }
-    template <class D> void intrusive_ptr_release(RefCounted<D> * p) { p->release(); }
+    template <typename D> void intrusive_ptr_add_ref(RefCounted<D> * p) { p->add_ref(); }
+    template <typename D> void intrusive_ptr_release(RefCounted<D> * p) { p->release(); }
 }
 
 #endif

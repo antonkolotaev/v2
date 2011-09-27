@@ -8,7 +8,7 @@ namespace marketsim
 	    Matches incoming_order with a queue of limit orders stored in priority queue limit_orders
 	    Returns true iff incoming_order has been matched
     */
-    template <class OrderPriorityQueue, class IncomingOrder, class OrderBook>
+    template <typename OrderPriorityQueue, typename IncomingOrder, typename OrderBook>
 	    bool matchOrder(OrderPriorityQueue & limit_orders, IncomingOrder & incoming_order, OrderBook * order_book)
     {
 	    while (!limit_orders.empty())
@@ -39,12 +39,12 @@ namespace marketsim
     }
 
     struct DummyOrderBook {
-        template <class IncomingOrder, class LimitOrder>
+        template <typename IncomingOrder, typename LimitOrder>
             void onMatched(PriceVolume const &, IncomingOrder &, LimitOrder &)
             {}
     };
 
-    template <class OrderPriorityQueue, class IncomingOrder>
+    template <typename OrderPriorityQueue, typename IncomingOrder>
 	    bool matchOrder(OrderPriorityQueue & limit_orders, IncomingOrder & incoming_order)
         {
             DummyOrderBook * dummy = 0;

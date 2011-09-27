@@ -11,7 +11,7 @@ namespace marketsim
 {
     namespace rng 
     {
-		template <class T>
+		template <typename T>
 		struct IGenerator : RefCounted<IGenerator<T> >
 		{
 			virtual T operator () () = 0;
@@ -19,14 +19,14 @@ namespace marketsim
 			void on_released() { delete this; }
 		};
 
-		template <class T>
+		template <typename T>
 			struct Generator : boost::intrusive_ptr<IGenerator<T> >
 		{
 			typedef boost::intrusive_ptr<IGenerator<T> > Base;
 
 			Generator() : Base() {}
 
-			template <class T> Generator(T x) : Base(x) {}
+			template <typename T> Generator(T x) : Base(x) {}
 
 			T operator () () { return Base::operator *() (); }
 		};
@@ -38,7 +38,7 @@ namespace marketsim
 
 		template <int N> boost::mt19937 IntRngHolderT<N>::g_int_rnd;
 
-		template <class Interface = Empty>
+		template <typename Interface = Empty>
 			struct uniform_01 : boost::uniform_01<>, Interface
         {
             typedef boost::uniform_01<> base;
@@ -46,7 +46,7 @@ namespace marketsim
 			result_type operator () () { return base::operator() (IntRngHolderT<0>::g_int_rnd); }
         };
 
-		template <class Interface = Empty>
+		template <typename Interface = Empty>
 			struct uniform_smallint : boost::uniform_smallint<>, Interface
         {
             typedef boost::uniform_smallint<> base;
@@ -58,7 +58,7 @@ namespace marketsim
 			result_type operator () () { return base::operator ()(IntRngHolderT<0>::g_int_rnd); }
         };
 
-        template <class T = double, class Interface = Empty>
+        template <typename T = double, typename Interface = Empty>
 			struct constant : Interface
         {
             explicit constant(T x) : x(x) {}
@@ -76,7 +76,7 @@ namespace marketsim
 
 		template <int N> uniform_01<> RngHolder<N>::g_RNG;
 
-		template <class Interface = Empty>
+		template <typename Interface = Empty>
 			struct exponential : boost::exponential_distribution<>, Interface
         {
             typedef boost::exponential_distribution<> base;
@@ -87,7 +87,7 @@ namespace marketsim
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
         };
 
-		template <class Interface = Empty>
+		template <typename Interface = Empty>
 			struct normal : boost::normal_distribution<>, Interface
         {
             typedef boost::normal_distribution<> base;
@@ -99,7 +99,7 @@ namespace marketsim
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
         };
 
-		template <class Interface = Empty>
+		template <typename Interface = Empty>
 			struct lognormal : boost::lognormal_distribution<>, Interface
         {
             typedef boost::lognormal_distribution<> base;
@@ -111,7 +111,7 @@ namespace marketsim
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
         };
 
-		template <class Interface = Empty>
+		template <typename Interface = Empty>
 			struct gamma : boost::gamma_distribution<>, Interface
         {
             typedef boost::gamma_distribution<> base;
@@ -121,7 +121,7 @@ namespace marketsim
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
         };
 
-		template <class Interface = Empty>
+		template <typename Interface = Empty>
 			struct uniform_real : boost::uniform_real<>, Interface
         {
             typedef boost::uniform_real<> base;

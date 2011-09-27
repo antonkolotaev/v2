@@ -10,10 +10,10 @@
 
 namespace marketsim{
 namespace {
-    template <class Base>
+    template <typename Base>
         struct WithExpiration : Base, EventHandler
         {
-            template <class T>
+            template <typename T>
                 WithExpiration(T const & x)
                     :   Base(boost::get<0>(x))
             {

@@ -24,7 +24,7 @@ namespace {
     template <Side SIDE>
         struct MarketT : MarketOrderBase<SIDE, MarketT<SIDE> >
         {
-            template <class X>
+            template <typename X>
                 MarketT(Volume v, X) : base(v) {}
         };
 
@@ -52,7 +52,7 @@ namespace {
    {
 	   typedef PriceVolume	ValueType;
 
-	   template <class T> 
+	   template <typename T> 
 			static ValueType getValue(T x) 
 			{
 				return PriceVolume(x->top()->price, x->getBestVolume());
@@ -86,7 +86,7 @@ namespace {
     {
 		AgentT() : base(boost::make_tuple(boost::make_tuple(boost::make_tuple(dummy, "history.log"), dummy), dummy)) {}
 
-		template <class TAG>
+		template <typename TAG>
 			std::deque<std::pair<Time, typename TAG::ValueType> > const & getHistory() 
 			{
 				getHandler((history::Collector<TAG, history::InDeque<typename TAG::ValueType> >*)0).flush();

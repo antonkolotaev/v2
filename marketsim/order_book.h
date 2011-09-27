@@ -7,8 +7,8 @@
 namespace marketsim
 {
     template <
-        class QueueBuySide, 
-        class QueueSellSide
+        typename QueueBuySide, 
+        typename QueueSellSide
     >
         struct OrderBook
     {
@@ -21,7 +21,7 @@ namespace marketsim
 
 		DECLARE_ARROW(OrderBook);	// to be replaced by derived
 
-        template <class Order>
+        template <typename Order>
             bool processOrder(Order order, limit_order_tag)
             {
                 typedef typename order_side<Order> :: type      side;
@@ -36,7 +36,7 @@ namespace marketsim
                 return true;
             }
 
-        template <class Order>
+        template <typename Order>
             bool processOrder(Order order, market_order_tag)
             {
                 typedef typename order_side<Order> :: type      side;
@@ -45,27 +45,27 @@ namespace marketsim
                 return matchOrder(orderQueue(opposite()), order, self());
             }
 
-        template <class Order>
+        template <typename Order>
             bool processOrder(Order order)
             {
                 return processOrder(order, typename order_category<Order>::type());
             }
 
-        template <class Order>
+        template <typename Order>
             void onOrderCancelled(Order order, limit_order_tag)
             {
                 typedef typename order_side<Order> :: type      side;
                 orderQueue(side()).onOrderCancelled(order);
             }
 
-        template <class Order>
+        template <typename Order>
             void onOrderCancelled(Order order)
             {
                 onOrderCancelled(order, typename order_category<Order>::type());
             }
 
         // we will use this method to record the last trade
-        template <class IncomingOrder, class LimitOrder>
+        template <typename IncomingOrder, typename LimitOrder>
             void onMatched(PriceVolume const &x, IncomingOrder &incoming_order, LimitOrder &limit_order)
             {
 				typedef typename order_side<LimitOrder> :: type      side;
