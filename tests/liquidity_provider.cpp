@@ -51,8 +51,8 @@ namespace {
             >
        >
    {
-        LiquidityProviderT() 
-            :  base(boost::make_tuple(dummy, 
+        LiquidityProviderT(OrderBook *book) 
+            :  base(boost::make_tuple(boost::make_tuple(dummy, book),
                                      rng::constant<Time>(1.), 
                                      rng::constant<Price>(2), 
                                      rng::constant<Volume>(5), 
@@ -68,12 +68,11 @@ namespace {
 
    TEST_CASE("liquidity_provider", "An agent sending limit orders")
    {
-       LiquidityProviderT<Sell>     trader;
+       Scheduler                    scheduler;
        OrderBook                    orderBook(2);
+       LiquidityProviderT<Sell>     trader(&orderBook);
 
-       trader.setOrderBook(&orderBook);
-
-       scheduler().workTill(3.5);
+       scheduler.workTill(3.5);
 
        REQUIRE(!orderBook.empty<Sell>());
        REQUIRE(orderBook.bestPrice<Sell>() == 102);
@@ -81,11 +80,9 @@ namespace {
        orderBook.processOrder(MarketBuy(10));
 
        REQUIRE(orderBook.bestPrice<Sell>() == 104);
-       scheduler().workTill(4.5);
+       scheduler.workTill(4.5);
        
        orderBook.processOrder(MarketBuy(5));
        REQUIRE(orderBook.bestPrice<Sell>() == 106);
-
-       scheduler().reset();
    }
 }}  

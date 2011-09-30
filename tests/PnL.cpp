@@ -66,7 +66,7 @@ namespace {
 	   > 
    >    
    {
-	   std::deque<std::pair<Time, PriceVolume> > const & getHistory() 
+       std::deque<history::TimeStamped<PriceVolume> > const & getHistory() 
 	   {
 		   orderQueue(sell_tag()).getHandler((history::Collector<BestPriceAndVolume, history::InDeque<PriceVolume> >*)0).flush();
 		   return orderQueue(sell_tag()).getHandler((history::Collector<BestPriceAndVolume, history::InDeque<PriceVolume> >*)0).getHistory();
@@ -75,19 +75,28 @@ namespace {
 
    template <Side SIDE>
     struct AgentT :
-		OnPartiallyFilled<history::Collector<PnL, history::InDeque<Price> >,
-			OnPartiallyFilled<history::Collector<Quantity, history::InDeque<Volume> >,
-				OnPartiallyFilled<history::Collector<PnL, history::InFile>,  
-					PnL_Holder<
-						Quantity_Holder<
-							LinkToOrderBook<OrderBook*, 
-								PrivateOrderPool<LimitT<SIDE>, 
-									AgentBase<AgentT<SIDE> > > > > > > > > 
+        OnPartiallyFilled   < history::Collector<PnL, history::InDeque<Price> >,
+        OnPartiallyFilled   < history::Collector<Quantity, history::InDeque<Volume> >,
+        OnPartiallyFilled   < history::Collector<PnL, history::InFile>,  
+        PnL_Holder          <
+        Quantity_Holder     <
+        LinkToOrderBook     < OrderBook*, 
+        PrivateOrderPool    < LimitT<SIDE>, 
+        AgentBase           < AgentT<SIDE> > 
+        > > > > > > > 
     {
-		AgentT() : base(boost::make_tuple(boost::make_tuple(boost::make_tuple(dummy, "history.log"), dummy), dummy)) {}
+		AgentT(OrderBook* book) : base(
+            boost::make_tuple(
+                boost::make_tuple(
+                    boost::make_tuple(
+                        boost::make_tuple(dummy, book), 
+                        "history.log"), 
+                    dummy), 
+                dummy)) 
+        {}
 
 		template <typename TAG>
-			std::deque<std::pair<Time, typename TAG::ValueType> > const & getHistory() 
+            std::deque<history::TimeStamped<typename TAG::ValueType> > const & getHistory() 
 			{
 				getHandler((history::Collector<TAG, history::InDeque<typename TAG::ValueType> >*)0).flush();
 				return getHandler((history::Collector<TAG, history::InDeque<typename TAG::ValueType> >*)0).getHistory();
@@ -110,17 +119,17 @@ namespace {
 
     TEST_CASE("PnL_test", "checking that PnL history works well")
     {
-        AgentT<Sell>    trader;
+        Scheduler       scheduler;
+        OrderBook       book;
+        AgentT<Sell>    trader(&book);
 
-        OrderBook   book;
-        trader.setOrderBook(&book);
         trader.setQuantity(0);
 
         trader.sendOrder(100, 3);
         trader.sendOrder(102, 5);
         trader.sendOrder(105, 7);
 
-		std::deque<std::pair<Time, PriceVolume> > book_history = book.getHistory();
+        std::deque<history::TimeStamped<PriceVolume> > book_history = book.getHistory();
 
 		REQUIRE(book_history[0].first == 0);
 		REQUIRE(book_history[0].second == PriceVolume(100, 3));
@@ -131,7 +140,7 @@ namespace {
         REQUIRE(trader.getQuantity() == 0);
         REQUIRE(trader.getHistory<Quantity>().empty());
 
-        scheduler().workTill(1.5);
+        scheduler.workTill(1.5);
 
         book.processOrder(buy(1));
 
@@ -148,7 +157,7 @@ namespace {
         REQUIRE(trader.getHistory<PnL>().back() == PnLHistoryPiece(1.5, 100));
         REQUIRE(trader.getHistory<Quantity>().back() == QuantityHistoryPiece(1.5, -1));
 
-        scheduler().workTill(3.5);
+        scheduler.workTill(3.5);
 
         book.processOrder(buy(3));
 
@@ -164,8 +173,6 @@ namespace {
         REQUIRE(trader.getHistory<PnL>().back() == PnLHistoryPiece(3.5, 100 + 200 + 102));
         REQUIRE(trader.getHistory<Quantity>().size() == 2);
         REQUIRE(trader.getHistory<Quantity>().back() == QuantityHistoryPiece(3.5, -4));
-
-        scheduler().reset();
     }
 
 }}

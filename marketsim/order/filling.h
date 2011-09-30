@@ -13,7 +13,7 @@ namespace marketsim
 
         ExecutionHistoryPiece(PriceVolume const & pv)
             :   PriceVolume(pv)
-            ,   timestamp(scheduler().currentTime())
+            ,   timestamp(Scheduler::currentTime())
         {}
         ExecutionHistoryPiece(Time t, PriceVolume const & pv)
             :   PriceVolume(pv)

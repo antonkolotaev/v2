@@ -5,6 +5,8 @@
 #include <marketsim/common_types.h>
 #include <marketsim/scheduler.h>
 
+#undef max
+
 namespace marketsim
 {
     template <typename GenerationPeriod, typename LagDistribution, typename VolumeDistribution, typename Base>
@@ -12,7 +14,7 @@ namespace marketsim
     {
         template <typename T> LiquidityProvider(T const & x) 
             : Base   (boost::get<0>(x))
-            , timer_ (*self(), &LiquidityProvider::createOrder, boost::get<1>(x))
+            , timer_ (*self(), &LiquidityProvider::sendOrder, boost::get<1>(x))
             , lag_   (boost::get<2>(x))
             , volume_(boost::get<3>(x))
             , initialPrice_(boost::get<4>(x)) 
@@ -22,16 +24,15 @@ namespace marketsim
 
         typedef typename order_side<order_type> :: type  side;
 
-        typedef LiquidityProvider   base;  // for derived classes
+        DECLARE_BASE(LiquidityProvider)
 
-        void createOrder()
+        void sendOrder()
         {
-            Price tickSize = getOrderBook()->getTickSize();
             Price bp = getOrderBook()->empty(side()) ? initialPrice_ : getOrderBook()->bestPrice(side());
-            Price delta =   (Price)(lag_() / tickSize) * tickSize /*+ 1*/;
-            Price p = std::max(Price(0), side::value == Sell ? bp + delta : bp - delta);
+            Price delta = getOrderBook()->ceilPrice(lag_());
+            Price p = std::max(Price(1), side::value == Sell ? bp + delta : bp - delta);
             
-            Volume v = std::max(Volume(1), volume_());
+            Volume v = std::max(Volume(1), static_cast<Volume>(volume_()));
 
             Base::processOrder(Base::createOrder(pv(p,v)));
         }

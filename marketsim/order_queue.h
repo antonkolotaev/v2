@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <algorithm>
+#include <boost/type_traits/remove_pointer.hpp>
 
 #include <marketsim/common_types.h>
 
@@ -14,6 +15,9 @@ namespace marketsim
     template <typename Order>
         struct OrderQueue : protected std::priority_queue<Order, std::vector<Order>, typename ordered_by_price<Order>::type>
     {
+    private:
+        OrderQueue(OrderQueue const &);
+    public:
 		typedef typename ordered_by_price<Order>::type comparer_type;
 
         typedef 
@@ -27,13 +31,18 @@ namespace marketsim
         using base::reference;
         using base::push;
         using base::top;
-		using base::empty;
+		//using base::empty;
 		using base::value_type;
 
         void pop() // we suppose that the order on top is valid
         { 
             base::pop(); 
             make_valid();
+        }
+
+        bool empty() const 
+        {
+            return base::empty();
         }
 
         struct Cancalled {
@@ -149,6 +158,13 @@ namespace marketsim
 			return empty() ? 0 : volumeForBetterPrices(top()->price);
 		}
 
+        Price getBestPrice() const 
+        {
+            /// !!!! We should use a free meta function in order to get access to the real order type
+            typedef typename Order::element_type  E;
+            return empty() ? E::worstPrice() : top()->price;
+        }
+
 		struct IdxComparer
 		{
 			IdxComparer(comparer_type const & comp, value_type const * ptr) : comp(comp), ptr(ptr) {}
@@ -183,19 +199,36 @@ namespace marketsim
 			return result;
 		}
 
+        template <typename PoolPtr>
+        struct BelongsTo {
+            BelongsTo(PoolPtr a) : a(a) {}
+            template <typename OrderPtr> bool operator () (OrderPtr o) const {
+                return o->is_my_pool(a);
+            }
+            PoolPtr a;
+        };
+
+        template <typename PoolPtr>
+            void remove_all_pool_orders(PoolPtr p) 
+            {
+                c.erase(std::remove_if(c.begin(),c.end(),BelongsTo<PoolPtr>(p)), c.end());
+                std::make_heap(c.begin(), c.end(), comp);
+            }
+
 		template <typename OutputIterator>
 			void getBestN(int N, OutputIterator out) const 
 		{
 			PriceVolume		last(-1,-1);
 			int  			sent_1 = 0;
 
+            if (c.empty())
+                return;
+
 			value_type const * before_first = &c[0] - 1;
 			size_t size_1 = c.size() + 1;
 
-			IdxComparer idx_comparer(comp, before_first);
-			// we use static in order to avoid excessive memory allocations ==> this function is not thread-safe!
-			static IndicesQueue	indices(idx_comparer);
-			indices.reset();
+			IdxComparer     idx_comparer(comp, before_first);
+			IndicesQueue	indices(idx_comparer);
 			
 			if (!c.empty())
 				indices.push(1);
@@ -206,15 +239,18 @@ namespace marketsim
 
 				if (last.price != before_first[idx]->price)
 				{
-					if (sent_1 && last.volume)
-						*out++ = last;
+                    if (before_first[idx]->volume)
+                    {
+                        if (sent_1 && last.volume)
+                            *out++ = last;
 
-					if (sent_1 == N)
-						return;
+                        if (sent_1 == N)
+                            return;
 
-					last.price = before_first[idx]->price;
-					last.volume = before_first[idx]->volume;
-					++sent_1;
+                        last.price = before_first[idx]->price;
+                        last.volume = before_first[idx]->volume;
+                        ++sent_1;
+                    }
 				}
 				else
 					last.volume += before_first[idx]->volume;
@@ -238,6 +274,28 @@ namespace marketsim
 
 		DECLARE_ARROW(OrderQueue);
 
+#ifdef MARKETSIM_BOOST_PYTHON
+        template <typename T>
+            static void py_visit(T & class_def)
+            {
+                class_def
+                     .def("empty",       &OrderQueue::empty)
+                     .def("bestVolume",  &OrderQueue::getBestVolume)
+                     .def("bestPrice",   &OrderQueue::getBestPrice)
+                     .def("bestOrders",  &OrderQueue::getBestOrders)
+                    ;
+            }
+
+            boost::python::list getBestOrders(int N) const 
+            {
+                std::vector<PriceVolume>  const &  best = getBestN(N);
+                boost::python::list result;
+                BOOST_FOREACH(PriceVolume const & x, best)
+                    result.append(x);
+                return result;
+            }
+#endif
+
 		void getHandler(); // to be defined in derived classes if needed
     private:
         void make_valid()
@@ -252,17 +310,30 @@ namespace marketsim
         }
     };
 
-	template <typename Handler, typename Base>
+    struct BestPriceAndVolume 
+    {
+        typedef PriceVolume	ValueType;
+
+        template <typename T> 
+        static ValueType getValue(T x) 
+        {
+            return PriceVolume(x->getBestPrice(), x->getBestVolume());
+        }
+    };
+
+    template <typename Handler, typename Base>
 		struct OnQueueTopChanged : Base
 	{
 		OnQueueTopChanged() {}
 
+/*
 		template <typename T> OnQueueTopChanged(T const & x) 
 			: Base	  (boost::get<0>(x))
 			, handler_(boost::get<1>(x))
 		{}
+*/
 
-		typedef OnQueueTopChanged base; // for derived classes
+		DECLARE_BASE(OnQueueTopChanged);
 
 		using Base :: value_type;
 
@@ -303,6 +374,8 @@ namespace marketsim
 
 	private:
 		Handler			handler_;	
+
+        OnQueueTopChanged(OnQueueTopChanged const &);
 	};
 }
 

@@ -8,12 +8,11 @@ namespace marketsim
     {
         template <typename T>
             LinkToOrderBook(T const & x) 
-            :   Base(x)
-            ,   order_book_(0)
+            :   Base       (boost::get<0>(x))
+            ,   order_book_(boost::get<1>(x))
         {}
 
         BookPtr getOrderBook() { return order_book_; }
-        void setOrderBook(BookPtr b) { order_book_ = b; }
 
         template <typename T>
             void processOrder(T x)
@@ -26,6 +25,16 @@ namespace marketsim
         {
             order_book_->onOrderCancelled(x);
         }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+        template <typename T>
+            static void py_visit(T & c)
+            {
+                using namespace boost::python;
+                Base::py_visit(c);
+                c.def("orderBook", &LinkToOrderBook::getOrderBook, return_internal_reference<>());
+            }
+#endif
 
 
     private:

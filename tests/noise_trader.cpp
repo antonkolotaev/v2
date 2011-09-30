@@ -29,12 +29,10 @@ namespace {
                     AgentBase<NoiseTraderTester> > > >
     {
         NoiseTraderTester()
-            :   base(boost::make_tuple(dummy, rng::constant<double>(1.), boost::ref(*self())))
+            :   base(boost::make_tuple(boost::make_tuple(dummy, this), rng::constant<double>(1.), boost::ref(*self())))
             ,   v_(1)
             ,   processed_(0)
-        {
-            setOrderBook(this);
-        }
+        {}
 
         bool processOrder(MarketT<Buy> const & x)
         {
@@ -65,18 +63,19 @@ namespace {
 
     TEST_CASE("noise_trader", "checking that noise trader sends orders")
     {
+        Scheduler          scheduler;
         NoiseTraderTester  tester;
 
-        scheduler().workTill(3.5);
+        scheduler.workTill(3.5);
 
         REQUIRE(tester.getProcessed() == 3);
 
         tester.setVolume(-3);
 
-        scheduler().workTill(5.5);
+        scheduler.workTill(5.5);
 
         REQUIRE(tester.getProcessed() == -3);
 
-        scheduler().reset();
+        scheduler.reset();
     }
 }}

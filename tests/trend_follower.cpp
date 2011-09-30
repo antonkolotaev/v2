@@ -22,17 +22,22 @@ namespace {
         };
 
     struct TrendFollowerTester :
-        TrendFollower<rng::constant<Time>, rng::constant<Volume>, 
-            MarketOrderFactory<MarketT<Buy>, MarketT<Sell>, 
-                LinkToOrderBook<TrendFollowerTester*, 
-                    AgentBase<TrendFollowerTester> > > >
+                TrendFollower       <rng::constant<Time>, rng::constant<Volume>, 
+                MarketOrderFactory  <MarketT<Buy>, MarketT<Sell>, 
+                LinkToOrderBook     <TrendFollowerTester*, 
+                AgentBase           <TrendFollowerTester>
+            > > >
     {
         TrendFollowerTester()
-            :   base(boost::make_tuple(dummy, rng::constant<Time>(1.), rng::constant<Volume>(1)))
+            :   base(
+                    boost::make_tuple(
+                        boost::make_tuple(dummy,this), 
+                        rng::constant<Time>(1.), 
+                        rng::constant<Volume>(1))
+                    )
             ,   ask_(0), bid_(0)
             ,   processed_(0)
         {
-            setOrderBook(this);
         }
 
         bool processOrder(MarketT<Buy> const & x)
@@ -64,27 +69,26 @@ namespace {
 
     TEST_CASE("trend_follower", "Checking that trend follower follows the trend")
     {
+        Scheduler               scheduler;
         TrendFollowerTester     trader;
 
         trader.setBid(95); trader.setAsk(105);
 
-        scheduler().workTill(1.5);
+        scheduler.workTill(1.5);
         REQUIRE(trader.getProcessed() == 0);
 
-        scheduler().workTill(2.5);
+        scheduler.workTill(2.5);
         REQUIRE(trader.getProcessed() == 0);
 
         trader.setAsk(110);
 
-        scheduler().workTill(3.5);
+        scheduler.workTill(3.5);
         REQUIRE(trader.getProcessed() == -1);
 
         trader.setBid(10);
 
-        scheduler().workTill(4.5);
+        scheduler.workTill(4.5);
         REQUIRE(trader.getProcessed() == 0);
-
-        scheduler().reset();
     }
 
 }}

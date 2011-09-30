@@ -7,7 +7,7 @@
 
 namespace marketsim
 {
-    template <typename CancelInterval, typename Order, typename Base, typename IndexChooser = rng::uniform_smallint >
+    template <typename CancelInterval, typename Order, typename Base, typename IndexChooser = rng::uniform_smallint<> >
         struct OrderCanceller : Base
     {
         typedef Timer<OrderCanceller, CancelInterval>   timer_t;

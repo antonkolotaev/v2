@@ -76,10 +76,10 @@ namespace marketsim
 
 		template <int N> uniform_01<> RngHolder<N>::g_RNG;
 
-		template <typename Interface = Empty>
-			struct exponential : boost::exponential_distribution<>, Interface
+		template <typename T = double, typename Interface = Empty>
+			struct exponential : boost::exponential_distribution<T>, Interface
         {
-            typedef boost::exponential_distribution<> base;
+            typedef boost::exponential_distribution<T> base;
 
             explicit exponential(result_type lambda_arg = result_type(1))
                 : base(lambda_arg) {}
@@ -87,10 +87,10 @@ namespace marketsim
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
         };
 
-		template <typename Interface = Empty>
-			struct normal : boost::normal_distribution<>, Interface
+		template <typename T = double, typename Interface = Empty>
+			struct normal : boost::normal_distribution<T>, Interface
         {
-            typedef boost::normal_distribution<> base;
+            typedef boost::normal_distribution<T> base;
 
             explicit normal(const result_type& mean_arg = result_type(0),
                 const result_type& sigma_arg = result_type(1))
@@ -99,10 +99,10 @@ namespace marketsim
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
         };
 
-		template <typename Interface = Empty>
-			struct lognormal : boost::lognormal_distribution<>, Interface
+		template <typename T = double, typename Interface = Empty>
+			struct lognormal : boost::lognormal_distribution<T>, Interface
         {
-            typedef boost::lognormal_distribution<> base;
+            typedef boost::lognormal_distribution<T> base;
 
             explicit lognormal(result_type mean_arg = result_type(1),
                 result_type sigma_arg = result_type(1))
@@ -111,20 +111,20 @@ namespace marketsim
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
         };
 
-		template <typename Interface = Empty>
-			struct gamma : boost::gamma_distribution<>, Interface
+		template <typename T = double, typename Interface = Empty>
+			struct gamma : boost::gamma_distribution<T>, Interface
         {
-            typedef boost::gamma_distribution<> base;
+            typedef boost::gamma_distribution<T> base;
 
             explicit gamma(const result_type& alpha_arg = result_type(1)) : base(alpha_arg) {}
 
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
         };
 
-		template <typename Interface = Empty>
-			struct uniform_real : boost::uniform_real<>, Interface
+		template <typename T = double, typename Interface = Empty>
+			struct uniform_real : boost::uniform_real<T>, Interface
         {
-            typedef boost::uniform_real<> base;
+            typedef boost::uniform_real<T> base;
 
             uniform_real(double min_arg = 0,
                 double max_arg = 1) 

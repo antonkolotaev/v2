@@ -25,6 +25,15 @@ namespace marketsim
 
             Price getPnL() const { return PnL_; }
 
+#ifdef MARKETSIM_BOOST_PYTHON
+            template <typename T>
+                static void py_visit(T & c)
+                {
+                    Base::py_visit(c);
+                    c.def_readonly("PnL", &PnL_Holder::PnL_);
+                }
+#endif
+
         private:
             Price   PnL_;
         };

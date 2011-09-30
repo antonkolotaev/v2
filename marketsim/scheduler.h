@@ -44,36 +44,62 @@ namespace marketsim
         }
     };
 
-    struct Scheduler
+    template <typename Dummy = int>
+        struct SchedulerT
+            :  protected std::priority_queue<IEventHandlerPtr, std::vector<IEventHandlerPtr>, IEventHandlerPtrCmp >
     {
-        void schedule(IEventHandler* eh)
+        // NOTE: another data structure with priority_queue interface might be chosen here
+        typedef 
+            std::priority_queue<IEventHandlerPtr, std::vector<IEventHandlerPtr>, IEventHandlerPtrCmp >
+            Queue;
+
+        SchedulerT() : currentTime_(0)
         {
-            eventQueue_.push(eh);
+            assert(instance_ == 0);
+            instance_ = this;
         }
+
+        ~SchedulerT()
+        {
+            assert(instance_ == this);
+            instance_ = 0;
+        }
+
+        static Time currentTime() 
+        {
+            return instance_->currentTime_impl();
+        }
+
+        static void schedule(IEventHandler *eh)
+        {
+            instance_->schedule_impl(eh);
+        }
+
+        static void cancel(IEventHandlerPtr eh)
+        {
+            // if there is no scheduler no events are scheduled
+            if (instance_)
+                instance_->cancel_impl(eh);
+        }
+
 
         bool empty() const 
         {
-            return eventQueue_.empty();
+            return Queue::empty();
         }
 
-        Time currentTime() const 
-        {
-            return currentTime_;
-        }
 
         void makeStep() 
         {
-            IEventHandlerPtr  t = eventQueue_.top();
+            IEventHandlerPtr  t = Queue::top();
             currentTime_ = t->getActionTime();
-            eventQueue_.pop();
+            Queue::pop();
             t->process();
         }
 
-        Scheduler() : currentTime_(0) {}
-
         void workTill(Time t)
         {
-            while (!eventQueue_.empty() && eventQueue_.top()->getActionTime() < t)
+            while (!Queue::empty() && Queue::top()->getActionTime() < t)
             {
                 makeStep();
             }
@@ -82,39 +108,60 @@ namespace marketsim
 
         void reset() 
         {
-            while (!eventQueue_.empty())
-                eventQueue_.pop();
+            while (!Queue::empty())
+                Queue::pop();
             currentTime_ = 0;
         }
 
-    private:
-        // NOTE: another data structure with priority_queue interface might be chosen here
-        typedef 
-            std::priority_queue<IEventHandlerPtr, std::vector<IEventHandlerPtr>, IEventHandlerPtrCmp >
-            Queue;
+#ifdef MARKETSIM_BOOST_PYTHON
 
-        Queue    eventQueue_;
+        static void py_register(const char * name)
+        {
+            using namespace boost::python;
+            class_<SchedulerT, boost::noncopyable>(name)
+                .def("workTill", &SchedulerT::workTill)
+                .def("currentTime", &SchedulerT::currentTime_impl)
+                .def("reset", &SchedulerT::reset)
+                ;
+        }
+
+#endif 
+
+    private:
+
+        // O(nlogn)!!!
+        void cancel_impl(IEventHandlerPtr eh)
+        {
+            c.erase(std::remove(c.begin(), c.end(), eh), c.end());
+            std::make_heap(c.begin(), c.end());
+        }
+
+        void schedule_impl(IEventHandler* eh)
+        {
+            Queue::push(eh);
+        }
+
+        Time currentTime_impl() const 
+        {
+            return currentTime_;
+        }
+
+        static SchedulerT*   instance_;
+
+    private:
         Time     currentTime_;
     };
 
-	template <int> struct SchedulerHolderT
-	{
-		static Scheduler instance;
-	};
+    typedef SchedulerT<> Scheduler;
 
-	template <int N> Scheduler SchedulerHolderT<N>::instance;
-
-    inline Scheduler& scheduler() 
-    {
-		return SchedulerHolderT<1>::instance;   
-    }
+	template <typename T> SchedulerT<T>* SchedulerT<T>::instance_ = 0;
 
     struct EventHandler : IEventHandler
     {
         void schedule(TimeInterval dt)
         {
-            setActionTime(scheduler().currentTime() + dt);
-            scheduler().schedule(this);
+            setActionTime(Scheduler::currentTime() + dt);
+            Scheduler::schedule(this);
         }
     };
 
@@ -137,6 +184,11 @@ namespace marketsim
 
         void on_released() 
         {}
+
+        ~Timer()
+        {
+            Scheduler::cancel(this);
+        }
 
     private:
         T   &           parent_;

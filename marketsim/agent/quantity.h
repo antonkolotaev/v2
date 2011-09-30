@@ -14,7 +14,7 @@ namespace marketsim
         template <typename T>
             Quantity_Holder(T const & x) : Base(x), quantity_(0) {}
 
-        typedef Quantity_Holder    base; // for derived typenamees
+        DECLARE_BASE(Quantity_Holder);
 
         void setQuantity(Volume v) { quantity_ = v; }
         Volume getQuantity() const { return quantity_; }
@@ -25,6 +25,14 @@ namespace marketsim
             quantity_ += order->calculateQuantity(x.volume);
             Base::onOrderPartiallyFilled(order, x);
         }
+#ifdef MARKETSIM_BOOST_PYTHON
+        template <typename T>
+            static void py_visit(T & c)
+            {
+                Base::py_visit(c);
+                c.def_readwrite("assetsAvailable", &Quantity_Holder::quantity_);
+            }
+#endif
 
     private:
         Volume  quantity_;

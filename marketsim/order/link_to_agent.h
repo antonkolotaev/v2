@@ -29,7 +29,6 @@ namespace marketsim
             agent_->onOrderCancelled(self());
         }
 
-
         private:
             AgentPtr  agent_;
         };

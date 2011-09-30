@@ -91,10 +91,9 @@ namespace {
 
     TEST_CASE("scheduler", "Testing scheduler events resided in a pool")
     {
+        Scheduler scheduler;
         FFF fff;
 
-        scheduler().workTill(100);
-
-        scheduler().reset();
+        scheduler.workTill(100);
     }
 }}

@@ -1,6 +1,8 @@
 #ifndef _marketsim_agent_on_order_partially_filled_h_included_
 #define _marketsim_agent_on_order_partially_filled_h_included_
 
+#include <marketsim/common_types.h>
+
 namespace marketsim
 {
     template <typename Handler, typename Base>
@@ -12,7 +14,7 @@ namespace marketsim
 				,	Handler_(boost::get<1>(x))
 			{}
 
-        typedef OnPartiallyFilled base; // for derived typenamees
+        DECLARE_BASE(OnPartiallyFilled);
 
 		Handler & getHandler(Handler*) { return Handler_; }
 		Handler const & getHandler(Handler*) const { return Handler_; }

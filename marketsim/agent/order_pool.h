@@ -22,6 +22,11 @@ namespace marketsim
                 return new (pool_.alloc()) Order(x, &pool_, self());
             }
 
+        ~PrivateOrderPool()
+        {
+            self()->getOrderBook()->orderQueue(typename order_side<Order>::type()).remove_all_pool_orders(&pool_);
+        }
+
    private:
        object_pool<Order>   pool_;
    };

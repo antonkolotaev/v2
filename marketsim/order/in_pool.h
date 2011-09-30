@@ -25,13 +25,20 @@ namespace marketsim
                 holder_->free(self());
             }
 
+            typedef typename Holder::apply<base::derived_t>::type  holder_t;
+
+            bool is_my_pool(holder_t h) const 
+            {
+                return h == holder_;
+            }
+
             ~InPool() 
             {
                 //std::cout << "~LimitOrder(" << price << ", " << volume << ")" << std::endl;
             }
 
         private:
-            typename Holder::apply<base::derived_t>::type  holder_;
+            holder_t  holder_;
         };
 
 /*

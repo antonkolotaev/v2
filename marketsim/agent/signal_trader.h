@@ -19,12 +19,12 @@ namespace marketsim
         {
             if (x > threshold_)
             {
-                Base::processOrder(Base::createOrder(volume_(), sell_tag()));
+                self()->sendSellOrder((Volume)volume_());
             }
 
             if (x < -threshold_)
             {
-                Base::processOrder(Base::createOrder(volume_(), buy_tag()));
+                self()->sendBuyOrder((Volume)volume_());
             }
         }
 

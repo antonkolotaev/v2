@@ -32,12 +32,10 @@ namespace {
                     AgentBase<FundamentalValueTester> > > >
     {
         FundamentalValueTester()
-            :   base(boost::make_tuple(dummy, rng::constant<Time>(1.), rng::constant<Volume>(1), 100))
+            :   base(boost::make_tuple(boost::make_tuple(dummy, this), rng::constant<Time>(1.), rng::constant<Volume>(1), 100))
             ,   ask_(0), bid_(0)
             ,   processed_(0)
-        {
-            setOrderBook(this);
-        }
+        {}
 
         bool processOrder(MarketT<Buy> const & x)
         {
@@ -50,6 +48,12 @@ namespace {
             processed_ += x.volume;
             return true;
         }
+
+        template <Side SIDE>
+            bool empty() const 
+            {
+                return false;
+            }
 
         Price bestPriceImpl(sell_tag) const { return ask_; }
         Price bestPriceImpl(buy_tag) const { return bid_; }
@@ -68,23 +72,22 @@ namespace {
 
     TEST_CASE("fundamental_value_trader", "")
     {
+        Scheduler scheduler;
         FundamentalValueTester  trader;
 
         trader.setBid(95); trader.setAsk(105);
 
-        scheduler().workTill(1.5);
+        scheduler.workTill(1.5);
         REQUIRE(trader.getProcessed() == 0);
 
         trader.setAsk(110);
 
-        scheduler().workTill(2.5);
+        scheduler.workTill(2.5);
         REQUIRE(trader.getProcessed() == 1);
 
         trader.setBid(10);
 
-        scheduler().workTill(3.5);
+        scheduler.workTill(3.5);
         REQUIRE(trader.getProcessed() == 0);
-
-        scheduler().reset();
     }
 }}

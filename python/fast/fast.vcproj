@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="tests"
-	ProjectGUID="{626E7D9B-0754-43D7-94C3-FDCBADB07142}"
-	RootNamespace="tests"
+	Name="fast"
+	ProjectGUID="{79B7FE66-4A3C-424E-9F1E-968D967C3D32}"
+	RootNamespace="fast"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -18,9 +18,9 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)\marketsim"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -41,8 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\&quot;;d:\boost_1_44_0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)&quot;;D:\boost_1_44_0;C:\Python27\include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;FAST_EXPORTS;MARKETSIM_BOOST_PYTHON"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,9 +61,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\fast.pyd"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="c:\Python27\libs"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -92,7 +94,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -115,7 +117,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;FAST_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
@@ -135,7 +137,7 @@
 				Name="VCLinkerTool"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
-				SubSystem="1"
+				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -166,80 +168,46 @@
 	<References>
 	</References>
 	<Files>
-		<Filter
-			Name="tests"
-			>
-			<File
-				RelativePath=".\canceller.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\event_in_pool.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\fundamental_value_trader.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\limit_orders.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\liquidity_provider.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\matching.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\matching_engine.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\noise_trader.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\object_pool.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\order_book.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\order_book_history.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\order_expiry.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\orders.h"
-				>
-			</File>
-			<File
-				RelativePath=".\PnL.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\signal_trader.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\trend_follower.cpp"
-				>
-			</File>
-		</Filter>
 		<File
-			RelativePath=".\catch.hpp"
+			RelativePath=".\dllmain.cpp"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+					CompileAsManaged="0"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+					CompileAsManaged="0"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\fast.cpp"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\PnL_Quantity_history_in_deque.h"
 			>
 		</File>
 		<File
-			RelativePath=".\tests.cpp"
+			RelativePath=".\with_history_in_deque.h"
 			>
 		</File>
 	</Files>

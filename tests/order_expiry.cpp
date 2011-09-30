@@ -72,6 +72,7 @@ namespace {
 
     TEST_CASE("order_expiry", "Testing orders with expiry time")
     {
+        Scheduler                   scheduler;
         object_pool<LimitSell>      pool;
 
         OrderQueue<LimitSellPtr>    sell_orders;
@@ -81,28 +82,26 @@ namespace {
         sell_orders.push(ls = new (pool.alloc()) LimitSell(pv(100, 123), 15., &pool, &sell_orders));
         sell_orders.push(ls = new (pool.alloc()) LimitSell(pv(90, 978), 3., &pool, &sell_orders));
 
-        scheduler().workTill(1.);
+        scheduler.workTill(1.);
 
         REQUIRE(sell_orders.top()->volume == 978);
         REQUIRE(g_counter == 2);
         REQUIRE(!sell_orders.empty());
-        scheduler().workTill(10.);
+        scheduler.workTill(10.);
 
         sell_orders.push(ls = new (pool.alloc()) LimitSell(pv(91, 555), 1., &pool, &sell_orders));
         REQUIRE(g_counter == 2);
         REQUIRE(!sell_orders.empty());
         REQUIRE(sell_orders.top()->volume == 555);
 
-        scheduler().workTill(12.);
+        scheduler.workTill(12.);
         REQUIRE(g_counter == 1);
         REQUIRE(!sell_orders.empty());
         REQUIRE(sell_orders.top()->volume == 123);
 
-        scheduler().workTill(20.);
+        scheduler.workTill(20.);
         REQUIRE(g_counter == 0);
         REQUIRE(sell_orders.empty());
-
-        scheduler().reset();
     }
 
 }}

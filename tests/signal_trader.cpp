@@ -23,19 +23,18 @@ namespace {
         };
 
     struct SignalTraderTester :
-        SignalTrader<rng::constant<Volume>, 
-            MarketOrderFactory<MarketT<Buy>, MarketT<Sell>, 
-                LinkToOrderBook<SignalTraderTester*, 
-                    AgentBase<SignalTraderTester> > > >
+                SignalTrader        <rng::constant<Volume>, 
+                MarketOrderFactory  <MarketT<Buy>, MarketT<Sell>, 
+                LinkToOrderBook     <SignalTraderTester*, 
+                AgentBase           <SignalTraderTester> 
+            > > >
     {
         SignalTraderTester()
-            :   base(boost::make_tuple(dummy, rng::constant<Volume>(1), 0.7))
+            :   base(boost::make_tuple(boost::make_tuple(dummy, this), rng::constant<Volume>(1), 0.7))
             ,   signal_(rng::constant<Time>(1.), boost::ref(*self()), self())
             ,   delta_(0)
             ,   processed_(0)
-        {
-            setOrderBook(this);
-        }
+        {}
 
         bool processOrder(MarketT<Buy> const & x)
         {
@@ -68,28 +67,27 @@ namespace {
 
     TEST_CASE("signal_trader", "Testing that a signal tester sends an order when threshold is surpassed")
     {
-        SignalTraderTester    trader;
+        Scheduler               scheduler;
+        SignalTraderTester      trader;
 
-        scheduler().workTill(1.5);
+        scheduler.workTill(1.5);
         REQUIRE(trader.getProcessed() == 0);
 
         trader.setDelta(1.);
 
-        scheduler().workTill(3.5);
+        scheduler.workTill(3.5);
         REQUIRE(trader.getProcessed() == 2);
 
         trader.setDelta(-1.);
 
-        scheduler().workTill(4.5);
+        scheduler.workTill(4.5);
         REQUIRE(trader.getProcessed() == 3);
 
-        scheduler().workTill(5.5);
+        scheduler.workTill(5.5);
         REQUIRE(trader.getProcessed() == 3);
         
-        scheduler().workTill(7.5);
+        scheduler.workTill(7.5);
         REQUIRE(trader.getProcessed() == 1);
-
-        scheduler().reset();
     }
 
 }}

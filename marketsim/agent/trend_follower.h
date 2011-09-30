@@ -31,10 +31,10 @@ namespace marketsim
                 Price trend = midPrice2 - *lastPrice_;
 
                 if (trend > 0)
-                    Base::processOrder(Base::createOrder(volume_(), buy_tag()));
+                    Base::sendBuyOrder(Volume(volume_()));
 
                 if (trend < 0)
-                    Base::processOrder(Base::createOrder(volume_(), sell_tag()));
+                    Base::sendSellOrder(Volume(volume_()));
             }
 
             lastPrice_ = midPrice2;

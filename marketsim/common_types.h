@@ -3,6 +3,7 @@
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <ostream>
 
 #pragma warning ( disable : 4355 )
 
@@ -13,6 +14,8 @@
     X const *   operator -> () const{ return  static_cast<X const *>(this); } \
     X &         operator * ()       { return  static_cast<X&>(*this); } \
     X const &   operator * () const { return  static_cast<X const&>(*this); } 
+ 
+#define DECLARE_BASE(X) typedef X base; typedef X type;
 
 namespace marketsim 
 {
@@ -47,7 +50,7 @@ namespace marketsim
     template <Side S> struct opposite_side<side_tag<S> > 
     {
         typedef side_tag<S == Buy ? Sell : Buy>     type;
-    };
+    }; 
 
     template <typename T>
     struct ordered_by_price 
@@ -58,6 +61,10 @@ namespace marketsim
 	typedef int Price;
 	typedef int Volume;
 	typedef double Time;
+
+    typedef double PriceF;
+    typedef double VolumeF;
+
 
     template <typename T> struct ordered_by_price<boost::intrusive_ptr<T> > 
     {
@@ -78,8 +85,14 @@ namespace marketsim
 
 	struct Empty {};
 
-	typedef int Dummy;
-	const int dummy = 0;
+    enum Dummy { dummy };
+
+    template <typename T>
+    std::string toStr(T const &x) 
+    {
+        return (std::stringstream() << x).str();
+    }
+
 
     struct PriceVolume 
     {
@@ -95,6 +108,30 @@ namespace marketsim
         }
 
         Price PnL_Raw() const { return price * volume; }
+
+		template <typename Stream>
+		friend Stream& operator << (Stream& out, PriceVolume const & x)
+			{
+				out << "{ Price=" << x.price << " Volume=" << x.volume << " }";
+				return out;
+			}
+
+#ifdef MARKETSIM_BOOST_PYTHON
+
+        static std::string py_name() { return "PriceVolume"; }
+
+        static void py_register(std::string const& name = py_name())
+        {
+            using namespace boost::python;
+            class_<PriceVolume>(name.c_str(), init<Price,Volume>())
+                .def_readwrite("price", &PriceVolume::price)
+                .def_readwrite("volume", &PriceVolume::volume)
+                .def("__str__",  toStr<PriceVolume>)
+                .def("__repr__", toStr<PriceVolume>)
+                ;
+        }
+#endif 
+
     };
 
     inline PriceVolume pv(Price p, Volume v) { return PriceVolume(p,v); }

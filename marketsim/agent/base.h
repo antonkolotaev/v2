@@ -10,6 +10,7 @@ namespace marketsim
     {
         AgentBase() {}
         AgentBase(Dummy) {}
+        AgentBase(boost::tuples::tuple<>) {}
 
         typedef Derived  derived_t;
 
@@ -28,6 +29,12 @@ namespace marketsim
         {}
 
 		void getHandler() const; // to be defined in derived classes if used
+
+#ifdef MARKETSIM_BOOST_PYTHON
+        template <typename T> 
+            static void py_visit(T & class_def)
+            {}
+#endif
     };
 }
 

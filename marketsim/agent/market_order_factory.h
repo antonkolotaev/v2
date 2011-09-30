@@ -19,6 +19,27 @@ namespace marketsim
                 { 
                     return MarketSell(x, self()); 
                 }
+
+            void sendBuyOrder(Volume x)
+            {
+                self()->processOrder(createOrder(x, buy_tag()));
+            }
+
+            void sendSellOrder(Volume x)
+            {
+                self()->processOrder(createOrder(x, sell_tag()));
+            }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+
+            template <typename T>
+                static void py_visit(T & c)
+                {
+                    c.def("sendBuyOrder", &MarketOrderFactory::sendBuyOrder);
+                    c.def("sendSellOrder",&MarketOrderFactory::sendSellOrder);
+                }
+
+#endif
         };
 
 }

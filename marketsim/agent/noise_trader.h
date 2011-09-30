@@ -10,7 +10,7 @@ namespace marketsim
     template <typename IntervalDistr, typename VolumeDistr, typename Base>
         struct NoiseTrader : Base 
     {
-        typedef NoiseTrader     base; // for derived classes
+        DECLARE_BASE(NoiseTrader);
 
         template <typename T>
             NoiseTrader(T const & x) 
@@ -19,16 +19,26 @@ namespace marketsim
                 ,   volume_(boost::get<2>(x))
             {}
 
+#ifdef MARKETSIM_BOOST_PYTHON
+
+        template <typename T>
+            static void py_visit(T &c)
+            {
+                Base::py_visit(c);
+            }
+
+#endif
+
     private:
         void createOrder()
         {
-            Volume v = volume_();
+            Volume v = (Volume)volume_();
 
             if (v > 0)
-                Base::processOrder(Base::createOrder(v, sell_tag()));
+                self()->sendSellOrder(v);
 
             if (v < 0)
-                Base::processOrder(Base::createOrder(-v, buy_tag()));
+                self()->sendBuyOrder(-v);
         }
 
     private:

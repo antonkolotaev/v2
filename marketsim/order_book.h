@@ -14,6 +14,18 @@ namespace marketsim
     {
         OrderBook(Price tickSize = 1) : tick_size_(tickSize) {}
 
+        Price floorPrice(PriceF p) const 
+        {
+            return Price(floor(p / tick_size_)) * tick_size_;
+        }
+
+        Price ceilPrice(PriceF p) const 
+        {
+            return Price(ceil(p / tick_size_)) * tick_size_;
+        }
+
+		typedef OrderBook	base;
+
 		typedef typename QueueBuySide :: value_type		LimitOrderBuy;
 		typedef typename QueueSellSide:: value_type		LimitOrderSell;
 
@@ -22,7 +34,7 @@ namespace marketsim
 		DECLARE_ARROW(OrderBook);	// to be replaced by derived
 
         template <typename Order>
-            bool processOrder(Order order, limit_order_tag)
+            bool processOrder_impl(Order order, limit_order_tag)
             {
                 typedef typename order_side<Order> :: type      side;
                 typedef typename opposite_side<side> :: type    opposite;
@@ -37,7 +49,7 @@ namespace marketsim
             }
 
         template <typename Order>
-            bool processOrder(Order order, market_order_tag)
+            bool processOrder_impl(Order order, market_order_tag)
             {
                 typedef typename order_side<Order> :: type      side;
                 typedef typename opposite_side<side> :: type    opposite;
@@ -48,7 +60,7 @@ namespace marketsim
         template <typename Order>
             bool processOrder(Order order)
             {
-                return processOrder(order, typename order_category<Order>::type());
+                return processOrder_impl(order, typename order_category<Order>::type());
             }
 
         template <typename Order>
@@ -77,7 +89,7 @@ namespace marketsim
 
         // 
         template <Side SIDE> Volume bestVolume(side_tag<SIDE> x = side_tag<SIDE>()) /*const*/ { return orderQueue(side_tag<SIDE>()).getBestVolume(); }
-        template <Side SIDE> Price  bestPrice(side_tag<SIDE> x = side_tag<SIDE>()) /*const*/ { return orderQueue(side_tag<SIDE>()).top()->price; }
+        template <Side SIDE> Price  bestPrice(side_tag<SIDE> x = side_tag<SIDE>()) /*const*/ { return orderQueue(side_tag<SIDE>()).getBestPrice(); }
 
         QueueBuySide  & orderQueue(buy_tag) { return buy_side_; }
         QueueSellSide & orderQueue(sell_tag){ return sell_side_; }
@@ -85,8 +97,21 @@ namespace marketsim
         QueueBuySide  const& orderQueue(buy_tag) const { return buy_side_; }
         QueueSellSide const& orderQueue(sell_tag)const { return sell_side_; }
 
+#ifdef MARKETSIM_BOOST_PYTHON
+        template <typename T>
+            static void py_visit(T & class_def)
+            {
+                class_def
+                    .def_readonly("asks", &OrderBook::sell_side_)
+                    .def_readonly("bids", &OrderBook::buy_side_)
+                    .def_readwrite("tickSize", &OrderBook::tick_size_)
+                    ;
+            }
+#endif
     private:
-        Price  const    tick_size_;
+        OrderBook(OrderBook const&);
+    private:
+        Price           tick_size_;
         QueueBuySide    buy_side_;
         QueueSellSide   sell_side_;
     };

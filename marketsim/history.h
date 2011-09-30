@@ -10,17 +10,72 @@
 namespace marketsim {
 namespace history {
 
+    template <typename T>
+        struct TimeStamped : std::pair<Time, T>
+        {
+            TimeStamped(Time t, T const &x)
+                :   std::pair<Time,T>(t,x)
+            {}
+
+            template <typename Stream>
+                friend Stream& operator << (Stream &out, TimeStamped const & x)
+                {
+                    out << "{ t=" << x.first << " " << x.second << "}";
+                    return out;
+                }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+            static std::string py_name() { return "TimeStamped_" + T::py_name(); }
+
+            static void py_register(std::string const & name = py_name())
+            {
+                using namespace boost::python;
+
+                ::py_register<T>();
+
+                class_<TimeStamped>(name.c_str(), init<Time, T>())
+                    .def_readonly("time",  &TimeStamped::first)
+                    .def_readonly("value", &TimeStamped::second)
+                    .def("__str__", &toStr<TimeStamped>)
+                    .def("__repr__", &toStr<TimeStamped>)
+                    ;
+            }
+#endif
+        };
+
+    template <typename T>
+        struct TimeSerie
+            :   std::deque<TimeStamped<T> >
+        {
+#ifdef MARKETSIM_BOOST_PYTHON
+            static std::string py_name() 
+            {
+                return "TimeSerie_" + T::py_name();
+            }
+
+            static void py_register(std::string const &name = py_name())
+            {
+                using namespace boost::python;
+                ::py_register<TimeStamped<T> >();
+
+                class_<TimeSerie>(name.c_str())
+                    .def("__iter__", boost::python::iterator<TimeSerie>())
+                    ;
+            }
+#endif
+        };
+
 	template <typename FieldType>
 		struct InDeque 
 		{
-			typedef std::pair<Time,FieldType>       HistoryPiece;
-			typedef std::deque<HistoryPiece>        HistoryStorage;
+			typedef TimeStamped<FieldType>        HistoryPiece;
+			typedef TimeSerie<FieldType>          HistoryStorage;
 
 			InDeque() {}
 			template <typename T> 
 				InDeque(T const & x) {}
 
-			HistoryStorage const & getHistory() 
+			HistoryStorage const & getHistory() const
 			{
 				return history_;
 			}
@@ -75,7 +130,7 @@ namespace history {
 			{
                 if (recording_)
                 {
-                    Time t = scheduler().currentTime();
+                    Time t = Scheduler::currentTime();
                     FieldType p = FieldTag::getValue(x);
 
 					if (lastT_ != t)

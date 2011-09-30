@@ -1,8 +1,12 @@
 #ifndef _marketsim_order_base_h_included_
 #define _marketsim_order_base_h_included_
 
+
 #include <vector>
 #include <marketsim/common_types.h>
+#include <utility>
+#undef max
+#undef min
 
 namespace marketsim
 {
@@ -31,6 +35,14 @@ namespace marketsim
             return volume == 0;
         }
 
+#ifdef MARKETSIM_BOOST_PYTHON
+        template <typename T>
+            static void py_visit(T & c)
+            {
+                c.def_readonly("volume", &VolumeHolder::volume);
+            }
+#endif
+
         Volume		volume;
 	};
 
@@ -48,7 +60,22 @@ namespace marketsim
             {
                 return side == Buy ? +v : -v;
             }
+
+            static Price worstPrice() 
+            {
+                return side == Buy ? 0 : std::numeric_limits<Price>::max();
+            }
         };
+
+#ifdef MARKETSIM_BOOST_PYTHON
+        template <typename T> std::string py_name() 
+        {
+            return T::py_name();
+        }
+
+        template <> std::string py_name<sell_tag>() { return "Sell"; }
+        template <> std::string py_name<buy_tag>() { return "Buy"; }
+#endif
 
 	template <Side side>	
         struct PriceHolder : side_is<side>

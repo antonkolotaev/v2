@@ -19,20 +19,27 @@ namespace marketsim
             ,   fundamentalValue2_(boost::get<3>(x) * 2)
         {}
 
+        DECLARE_BASE(FundamentalValueTrader);
+
     private:
         void createOrder()
         {
-            Price midPrice2 = 
-                Base::getOrderBook()->bestPrice<Sell>() + 
-                base::getOrderBook()->bestPrice<Buy>();
+            // TODO: consider trading if one side is empty
+            if (!Base::getOrderBook()->empty<Sell>() && !Base::getOrderBook()->empty<Buy>())
+            {
+                Price midPrice2 = 
+                    Base::getOrderBook()->bestPrice<Sell>() + 
+                    base::getOrderBook()->bestPrice<Buy>();
 
-            Price delta = midPrice2 - fundamentalValue2_;
+                Price delta = midPrice2 - fundamentalValue2_;
+                Volume v = (Volume)volume_();
 
-            if (delta < 0)
-                Base::processOrder(Base::createOrder(volume_(), buy_tag()));
+                if (delta < 0)
+                    self()->sendBuyOrder(v);
 
-            if (delta > 0)
-                Base::processOrder(Base::createOrder(volume_(), sell_tag()));
+                if (delta > 0)
+                    self()->sendSellOrder(v);
+            }
         }
 
     private:
