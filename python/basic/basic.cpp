@@ -30,10 +30,24 @@
 #include "PnL_Quantity_history_in_deque.h"
 
 namespace marketsim {
-namespace fast {
+namespace basic {
 
     using namespace boost::python;
 
+    typedef boost::python::object   py_object;
+
+    template <class T>
+    struct py_value
+    {
+        py_value(py_object value) : value(value) {}
+
+        T operator () ()
+        {
+            return boost::python::extract<T>(value());
+        }
+
+        py_object value;
+    };
     //-----------------------------------------  Orders
     template <Side SIDE, typename Sender>
         struct MarketT : 
@@ -115,8 +129,8 @@ namespace fast {
 
    template <Side SIDE>
     struct LiquidityProviderT :
-        LiquidityProvider   < rng::exponential<Time>, rng::normal<PriceF>, rng::exponential<VolumeF>, 
-        OrderCanceller      < rng::exponential<Time>, boost::intrusive_ptr<LimitT<SIDE> >, 
+        LiquidityProvider   < py_value<Time>, py_value<PriceF>, py_value<VolumeF>, 
+        OrderCanceller      < py_value<Time>, boost::intrusive_ptr<LimitT<SIDE> >, 
         PnL_Quantity_History_InDeque <
         LinkToOrderBook     < OrderBook*, 
         PrivateOrderPool    < LimitT<SIDE>, 
@@ -124,19 +138,19 @@ namespace fast {
         > > > > > > 
     {
 		LiquidityProviderT( OrderBook * book, 
-                Time        meanCreationTime, 
-                Time        meanCancellationTime, 
-                PriceF      priceSigma,
-                VolumeF     meanOrderVolume, 
+                py_object   creationTimeDistr, 
+                py_object   cancelTimeDistr, 
+                py_object   priceDistr,
+                py_object   volumeDistr, 
                 Price       initialPrice) 
             : base(
                 boost::make_tuple(
                     boost::make_tuple(
                         boost::make_tuple(dummy, book), 
-                        rng::exponential<Time>(meanCancellationTime)),
-                    rng::exponential<Time>(meanCreationTime), 
-                    rng::normal<PriceF>(0., priceSigma), 
-                    meanOrderVolume, 
+                        cancelTimeDistr),
+                    creationTimeDistr, 
+                    priceDistr, 
+                    volumeDistr, 
                     initialPrice
                 ))
         {}
@@ -148,7 +162,7 @@ namespace fast {
 
         static void py_register(std::string const &name = py_name())
         {
-            class_<LiquidityProviderT, boost::noncopyable> c(name.c_str(), init<OrderBook*, Time, Time, PriceF, VolumeF, Price>());
+            class_<LiquidityProviderT, boost::noncopyable> c(name.c_str(), init<OrderBook*, py_object, py_object, py_object, py_object, Price>());
 
             base::py_visit(c);
 
@@ -168,86 +182,86 @@ namespace fast {
 
     struct FV_Trader :
         PnL_Quantity_History_InDeque<
-        FundamentalValueTrader  <rng::exponential<Time>, rng::exponential<VolumeF>, 
+        FundamentalValueTrader  <py_value<Time>, py_value<VolumeF>, 
         MarketOrderFactory      <MarketT<Buy, FV_Trader*>, MarketT<Sell, FV_Trader*>, 
         LinkToOrderBook         <OrderBook*, 
         AgentBase               <FV_Trader
         > > > > >
     {
-        FV_Trader(OrderBook *book, Price FV, Time creationTime, VolumeF meanVolume)
+        FV_Trader(OrderBook *book, Price FV, py_object intervalDist, py_object volumeDist)
             :   base(
                     boost::make_tuple(
                         boost::make_tuple(dummy, book), 
-                        rng::exponential<Time>(creationTime), 
-                        rng::exponential<VolumeF>(meanVolume), 
+                        intervalDist, 
+                        volumeDist, 
                         FV)
                     )
         {}
 
         static void py_register(const char * name)
         {
-            class_<FV_Trader, boost::noncopyable> c(name, init<OrderBook*, Price, Time, VolumeF>());
+            class_<FV_Trader, boost::noncopyable> c(name, init<OrderBook*, Price, py_object, py_object>());
             base::py_visit(c);
         }
     };
 
     struct Signal_Trader :
         PnL_Quantity_History_InDeque<
-        SignalTrader        <rng::exponential<VolumeF>, 
+        SignalTrader        <py_value<VolumeF>, 
         MarketOrderFactory  <MarketT<Buy, Signal_Trader*>, MarketT<Sell, Signal_Trader*>, 
         LinkToOrderBook     <OrderBook*, 
         AgentBase           <Signal_Trader> 
         > > > >
     {
-        Signal_Trader(OrderBook * book, VolumeF meanVolume, double threshold)
+        Signal_Trader(OrderBook * book, py_object volumeDist, double threshold)
             :   base(
                     boost::make_tuple(
                         boost::make_tuple(dummy, book), 
-                        rng::exponential<VolumeF>(meanVolume), 
+                        volumeDist, 
                         threshold
                     ))
         {}
 
         static void py_register(const char * name)
         {
-            class_<Signal_Trader, boost::noncopyable> c(name, init<OrderBook*, VolumeF, double>());
+            class_<Signal_Trader, boost::noncopyable> c(name, init<OrderBook*, py_object, double>());
             base::py_visit(c);
         }
     };
 
-    struct Signal : marketsim::Signal<rng::exponential<Time>, rng::normal<double>, Signal_Trader*>
+    struct Signal : marketsim::Signal<py_value<Time>, py_value<double>, Signal_Trader*>
     {
-        Signal(Signal_Trader * trader, Time meanUpdateTime, double deltaSigma)
-            :   base(rng::exponential<Time>(meanUpdateTime), rng::normal<double>(0., deltaSigma), trader)
+        Signal(Signal_Trader * trader, py_object updateDist, py_object signalDist)
+            :   base(updateDist, signalDist, trader)
         {}
 
         static void py_register(const char * name)
         {
-            class_<Signal, boost::noncopyable> c(name, init<Signal_Trader*, Time, double>());
+            class_<Signal, boost::noncopyable> c(name, init<Signal_Trader*, py_object, py_object>());
             base::py_visit(c);
         }
     };
 
     struct Noise_Trader :
         PnL_Quantity_History_InDeque<
-        NoiseTrader         < rng::exponential<Time>,     rng::exponential<VolumeF>,
+        NoiseTrader         < py_value<Time>, py_value<VolumeF>,
         MarketOrderFactory  < MarketT<Buy,Noise_Trader*>, MarketT<Sell,Noise_Trader*>, 
         LinkToOrderBook     < OrderBook*, 
         AgentBase           < Noise_Trader
         > > > > >
     {
-        Noise_Trader(OrderBook * book, Time meanInterval, VolumeF meanVolume)
+        Noise_Trader(OrderBook * book, py_object interval, py_object meanVolume)
             :   base(
                     boost::make_tuple(
                         boost::make_tuple(dummy, book), 
-                        rng::exponential<Time>(meanInterval), 
-                        rng::exponential<VolumeF>(meanVolume)
+                        interval, 
+                        meanVolume
                     ))
         {}
 
         static void py_register(const char * name)
         {
-            class_<Noise_Trader, boost::noncopyable> c(name, init<OrderBook*, Time, VolumeF>());
+            class_<Noise_Trader, boost::noncopyable> c(name, init<OrderBook*, py_object, py_object>());
             base::py_visit(c);
         }
     };
@@ -273,9 +287,9 @@ template <typename T>
         }
     }
 
-BOOST_PYTHON_MODULE(fast)
+BOOST_PYTHON_MODULE(basic)
 {
-	using namespace marketsim::fast;
+	using namespace marketsim::basic;
 
     py_register<marketsim::Scheduler>("Scheduler");
 
@@ -294,5 +308,14 @@ BOOST_PYTHON_MODULE(fast)
     py_register<Signal_Trader>("Signal_Trader");
     py_register<Signal>("Signal");
     py_register<Noise_Trader>("Noise_Trader");
+
+    py_register<marketsim::rng::exponential<> >();
+    py_register<marketsim::rng::constant<> >();
+    py_register<marketsim::rng::gamma<> >();
+    py_register<marketsim::rng::lognormal<> >();
+    py_register<marketsim::rng::normal<> >();
+    py_register<marketsim::rng::uniform_01<> >();
+    py_register<marketsim::rng::uniform_real<> >();
+    py_register<marketsim::rng::uniform_smallint<> >();
 }
 

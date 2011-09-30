@@ -6,7 +6,7 @@ namespace marketsim
     template <typename VolumeDistr, typename Base>
         struct SignalTrader : Base
     {
-        typedef SignalTrader    base; // for derived typenamees
+        DECLARE_BASE(SignalTrader);
 
         template <typename T>
             SignalTrader(T const & x)

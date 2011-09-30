@@ -44,6 +44,17 @@ namespace marketsim
             typedef boost::uniform_01<> base;
 
 			result_type operator () () { return base::operator() (IntRngHolderT<0>::g_int_rnd); }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+            static void py_register()
+            {
+                using namespace boost::python;
+
+                class_<uniform_01>("uniform_01")
+                    .def("__call__", &uniform_01::operator ())
+                    ;
+            }
+#endif
         };
 
 		template <typename Interface = Empty>
@@ -56,6 +67,17 @@ namespace marketsim
             {}
 
 			result_type operator () () { return base::operator ()(IntRngHolderT<0>::g_int_rnd); }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+            static void py_register()
+            {
+                using namespace boost::python;
+
+                class_<uniform_smallint>("uniform_smallint", boost::python::init<int,int>())
+                    .def("__call__", &uniform_smallint::operator ())
+                    ;
+            }
+#endif
         };
 
         template <typename T = double, typename Interface = Empty>
@@ -64,6 +86,17 @@ namespace marketsim
             explicit constant(T x) : x(x) {}
 
             T operator () () { return x; }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+            static void py_register()
+            {
+                using namespace boost::python;
+
+                class_<constant>("constant", boost::python::init<T>())
+                    .def("__call__", &constant::operator ())
+                    ;
+            }
+#endif
 
         private:
             T   x;
@@ -85,6 +118,17 @@ namespace marketsim
                 : base(lambda_arg) {}
 
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+            static void py_register()
+            {
+                using namespace boost::python;
+
+                class_<exponential>("exponential", boost::python::init<result_type>())
+                    .def("__call__", &exponential::operator ())
+                    ;
+            }
+#endif
         };
 
 		template <typename T = double, typename Interface = Empty>
@@ -97,6 +141,17 @@ namespace marketsim
                 : base(mean_arg, sigma_arg) {}
 
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+            static void py_register()
+            {
+                using namespace boost::python;
+
+                class_<normal>("normal", boost::python::init<result_type, result_type>())
+                    .def("__call__", &normal::operator ())
+                    ;
+            }
+#endif
         };
 
 		template <typename T = double, typename Interface = Empty>
@@ -109,6 +164,18 @@ namespace marketsim
                 : base(mean_arg, sigma_arg) {}
 
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+            static void py_register()
+            {
+                using namespace boost::python;
+
+                class_<lognormal>("lognormal", boost::python::init<double, double>())
+                    .def("__call__", &lognormal::operator ())
+                    ;
+            }
+#endif
+
         };
 
 		template <typename T = double, typename Interface = Empty>
@@ -119,6 +186,18 @@ namespace marketsim
             explicit gamma(const result_type& alpha_arg = result_type(1)) : base(alpha_arg) {}
 
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+            static void py_register()
+            {
+                using namespace boost::python;
+
+                class_<gamma>("gamma", boost::python::init<double>())
+                    .def("__call__", &gamma::operator ())
+                    ;
+            }
+#endif
+
         };
 
 		template <typename T = double, typename Interface = Empty>
@@ -131,6 +210,17 @@ namespace marketsim
                 :  base(min_arg, max_arg) {}
 
 			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+            static void py_register()
+            {
+                using namespace boost::python;
+
+                class_<uniform_real>("uniform_real", boost::python::init<result_type,result_type>())
+                    .def("__call__", &uniform_real::operator ())
+                    ;
+            }
+#endif
         };
     }
 

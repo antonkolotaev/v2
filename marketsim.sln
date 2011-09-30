@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Python", "Python", "{24C128
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fast", "python\fast\fast.vcproj", "{79B7FE66-4A3C-424E-9F1E-968D967C3D32}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "basic", "python\basic\basic.vcproj", "{79B7FE66-4A3C-424E-9F1E-968D967C3D31}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -27,11 +29,16 @@ Global
 		{79B7FE66-4A3C-424E-9F1E-968D967C3D32}.Debug|Win32.Build.0 = Debug|Win32
 		{79B7FE66-4A3C-424E-9F1E-968D967C3D32}.Release|Win32.ActiveCfg = Release|Win32
 		{79B7FE66-4A3C-424E-9F1E-968D967C3D32}.Release|Win32.Build.0 = Release|Win32
+		{79B7FE66-4A3C-424E-9F1E-968D967C3D31}.Debug|Win32.ActiveCfg = Debug|Win32
+		{79B7FE66-4A3C-424E-9F1E-968D967C3D31}.Debug|Win32.Build.0 = Debug|Win32
+		{79B7FE66-4A3C-424E-9F1E-968D967C3D31}.Release|Win32.ActiveCfg = Release|Win32
+		{79B7FE66-4A3C-424E-9F1E-968D967C3D31}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{79B7FE66-4A3C-424E-9F1E-968D967C3D32} = {24C12864-833E-4E6F-9995-4E326D52963B}
+		{79B7FE66-4A3C-424E-9F1E-968D967C3D31} = {24C12864-833E-4E6F-9995-4E326D52963B}
 	EndGlobalSection
 EndGlobal
