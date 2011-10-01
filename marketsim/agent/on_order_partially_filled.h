@@ -27,7 +27,8 @@ namespace marketsim
             Base::onOrderPartiallyFilled(order, x);
             Handler_(self());            
         }
-    private:
+    //private:
+    protected:
         Handler     Handler_;
     };
 

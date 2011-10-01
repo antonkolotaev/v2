@@ -1,5 +1,5 @@
 #include <boost/python.hpp>
-
+#include <list>
 //#define MARKETSIM_BOOST_PYTHON
 
 #include <marketsim/object_pool.h>
@@ -48,6 +48,55 @@ namespace basic {
 
         py_object value;
     };
+
+    struct py_callback
+    {   
+        py_callback(py_object c) 
+        {
+            callbacks.push_back(c);
+        }
+
+        py_callback(Dummy) {}       
+        py_callback() {}
+
+        template <class T>
+            void operator () (T * x)
+            {
+                reference_existing_object::apply<T*>::type converter;
+                PyObject* obj = converter( x );
+                object real_obj = object( handle<>( obj ) );
+
+                BOOST_FOREACH(py_object callback, callbacks)
+                {
+                    if (!callback.is_none())
+                    {
+                        callback(real_obj);
+                    }
+                }
+            }
+
+        void add(py_object x)
+        {
+            callbacks.push_back(x);
+        }
+
+        void remove(py_object x)
+        {
+            callbacks.erase(std::remove(callbacks.begin(), callbacks.end(), x), callbacks.end());
+        }
+
+
+        static void py_register()
+        {
+            class_<py_callback>("py_callback")
+                .def("add", &py_callback::add)
+                .def("remove", &py_callback::remove)
+                ;
+        }
+
+        std::list<py_object>   callbacks;
+    };
+
     //-----------------------------------------  Orders
     template <Side SIDE, typename Sender>
         struct MarketT : 
@@ -181,26 +230,30 @@ namespace basic {
     };
 
     struct FV_Trader :
+        OnPartiallyFilled       < py_callback,
         PnL_Quantity_History_InDeque<
-        FundamentalValueTrader  <py_value<Time>, py_value<VolumeF>, 
-        MarketOrderFactory      <MarketT<Buy, FV_Trader*>, MarketT<Sell, FV_Trader*>, 
-        LinkToOrderBook         <OrderBook*, 
-        AgentBase               <FV_Trader
-        > > > > >
+        FundamentalValueTrader  < py_value<Time>, py_value<VolumeF>, 
+        MarketOrderFactory      < MarketT<Buy, FV_Trader*>, MarketT<Sell, FV_Trader*>, 
+        LinkToOrderBook         < OrderBook*, 
+        AgentBase               < FV_Trader
+        > > > > > >
     {
         FV_Trader(OrderBook *book, Price FV, py_object intervalDist, py_object volumeDist)
             :   base(
                     boost::make_tuple(
-                        boost::make_tuple(dummy, book), 
-                        intervalDist, 
-                        volumeDist, 
-                        FV)
+                        boost::make_tuple(
+                            boost::make_tuple(dummy, book), 
+                            intervalDist, 
+                            volumeDist, 
+                            FV),
+                        dummy)
                     )
         {}
 
         static void py_register(const char * name)
         {
-            class_<FV_Trader, boost::noncopyable> c(name, init<OrderBook*, Price, py_object, py_object>());
+            class_<FV_Trader, boost::noncopyable > c(name, init<OrderBook*, Price, py_object, py_object>());
+            c.def_readonly("on_partially_filled", &FV_Trader::Handler_);
             base::py_visit(c);
         }
     };
@@ -317,5 +370,7 @@ BOOST_PYTHON_MODULE(basic)
     py_register<marketsim::rng::uniform_01<> >();
     py_register<marketsim::rng::uniform_real<> >();
     py_register<marketsim::rng::uniform_smallint<> >();
+
+    py_register<py_callback>();
 }
 
