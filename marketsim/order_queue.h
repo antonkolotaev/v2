@@ -4,6 +4,7 @@
 #include <queue>
 #include <algorithm>
 #include <boost/type_traits/remove_pointer.hpp>
+#include <boost/mpl/if.hpp>
 
 #include <marketsim/common_types.h>
 
@@ -12,12 +13,15 @@ namespace marketsim
     // requires: 
     //      Order is a pointer-like type
     //      order->cancelled() returns true iff the order is useless and thus may be removed
-    template <typename Order>
+    template <typename Order, class Derived_t = boost::mpl::na>
         struct OrderQueue : protected std::priority_queue<Order, std::vector<Order>, typename ordered_by_price<Order>::type>
     {
     private:
         OrderQueue(OrderQueue const &);
     public:
+
+        typedef typename boost::mpl::if_na<Derived_t, OrderQueue>::type    Derived;
+
 		typedef typename ordered_by_price<Order>::type comparer_type;
 
         typedef 
@@ -272,7 +276,9 @@ namespace marketsim
 			void onPartiallyFilled(Order const & order, PriceVolume const & trade)
 			{}
 
-		DECLARE_ARROW(OrderQueue);
+        typedef Derived derived_t;
+
+		DECLARE_ARROW(Derived);
 
 #ifdef MARKETSIM_BOOST_PYTHON
         template <typename T>
@@ -321,6 +327,26 @@ namespace marketsim
         }
     };
 
+#ifdef MARKETSIM_BOOST_PYTHON
+    struct py_BestPriceAndVolume
+    {
+        typedef PriceVolume	ValueType;
+
+        static ValueType getValue(boost::python::object x) 
+        {
+            return PriceVolume(
+                boost::python::extract<Price>(x.attr("bestPrice")()), 
+                boost::python::extract<Volume>(x.attr("bestVolume")()));
+        }
+
+        static std::string py_name() 
+        {
+            return "BestPriceAndVolume";
+        }
+    };
+
+#endif
+
     template <typename Handler, typename Base>
 		struct OnQueueTopChanged : Base
 	{
@@ -351,7 +377,7 @@ namespace marketsim
 				bool better = !comp(x, top());
 				Base::onOrderCancelled(x);
 				if (better)
-					handler_(self());		// TODO: use self() and introduce derived_t
+					handler_(self());		
 			}
 
 		void pop() 
@@ -371,6 +397,16 @@ namespace marketsim
 		Handler       & getHandler(Handler *)       { return handler_; }
 
 		using Base::getHandler;
+
+#ifdef MARKETSIM_BOOST_PYTHON
+        template <class T>  
+            static void py_visit(T & c)
+            {
+                Base::py_visit(c);
+                c.def_readonly("on_top_changed", &OnQueueTopChanged::handler_);
+            }
+
+#endif
 
 	private:
 		Handler			handler_;	

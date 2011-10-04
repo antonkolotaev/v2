@@ -18,6 +18,29 @@ namespace marketsim
        {
            return PriceVolume(x->getPnL(), x->getQuantity());
        }
+#ifdef MARKETSIM_BOOST_PYTHON
+       static std::string py_name() 
+       {
+           return "PnL_Quantity";
+       }
+#endif
+   };
+
+   struct py_PnL_Quantity
+   {
+       typedef PriceVolume  ValueType;
+
+       static ValueType getValue(boost::python::object x)
+       {
+           return 
+               PriceVolume(
+                    boost::python::extract<Price>(x.attr("PnL")),
+                    boost::python::extract<Volume>(x.attr("assetsAvailable")));
+       }
+       static std::string py_name() 
+       {
+           return "PnL_Quantity";
+       }
    };
 
    template <typename Base>

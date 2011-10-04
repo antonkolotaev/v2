@@ -72,9 +72,10 @@ namespace fast {
 
    template <Side SIDE>
         struct queue_with_history
-            :   WithHistoryInDeque<
-                    OrderQueue<boost::intrusive_ptr<LimitT<SIDE> > > 
-            >
+            :   WithHistoryInDeque  <
+                OrderQueue          <   boost::intrusive_ptr<LimitT<SIDE> >,
+                queue_with_history  < SIDE
+                > > >
         {
             queue_with_history() {}
 

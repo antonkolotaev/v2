@@ -44,7 +44,7 @@ namespace marketsim
         }
     };
 
-    template <typename Dummy = int>
+    template <typename IEventHandlerPtr, typename IEventHandlerPtrCmp>
         struct SchedulerT
             :  protected std::priority_queue<IEventHandlerPtr, std::vector<IEventHandlerPtr>, IEventHandlerPtrCmp >
     {
@@ -70,7 +70,7 @@ namespace marketsim
             return instance_->currentTime_impl();
         }
 
-        static void schedule(IEventHandler *eh)
+        static void schedule(IEventHandlerPtr eh)
         {
             instance_->schedule_impl(eh);
         }
@@ -133,10 +133,10 @@ namespace marketsim
         void cancel_impl(IEventHandlerPtr eh)
         {
             c.erase(std::remove(c.begin(), c.end(), eh), c.end());
-            std::make_heap(c.begin(), c.end());
+            std::make_heap(c.begin(), c.end(), comp);
         }
 
-        void schedule_impl(IEventHandler* eh)
+        void schedule_impl(IEventHandlerPtr eh)
         {
             Queue::push(eh);
         }
@@ -152,9 +152,9 @@ namespace marketsim
         Time     currentTime_;
     };
 
-    typedef SchedulerT<> Scheduler;
+    typedef SchedulerT<IEventHandlerPtr, IEventHandlerPtrCmp> Scheduler;
 
-	template <typename T> SchedulerT<T>* SchedulerT<T>::instance_ = 0;
+	template <typename T, typename C> SchedulerT<T,C>* SchedulerT<T,C>::instance_ = 0;
 
     struct EventHandler : IEventHandler
     {
@@ -162,6 +162,11 @@ namespace marketsim
         {
             setActionTime(Scheduler::currentTime() + dt);
             Scheduler::schedule(this);
+        }
+
+        void cancel() 
+        {
+            Scheduler::cancel(this);
         }
     };
 
@@ -187,7 +192,7 @@ namespace marketsim
 
         ~Timer()
         {
-            Scheduler::cancel(this);
+            cancel();
         }
 
     private:

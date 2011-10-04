@@ -27,6 +27,18 @@ namespace marketsim
             Base::onOrderPartiallyFilled(order, x);
             Handler_(self());            
         }
+
+#ifdef MARKETSIM_BOOST_PYTHON
+        
+        template <class T>
+            static void py_visit(T & c)
+            {
+                Base::py_visit(c);
+                c.def_readonly("on_partially_filled", &OnPartiallyFilled::Handler_);
+            }
+
+#endif
+
     //private:
     protected:
         Handler     Handler_;

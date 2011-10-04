@@ -80,6 +80,14 @@ namespace history {
 				return history_;
 			}
 
+#ifdef MARKETSIM_BOOST_PYTHON
+            template <typename T>
+                static void py_visit(T & c)
+                {
+                    c.def_readonly("history", &InDeque::history_);
+                }
+#endif
+
 		protected:
 			void write(Time t, FieldType const & x)
 			{
@@ -152,6 +160,15 @@ namespace history {
 				}
 			}
 
+#ifdef MARKETSIM_BOOST_PYTHON
+            template <class T>
+                static void py_visit(T & c)
+                {
+                    c.def("__call__", &Collector::operator ()<object>);
+                    c.def_readwrite("recording", &Collector::recording_);                    
+                }
+#endif
+
 			~Collector() 
 			{
 				flush();
@@ -162,6 +179,41 @@ namespace history {
 			boost::optional<FieldType>	last_;
             bool						recording_;
         };
+
+        template <class FieldTag>   
+            struct CollectInDeque : Collector<FieldTag>
+            {
+                typedef Collector<FieldTag>         Base;
+                typedef typename Base::FieldType    FieldType;
+
+                template <class T> 
+                    CollectInDeque(T const & x) : Base(x)
+                    {}
+
+                CollectInDeque() {}
+
+                TimeSerie<FieldType> const & getHistory() 
+                {
+                    Base::flush();
+                    return Base::getHistory();
+                }
+
+#ifdef MARKETSIM_BOOST_PYTHON 
+
+                static std::string py_name() 
+                {
+                    return "HistoryInDeque_" + marketsim::py_name<FieldTag>();
+                }
+
+                static void py_register()
+                {
+                    using namespace boost::python;
+                    class_<CollectInDeque, boost::noncopyable> c(py_name().c_str());
+                    c.def("getHistory", &CollectInDeque::getHistory, return_internal_reference<>());
+                    Base::py_visit(c);
+                }
+#endif
+            };
 
 
 	// History encapsulates:

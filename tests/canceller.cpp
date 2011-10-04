@@ -22,11 +22,12 @@ namespace {
 
     template <Side SIDE>
         struct LimitT : 
-            WithCancelPosition<
-                WithLinkToAgent<AgentT<SIDE>*,
-                    InPool<PlacedInPool, 
-                        LimitOrderBase<SIDE, 
-                            LimitT<SIDE> > > > >
+                WithCancelPosition  <
+                WithLinkToAgent     <AgentT<SIDE>*,
+                InPool              <PlacedInPool, 
+                LimitOrderBase      <SIDE, 
+                LimitT              <SIDE
+                > > > > >
         {
             LimitT(PriceVolume const &x, object_pool<LimitT> * h, AgentT<SIDE> * agent) 
                 :   base(boost::make_tuple(boost::make_tuple(x, h), agent))

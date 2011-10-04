@@ -1,5 +1,6 @@
 #include <boost/python.hpp>
 #include <list>
+#include <set>
 //#define MARKETSIM_BOOST_PYTHON
 
 #include <marketsim/object_pool.h>
@@ -28,6 +29,26 @@
 
 #include "with_history_in_deque.h"
 #include "PnL_Quantity_history_in_deque.h"
+
+template <typename T>
+void py_register(const char * name)
+{
+    static bool registered = false;
+    if (!registered) {
+        T::py_register(name);
+        registered = true;
+    }
+}
+
+template <typename T>
+void py_register()
+{
+    static bool registered = false;
+    if (!registered) {
+        T::py_register();
+        registered = true;
+    }
+}
 
 namespace marketsim {
 namespace basic {
@@ -135,9 +156,11 @@ namespace basic {
 
    template <Side SIDE>
         struct queue_with_history
-            :   WithHistoryInDeque<
-                    OrderQueue<boost::intrusive_ptr<LimitT<SIDE> > > 
-            >
+            :   OnQueueTopChanged   < py_callback,
+                WithHistoryInDeque  <
+                OrderQueue          < boost::intrusive_ptr<LimitT<SIDE> >, 
+                queue_with_history  < SIDE
+                > > > >
         {
             queue_with_history() {}
 
@@ -229,6 +252,32 @@ namespace basic {
         }
     };
 
+    struct PnL_Quantity_History_Collector 
+        :   history::Collector<Get_PnL_Quantity, history::InDeque<PriceVolume> >
+    {
+        
+    };
+
+    struct MarketOrderTrader :
+        OnPartiallyFilled       < py_callback,
+        PnL_Holder              <
+        Quantity_Holder         <
+        MarketOrderFactory      < MarketT<Buy, MarketOrderTrader*>, MarketT<Sell, MarketOrderTrader*>, 
+        LinkToOrderBook         < OrderBook*, 
+        AgentBase               < MarketOrderTrader
+        > > > > > >
+    {
+        MarketOrderTrader(OrderBook * book)
+            :   base(boost::make_tuple(boost::make_tuple(dummy, book), dummy))
+        {}
+
+        static void py_register()
+        {
+            class_<MarketOrderTrader, boost::noncopyable > c("MarketOrderTrader", init<OrderBook*>());
+            base::py_visit(c);
+        }
+    };
+
     struct FV_Trader :
         OnPartiallyFilled       < py_callback,
         PnL_Quantity_History_InDeque<
@@ -253,7 +302,6 @@ namespace basic {
         static void py_register(const char * name)
         {
             class_<FV_Trader, boost::noncopyable > c(name, init<OrderBook*, Price, py_object, py_object>());
-            c.def_readonly("on_partially_filled", &FV_Trader::Handler_);
             base::py_visit(c);
         }
     };
@@ -318,27 +366,87 @@ namespace basic {
             base::py_visit(c);
         }
     };
+
+    struct ScheduledEvent : EventHandler
+    {
+        ScheduledEvent(TimeInterval dt, boost::python::object handler, boost::python::object callback) 
+            : handler(handler), callback(callback)
+        {
+            schedule(dt);
+        }
+
+        void process()
+        {
+            handler();
+        }
+
+        void on_released()
+        {
+            callback();
+            // do nothing since it is supposed to be handled by the Python runtime
+            // NB! It is very important to hold a reference to this object in python 
+            // TBD: implement boost::intrusive_ptr support Boost.Python
+        }
+
+        ~ScheduledEvent()
+        {
+            int a = 1;
+        }
+
+        boost::python::object  handler, callback;
+        
+        static void py_register()
+        {
+            using namespace boost::python;
+            class_<ScheduledEvent, boost::noncopyable>("Event", init<TimeInterval, object, object>())
+                .def("cancel", &ScheduledEvent::cancel)
+                ;
+        }
+    };
+
+    struct Timer : EventHandler
+    {
+        Timer(py_object intervals, py_object handler, py_object callback)
+            :   handler  (handler)
+            ,   intervals(intervals)
+            ,   callback (callback)
+        {
+            schedule(this->intervals());
+        }
+
+        void process()
+        {
+            handler();
+            schedule(intervals());
+        }
+
+        void on_released()
+        {
+            callback();
+            // do nothing since the object is to be managed by Python run time
+        }
+
+        ~Timer()
+        {
+            // in order to kill a timer cancel() method is to be called
+        }
+
+        static void py_register()
+        {
+            using namespace boost::python;
+
+            class_<Timer, boost::noncopyable>("Timer", init<object, object, object>())
+                .def("cancel", &Timer::cancel)
+                ;
+        }
+        
+
+        py_object               handler, callback;
+        py_value<TimeInterval>  intervals;
+    };
+
 }}
 
-template <typename T>
-    void py_register(const char * name)
-    {
-        static bool registered = false;
-        if (!registered) {
-            T::py_register(name);
-            registered = true;
-        }
-    }
-
-template <typename T>
-    void py_register()
-    {
-        static bool registered = false;
-        if (!registered) {
-            T::py_register();
-            registered = true;
-        }
-    }
 
 BOOST_PYTHON_MODULE(basic)
 {
@@ -362,6 +470,8 @@ BOOST_PYTHON_MODULE(basic)
     py_register<Signal>("Signal");
     py_register<Noise_Trader>("Noise_Trader");
 
+    py_register<MarketOrderTrader>();
+
     py_register<marketsim::rng::exponential<> >();
     py_register<marketsim::rng::constant<> >();
     py_register<marketsim::rng::gamma<> >();
@@ -372,5 +482,11 @@ BOOST_PYTHON_MODULE(basic)
     py_register<marketsim::rng::uniform_smallint<> >();
 
     py_register<py_callback>();
+
+    py_register<marketsim::history::CollectInDeque<marketsim::py_PnL_Quantity> >();
+    py_register<marketsim::history::CollectInDeque<marketsim::py_BestPriceAndVolume> >();
+
+    py_register<ScheduledEvent>();
+    py_register<Timer>();
 }
 
