@@ -49,40 +49,69 @@ class py_Trader(MarketOrderTrader):
     def __init__(self,book):
         super(py_Trader,self).__init__(book)
 
-class py_NoiseTrader(MarketOrderTrader):
+def py_NoiseTrader(book, intervalDistr, volumeDistr):
 
-    def __init__(self, book, intervalDistr, volumeDistr):
-
-        super(py_NoiseTrader, self).__init__(book)
+        trader = MarketOrderTrader(book)
 
         def wakeUp():
             v = int(volumeDistr())
             if v > 0:
-                self.sendBuyOrder(v)
+                trader.sendBuyOrder(v)
             if v < 0:
-                self.sendSellOrder(v)
+                trader.sendSellOrder(v)
 
         py_timer(intervalDistr, wakeUp)
 
+        return trader
 
-class py_FV_Trader(MarketOrderTrader):
+def py_FV_Trader(book, intervalDistr, volumeDistr, FV):
 
-    def __init__(self, book, intervalDistr, volumeDistr, FV):
-
-        super(py_FV_Trader, self).__init__(book)
+        trader = MarketOrderTrader(book)
 
         def wakeUp():
             if not book.asks.empty() and not book.bids.empty():
                 midPrice2 = book.asks.bestPrice() + book.bids.bestPrice()
                 v = int(volumeDistr())
                 if midPrice2 > FV*2:
-                    self.sendSellOrder(v)
+                    trader.sendSellOrder(v)
                 if midPrice2 < FV*2:
-                    self.sendBuyOrder(v)
+                    trader.sendBuyOrder(v)
 
         py_timer(intervalDistr, wakeUp)
 
+        return trader
+
+class py_Signal():
+
+    def __init__(self, intervalDistr, deltaDistr):
+        self.listeners = set()
+        self.signal = 0.
+
+        def wakeUp():
+            self.signal += deltaDistr()
+            for x in self.listeners:
+                x(self.signal)
+
+        py_timer(intervalDistr, wakeUp)
+
+def py_Signal_Trader(book, signal, threshold, volumeDistr):
+
+    trader = MarketOrderTrader(book)
+
+    def wakeUp(signal_value):
+        if signal_value > threshold:
+            trader.sendSellOrder(int(volumeDistr()))
+        if signal_value < -threshold:
+            trader.sendBuyOrder(int(volumeDistr()))
+
+    signal.listeners.add(wakeUp)
+
+    return trader
+
 scheduler = PyScheduler()
+
+py_signal = py_Signal(exponential(1.), normal(0., 1.))
+
 
 def YYY():
     print "Time = ", scheduler.currentTime()
@@ -93,6 +122,8 @@ book = OrderBook()
 book.tickSize = 2
 seller = LiquidityProvider_Sell(book, exponential(1.), exponential(.1), exponential(10.), exponential(0.1), 500)
 buyer = LiquidityProvider_Buy(book, exponential(1.), exponential(.1), exponential(10.), exponential(0.1), 400)
+
+py_signal_trader = py_Signal_Trader(book, py_signal, 0.7, exponential(0.1))
 
 py_noisetrader = py_NoiseTrader(book, exponential(1.), normal(0., 10.))
 py_fv_trader = py_FV_Trader(book, exponential(1.), exponential(.1), 500)
