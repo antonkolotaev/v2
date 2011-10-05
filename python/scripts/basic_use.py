@@ -108,6 +108,42 @@ def py_Signal_Trader(book, signal, threshold, volumeDistr):
 
     return trader
 
+def py_LiquidityProvider_Sell(book, sendOrderInterval, cancelOrderInterval, priceDistr, volumeDistr, initialPrice):
+
+        seller = LimitOrderTrader_Sell(book)
+
+        def sendAnOrder():
+            if book.asks.lastTradedVolume() == 0:
+                price = initialPrice
+            else:
+                price = book.asks.lastTradedPrice()
+            price = book.ceilPrice(price + priceDistr())
+            volume = int(volumeDistr())
+            seller.sendOrder(price, volume)
+
+        py_timer(sendOrderInterval, sendAnOrder)
+        py_timer(cancelOrderInterval, seller.cancelAnOrder)
+
+        return seller
+
+def py_LiquidityProvider_Buy(book, sendOrderInterval, cancelOrderInterval, priceDistr, volumeDistr, initialPrice):
+
+        buyer = LimitOrderTrader_Buy(book)
+
+        def sendAnOrder():
+            if book.bids.lastTradedVolume() == 0:
+                price = initialPrice
+            else:
+                price = book.bids.lastTradedPrice()
+            price = book.floorPrice(price - priceDistr())
+            volume = int(volumeDistr())
+            seller.sendOrder(price, volume)
+
+        py_timer(sendOrderInterval, sendAnOrder)
+        py_timer(cancelOrderInterval, buyer.cancelAnOrder)
+
+        return buyer
+
 scheduler = PyScheduler()
 
 py_signal = py_Signal(exponential(1.), normal(0., 1.))
@@ -127,6 +163,9 @@ py_signal_trader = py_Signal_Trader(book, py_signal, 0.7, exponential(0.1))
 
 py_noisetrader = py_NoiseTrader(book, exponential(1.), normal(0., 10.))
 py_fv_trader = py_FV_Trader(book, exponential(1.), exponential(.1), 500)
+
+py_seller = py_LiquidityProvider_Sell(book, exponential(1.), exponential(1.), normal(1., 5.), exponential(.1), 500)
+py_buyer = py_LiquidityProvider_Buy(book, exponential(1.), exponential(1.), normal(1., 5.), exponential(.1), 500)
 
 history = HistoryInDeque_PnL_Quantity()
 
@@ -162,6 +201,9 @@ signal = Signal(s_trader, exponential(1.), normal(0., .2))
 noise_trader = Noise_Trader(book, exponential(1.), exponential(0.1))
 
 book.bids.recordHistory(False)
+
+trader_sell = LimitOrderTrader_Sell(book)
+trader_sell.sendOrder(400, 100)
 
 for i in range(10):
     scheduler.workTill(scheduler.currentTime() + 10)

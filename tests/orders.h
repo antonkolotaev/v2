@@ -8,11 +8,17 @@ namespace marketsim
 {
     template <Side SIDE>
         struct LimitOrderT : 
+            RefCounted<LimitOrderT<SIDE> >,
             ExecutionHistory<
                 LimitOrderBase<SIDE, 
                     LimitOrderT<SIDE> > >    
     {
         LimitOrderT(PriceVolume const & x) : base(x) {}
+
+        void on_released()
+        {
+            delete this;
+        }
     };
 
     typedef LimitOrderT<Buy>    LimitOrderBuy;

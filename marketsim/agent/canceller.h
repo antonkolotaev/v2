@@ -4,47 +4,51 @@
 #include <vector>
 #include <marketsim/scheduler.h>
 #include <marketsim/rng.h>
+#include <boost/foreach.hpp>
 
 namespace marketsim
 {
-    template <typename CancelInterval, typename Order, typename Base, typename IndexChooser = rng::uniform_smallint<> >
-        struct OrderCanceller : Base
+    template <typename Order, typename Base>
+        struct OrdersSubmittedInVector : Base 
     {
-        typedef Timer<OrderCanceller, CancelInterval>   timer_t;
-
-        template <typename T>  OrderCanceller(T const & x) 
-            : Base     (boost::get<0>(x))
-            , timer_   (*self(), &OrderCanceller::cancelAnOrder, boost::get<1>(x))
-        {
-        }
+        template <typename T> OrdersSubmittedInVector(T const & x) : Base(x) {}
 
         const static int cancelledIdx = -0xbad;
 
-        typedef OrderCanceller base;    // for derived typenamees
-        
         template <typename Order>
             void processOrder(Order order)
-            {
-                order->setCancelPosition(orders_issued_.size());
-                orders_issued_.push_back(order);
-                Base::processOrder(order);
-            }
+        {
+            assert(order->volume > 0);
+            order->setCancelPosition(orders_issued_.size());
+            orders_issued_.push_back(order);
+            Base::processOrder(order);
+        }
 
         template <typename Order>
             void onOrderFilled(Order order)
-            {
-                removeOrder(order);
-                Base::onOrderFilled(order);
-            }
+        {
+            removeOrder(order);
+            Base::onOrderFilled(order);
+        }
 
         template <typename Order>
             void onOrderCancelled(Order order)
-            {
-                removeOrder(order);
-                Base::onOrderCancelled(order);
-            }
+        {
+            removeOrder(order);
+            Base::onOrderCancelled(order);
+        }
 
-    private:
+    protected:
+
+        size_t ordersIssuedCount() const 
+        {
+            return orders_issued_.size();
+        }
+
+        Order& getIssuedOrder(size_t idx) 
+        {
+            return orders_issued_[idx];
+        }
 
         template <typename Order>
             void removeOrder(Order order)
@@ -55,20 +59,6 @@ namespace marketsim
             {
                 assert(orders_issued_[pos] == order);
                 erase(pos);
-            }
-        }
-
-        void cancelAnOrder()
-        {
-            if (!orders_issued_.empty())
-            {
-                int pos = IndexChooser(0, orders_issued_.size() - 1)();
-
-                Order order = orders_issued_[pos];
-                erase(pos);
-
-                order->setCancelPosition(cancelledIdx);
-                order->onCancelled();
             }
         }
 
@@ -84,9 +74,45 @@ namespace marketsim
 
             orders_issued_.pop_back();
         }
-
+        void check_all_orders_in_queue()
+        {
+            BOOST_FOREACH(Order order, orders_issued_)
+            {
+                typename order_side<Order>::type  tag;
+                assert(Base::getOrderBook()->orderQueue(tag).contains(order));
+            }
+        }
     private:
         std::vector<Order>     orders_issued_;
+    };
+
+    template <typename CancelInterval, typename Order, typename Base, typename IndexChooser = rng::uniform_smallint<> >
+        struct OrderCanceller : OrdersSubmittedInVector<Order, Base>
+    {
+        typedef Timer<OrderCanceller, CancelInterval>   timer_t;
+        typedef OrdersSubmittedInVector<Order, Base>    RealBase;
+
+        template <typename T>  OrderCanceller(T const & x) 
+            : RealBase (boost::get<0>(x))
+            , timer_   (*self(), &OrderCanceller::cancelAnOrder, boost::get<1>(x))
+        {
+        }
+
+        DECLARE_BASE(OrderCanceller);
+        
+    protected:
+
+        void cancelAnOrder()
+        {
+            if (size_t n = RealBase::ordersIssuedCount())
+            {
+                int pos = IndexChooser(0, n - 1)();
+
+                RealBase::getIssuedOrder(pos)->onCancelled();
+            }
+        }
+
+    private:
         timer_t                timer_;
     };
 

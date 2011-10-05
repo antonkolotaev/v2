@@ -102,7 +102,7 @@ namespace marketsim
 			}
         };
 
-		Price	price;  // const!!!
+		Price const	price;  
 	};
 
     template <Side side, typename Derived>

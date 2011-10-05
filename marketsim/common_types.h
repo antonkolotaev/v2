@@ -44,6 +44,7 @@ namespace marketsim
     };
 
     template <typename T> struct order_side<T*> : order_side<T> {};
+    template <typename T> struct order_side<boost::intrusive_ptr<T> > : order_side<T> {};
 
     template <typename SideTag> struct opposite_side;
 

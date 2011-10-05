@@ -9,14 +9,14 @@ namespace {
 
     TEST_CASE("limit_buy_orders", "Ordering of buy limit orders")
     {
-        OrderQueue<LimitOrderBuy>	limit_orders;
+        OrderQueue<boost::intrusive_ptr<LimitOrderBuy> >	limit_orders;
 
-        limit_orders.push(LimitOrderBuy(pv(110, 3)));
-        limit_orders.push(LimitOrderBuy(pv(102, 3)));
-        limit_orders.push(LimitOrderBuy(pv(105, 3)));
-        limit_orders.push(LimitOrderBuy(pv(107, 3)));
-        limit_orders.push(LimitOrderBuy(pv(100, 3)));
-		limit_orders.push(LimitOrderBuy(pv(101, 0)));
+        limit_orders.push(new LimitOrderBuy(pv(110, 3)));
+        limit_orders.push(new LimitOrderBuy(pv(102, 3)));
+        limit_orders.push(new LimitOrderBuy(pv(105, 3)));
+        limit_orders.push(new LimitOrderBuy(pv(107, 3)));
+        limit_orders.push(new LimitOrderBuy(pv(100, 3)));
+		limit_orders.push(new LimitOrderBuy(pv(101, 0)));
 
 		REQUIRE(limit_orders.volumeForBetterPrices(90) == 15);
 		REQUIRE(limit_orders.volumeForBetterPrices(100) == 15);
@@ -36,22 +36,22 @@ namespace {
 		REQUIRE(best[4] == PriceVolume(100, 3));
 		REQUIRE(best.size() == 5);
 
-		REQUIRE(limit_orders.top().price == 110);
+		REQUIRE(limit_orders.top()->price == 110);
     }
 
 
     TEST_CASE("limit_sell_orders", "Ordering of sell limit orders")
     {
-        OrderQueue<LimitOrderSell>	limit_orders;
+        OrderQueue<boost::intrusive_ptr<LimitOrderSell> >	limit_orders;
 
-        limit_orders.push(LimitOrderSell(pv(110, 3)));
-		limit_orders.push(LimitOrderSell(pv(100, 3)));
-        limit_orders.push(LimitOrderSell(pv(102, 3)));
-        limit_orders.push(LimitOrderSell(pv(105, 3)));
-		limit_orders.push(LimitOrderSell(pv(100, 3)));
-        limit_orders.push(LimitOrderSell(pv(107, 3)));
-		limit_orders.push(LimitOrderSell(pv(100, 3)));
-		limit_orders.push(LimitOrderSell(pv(101, 0)));
+        limit_orders.push(new LimitOrderSell(pv(110, 3)));
+		limit_orders.push(new LimitOrderSell(pv(100, 3)));
+        limit_orders.push(new LimitOrderSell(pv(102, 3)));
+        limit_orders.push(new LimitOrderSell(pv(105, 3)));
+		limit_orders.push(new LimitOrderSell(pv(100, 3)));
+        limit_orders.push(new LimitOrderSell(pv(107, 3)));
+		limit_orders.push(new LimitOrderSell(pv(100, 3)));
+		limit_orders.push(new LimitOrderSell(pv(101, 0)));
 
 		REQUIRE(limit_orders.volumeForBetterPrices(100) == 9);
 		REQUIRE(limit_orders.volumeForBetterPrices(101) == 9);
@@ -70,7 +70,7 @@ namespace {
 		REQUIRE(best[4] == PriceVolume(110, 3));
 		REQUIRE(best.size() == 5);
 
-        REQUIRE(limit_orders.top().price == 100);
+        REQUIRE(limit_orders.top()->price == 100);
     }
 }}
 

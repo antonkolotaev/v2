@@ -7,6 +7,7 @@
 #include <boost/mpl/if.hpp>
 
 #include <marketsim/common_types.h>
+#include <boost/optional.hpp>
 
 namespace marketsim 
 {
@@ -33,15 +34,20 @@ namespace marketsim
 		OrderQueue(Dummy) {}
 
         using base::reference;
-        using base::push;
         using base::top;
-		//using base::empty;
 		using base::value_type;
 
         void pop() // we suppose that the order on top is valid
         { 
             base::pop(); 
             make_valid();
+        }
+
+        template <class T>
+            void push(T order)
+        {
+            assert(order->volume > 0);
+            base::push(order);
         }
 
         bool empty() const 
@@ -60,6 +66,11 @@ namespace marketsim
             {
                 make_valid();
             }
+
+        bool contains(Order order) const
+        {
+            return std::find(c.begin(), c.end(), order) != c.end();
+        }
 
         std::vector<Order>  getSorted() 
         {
@@ -274,7 +285,20 @@ namespace marketsim
 
 		template <typename Order>
 			void onPartiallyFilled(Order const & order, PriceVolume const & trade)
-			{}
+			{
+                lastTrade_ = trade;
+            }
+
+        Volume lastTradedVolume() const 
+        {
+            return lastTrade_ ? lastTrade_.get().volume : 0;
+        }
+
+        Price lastTradedPrice() const 
+        {
+            typedef typename Order::element_type  E;
+            return lastTrade_ ? lastTrade_.get().price : E::worstPrice();
+        }
 
         typedef Derived derived_t;
 
@@ -289,6 +313,8 @@ namespace marketsim
                      .def("bestVolume",  &OrderQueue::getBestVolume)
                      .def("bestPrice",   &OrderQueue::getBestPrice)
                      .def("bestOrders",  &OrderQueue::getBestOrders)
+                     .def("lastTradedPrice", &OrderQueue::lastTradedPrice)
+                     .def("lastTradedVolume",&OrderQueue::lastTradedVolume)
                     ;
             }
 
@@ -314,6 +340,7 @@ namespace marketsim
                 else break;
             }
         }
+        boost::optional<PriceVolume>    lastTrade_;
     };
 
     struct BestPriceAndVolume 

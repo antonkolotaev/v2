@@ -105,6 +105,8 @@ namespace marketsim
                     .def_readonly("asks", &OrderBook::sell_side_)
                     .def_readonly("bids", &OrderBook::buy_side_)
                     .def_readwrite("tickSize", &OrderBook::tick_size_)
+                    .def("floorPrice", &OrderBook::floorPrice)
+                    .def("ceilPrice", &OrderBook::ceilPrice)
                     ;
             }
 #endif

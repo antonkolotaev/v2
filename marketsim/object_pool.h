@@ -19,6 +19,7 @@ namespace marketsim
 
             Buffer   buffer_;
             Chunk    * next_free; 
+            //bool     freed;
         };
 
         DECLARE_ARROW(object_pool);
@@ -50,20 +51,25 @@ namespace marketsim
             if (first_free_chunk_)
             {
                 Chunk * p = first_free_chunk_;
+                //assert(p->freed);
                 first_free_chunk_ = first_free_chunk_->next_free;
                 p->next_free = 0;
+                //p->freed = false;
                 return p->getValue();
             }
 
             chunks_.push_back(Chunk());
             chunks_.back().next_free = 0;
+            //chunks_.back().freed = false;
             return chunks_.back().getValue();
         }
 
         void free(T * x)
         {
             Chunk * p = reinterpret_cast<Chunk*>(x);
+            //assert(p->freed == false);
             p->getValue()->~T();
+            //p->freed = true;
             p->next_free = first_free_chunk_;
             first_free_chunk_ = p;
         }

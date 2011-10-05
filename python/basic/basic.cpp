@@ -128,18 +128,16 @@ namespace basic {
             MarketT(Volume v, Sender s) : base(boost::make_tuple(v,s)) {}
         };
 
-    template <Side SIDE> struct LiquidityProviderT;
-
     template <Side SIDE>
         struct LimitT : 
                 WithCancelPosition  <
-                WithLinkToAgent     < LiquidityProviderT<SIDE>*,
+                WithLinkToAgent     < IAgentForOrder<LimitT<SIDE> >*,
                 InPool              < PlacedInPool, 
                 LimitOrderBase      < SIDE, 
                 LimitT              < SIDE
             > > > > >
         {
-            LimitT(PriceVolume const &x, object_pool<LimitT> * h, LiquidityProviderT<SIDE> * agent) 
+            LimitT(PriceVolume const &x, object_pool<LimitT> * h, IAgentForOrder<LimitT<SIDE> > * agent) 
                 :   base(boost::make_tuple(boost::make_tuple(x, h), agent))
             {}
 
@@ -197,17 +195,75 @@ namespace basic {
 
    //--------------------------------------------------------------- Agents
 
+   template <Side SIDE>
+    struct LimitOrderTraderT :
+        IAgentForOrderImpl      < LimitT<SIDE>,
+        OnPartiallyFilled       < py_callback, 
+        OrdersSubmittedInVector < boost::intrusive_ptr<LimitT<SIDE> >, 
+        PnL_Holder              <
+        Quantity_Holder         <
+        LinkToOrderBook         < OrderBook*, 
+        PrivateOrderPool        < LimitT<SIDE>, 
+        AgentBase               < LimitOrderTraderT<SIDE> 
+        > > > > > > > >
+    {
+		LimitOrderTraderT(OrderBook * book) 
+            : base(
+                    boost::make_tuple(
+                        boost::make_tuple(dummy, book), 
+                        dummy))
+        {}
+
+        static std::string py_name() 
+        {
+            return "LimitOrderTrader_" + marketsim::py_name<side_tag<SIDE> >();
+        }
+
+        static void py_register()
+        {
+            class_<LimitOrderTraderT, boost::noncopyable> c(py_name().c_str(), init<OrderBook*>());
+
+            base::py_visit(c);
+
+            c.def("sendOrder", &LimitOrderTraderT::sendOrder);
+            c.def("cancelAnOrder", &LimitOrderTraderT::cancelAnOrder);
+        }
+
+        void cancelAnOrder()
+        {
+            if (size_t n = base::ordersIssuedCount())
+            {
+                int pos = rng::uniform_smallint<>(0, n - 1)();
+
+                base::getIssuedOrder(pos)->onCancelled();
+            }
+        }
+
+
+        void sendOrder(Price p, Volume v)
+        {
+            if (v > 0)
+            {
+                LimitT<SIDE> * order = base::createOrder(pv(p,v));
+
+                base::processOrder(order);
+            }
+// 
+//             return order;
+        }
+    };
 
 
    template <Side SIDE>
     struct LiquidityProviderT :
+        IAgentForOrderImpl  < LimitT<SIDE>,
         LiquidityProvider   < py_value<Time>, py_value<PriceF>, py_value<VolumeF>, 
         OrderCanceller      < py_value<Time>, boost::intrusive_ptr<LimitT<SIDE> >, 
         PnL_Quantity_History_InDeque <
         LinkToOrderBook     < OrderBook*, 
         PrivateOrderPool    < LimitT<SIDE>, 
         AgentBase           < LiquidityProviderT<SIDE> 
-        > > > > > > 
+        > > > > > > >
     {
 		LiquidityProviderT( OrderBook * book, 
                 py_object   creationTimeDistr, 
@@ -244,9 +300,12 @@ namespace basic {
 
         void sendOrder(Price p, Volume v)
         {
-            LimitT<SIDE> * order = base::createOrder(pv(p,v));
+            if (v > 0)
+            {
+                LimitT<SIDE> * order = base::createOrder(pv(p,v));
 
-            base::processOrder(order);
+                base::processOrder(order);
+            }
 // 
 //             return order;
         }
@@ -417,7 +476,7 @@ namespace basic {
         void process()
         {
             handler();
-            schedule(intervals());
+            schedule(intervals()); 
         }
 
         void on_released()
@@ -464,6 +523,9 @@ BOOST_PYTHON_MODULE(basic)
 
     py_register<LiquidityProviderT<Sell> >();
     py_register<LiquidityProviderT<Buy> >();
+
+    py_register<LimitOrderTraderT<Sell> >();
+    py_register<LimitOrderTraderT<Buy> >();
 
     py_register<FV_Trader>("FV_Trader");
     py_register<Signal_Trader>("Signal_Trader");

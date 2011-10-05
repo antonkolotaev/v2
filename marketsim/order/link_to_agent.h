@@ -3,6 +3,40 @@
 
 namespace marketsim 
 {
+    template <typename Order>
+        struct IAgentForOrder 
+    {
+        virtual void onOrderPartiallyFilled(Order *, PriceVolume const &) = 0;
+        virtual void onOrderFilled   (Order *) = 0;
+        virtual void onOrderCancelled(Order *) = 0;
+    };
+
+    template <typename Order, typename Base>
+        struct IAgentForOrderImpl : Base, IAgentForOrder<Order>
+        {
+            template <class T>
+                IAgentForOrderImpl(T const & x)
+                    :   Base(x)
+                {}
+
+            DECLARE_BASE(IAgentForOrderImpl);
+
+            void onOrderPartiallyFilled(Order * order, PriceVolume const & x) 
+            {
+                Base::onOrderPartiallyFilled(order, x);
+            }
+
+            void onOrderFilled(Order *order)
+            {
+                Base::onOrderFilled(order);
+            }
+
+            void onOrderCancelled(Order * order)
+            {
+                Base::onOrderCancelled(order);
+            }
+        };
+
     template <typename AgentPtr, typename Base>
         struct WithLinkToAgent : Base 
         {
