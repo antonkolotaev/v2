@@ -120,8 +120,6 @@ namespace history {
         {
             typedef FieldTag                        Tag;
             typedef typename FieldTag :: ValueType  FieldType;
-            typedef std::pair<Time,FieldType>       HistoryPiece;
-            typedef std::deque<HistoryPiece>        HistoryStorage;
 
 			Collector() {}
 
@@ -208,6 +206,7 @@ namespace history {
                 static void py_register()
                 {
                     using namespace boost::python;
+                    ::py_register<HistoryStorage>();
                     class_<CollectInDeque, boost::noncopyable> c(py_name().c_str());
                     c.def("getHistory", &CollectInDeque::getHistory, return_internal_reference<>());
                     Base::py_visit(c);

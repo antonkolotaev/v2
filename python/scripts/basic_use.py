@@ -121,8 +121,14 @@ def py_LiquidityProvider_Sell(book, sendOrderInterval, cancelOrderInterval, pric
             volume = int(volumeDistr())
             seller.sendOrder(price, volume)
 
+        def cancelAnOrder():
+            n = seller.ordersIssuedCount()
+            if n > 0:
+                idx = uniform_smallint(0,n-1)()
+                seller.cancelOrder(idx)
+
         py_timer(sendOrderInterval, sendAnOrder)
-        py_timer(cancelOrderInterval, seller.cancelAnOrder)
+        py_timer(cancelOrderInterval, cancelAnOrder)
 
         return seller
 
@@ -139,8 +145,14 @@ def py_LiquidityProvider_Buy(book, sendOrderInterval, cancelOrderInterval, price
             volume = int(volumeDistr())
             seller.sendOrder(price, volume)
 
+        def cancelAnOrder():
+            n = buyer.ordersIssuedCount()
+            if n > 0:
+                idx = uniform_smallint(0,n-1)()
+                buyer.cancelOrder(idx)
+
         py_timer(sendOrderInterval, sendAnOrder)
-        py_timer(cancelOrderInterval, buyer.cancelAnOrder)
+        py_timer(cancelOrderInterval, cancelAnOrder)
 
         return buyer
 
@@ -200,8 +212,6 @@ signal = Signal(s_trader, exponential(1.), normal(0., .2))
 
 noise_trader = Noise_Trader(book, exponential(1.), exponential(0.1))
 
-book.bids.recordHistory(False)
-
 trader_sell = LimitOrderTrader_Sell(book)
 trader_sell.sendOrder(400, 100)
 
@@ -230,7 +240,7 @@ fv_trader.sendBuyOrder(100)
 #for a in book.asks.history():
 #    print a
 
-for a in book.bids.history():
+for a in book_history.getHistory():
     print a
 
 #print list(book_history.getHistory())

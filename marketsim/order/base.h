@@ -110,6 +110,8 @@ namespace marketsim
     {
         explicit LimitOrderBase(PriceVolume const & pv) : PriceHolder<side>(pv.price), VolumeHolder(pv.volume) {}
 
+        PriceVolume getPV() const { return PriceVolume(price, volume); }
+
         typedef Derived derived_t;
 
         DECLARE_ARROW(Derived);

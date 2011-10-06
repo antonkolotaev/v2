@@ -50,6 +50,11 @@ namespace marketsim
             return orders_issued_[idx];
         }
 
+        PriceVolume getIssuedOrderPV(size_t idx) const 
+        {
+            return orders_issued_[idx]->getPV();
+        }
+
         template <typename Order>
             void removeOrder(Order order)
         {
@@ -74,6 +79,22 @@ namespace marketsim
 
             orders_issued_.pop_back();
         }
+
+        void cancelOrder(size_t idx)
+        {
+            assert(idx < orders_issued_.size());
+            orders_issued_[idx]->onCancelled();
+        }
+
+        template <typename T>
+            static void py_visit(T & c)
+            {
+                Base::py_visit(c);
+                c.def("ordersIssuedCount", &OrdersSubmittedInVector::ordersIssuedCount);
+                c.def("getIssuedOrderPV", &OrdersSubmittedInVector::getIssuedOrderPV);
+                c.def("cancelOrder", &OrdersSubmittedInVector::cancelOrder);
+            }
+
         void check_all_orders_in_queue()
         {
             BOOST_FOREACH(Order order, orders_issued_)

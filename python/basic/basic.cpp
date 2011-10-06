@@ -153,14 +153,13 @@ namespace basic {
    //---------------------------------------------- OrderBook
 
    template <Side SIDE>
-        struct queue_with_history
+        struct queue_with_callback
             :   OnQueueTopChanged   < py_callback,
-                WithHistoryInDeque  <
                 OrderQueue          < boost::intrusive_ptr<LimitT<SIDE> >, 
-                queue_with_history  < SIDE
-                > > > >
+                queue_with_callback < SIDE
+                > > > 
         {
-            queue_with_history() {}
+            queue_with_callback() {}
 
             static std::string py_name() 
             {
@@ -169,16 +168,16 @@ namespace basic {
 
             static void py_register(std::string const & name = py_name())
             {
-                class_<queue_with_history, boost::noncopyable> c(name.c_str());
+                class_<queue_with_callback, boost::noncopyable> c(name.c_str());
 
                 base::py_visit(c);
             }
         private:
-            queue_with_history(queue_with_history const &);
+            queue_with_callback(queue_with_callback const &);
         };
 
    struct OrderBook 
-	   : marketsim::OrderBook<queue_with_history<Buy>, queue_with_history<Sell> >    
+	   : marketsim::OrderBook<queue_with_callback<Buy>, queue_with_callback<Sell> >    
    {
        OrderBook() {}
 
@@ -226,19 +225,7 @@ namespace basic {
             base::py_visit(c);
 
             c.def("sendOrder", &LimitOrderTraderT::sendOrder);
-            c.def("cancelAnOrder", &LimitOrderTraderT::cancelAnOrder);
         }
-
-        void cancelAnOrder()
-        {
-            if (size_t n = base::ordersIssuedCount())
-            {
-                int pos = rng::uniform_smallint<>(0, n - 1)();
-
-                base::getIssuedOrder(pos)->onCancelled();
-            }
-        }
-
 
         void sendOrder(Price p, Volume v)
         {
@@ -512,12 +499,13 @@ BOOST_PYTHON_MODULE(basic)
 	using namespace marketsim::basic;
 
     py_register<marketsim::Scheduler>("Scheduler");
+    py_register<marketsim::PriceVolume>();
 
 	using marketsim::Sell;
 	using marketsim::Buy;
 
-    py_register<queue_with_history<Buy> >();
-    py_register<queue_with_history<Sell> >();
+    py_register<queue_with_callback<Buy> >();
+    py_register<queue_with_callback<Sell> >();
 
     py_register<OrderBook>();
 
