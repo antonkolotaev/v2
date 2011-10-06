@@ -38,7 +38,7 @@ namespace marketsim
             Price   PnL_;
         };
 
-    typedef std::pair<Time, Price>  PnLHistoryPiece;
+    //typedef std::pair<Time, Price>  PnLHistoryPiece;
 
     struct PnL 
     {

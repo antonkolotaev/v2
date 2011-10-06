@@ -117,6 +117,8 @@ namespace {
         return MarketT<Buy>(v, dummy);
     }
 
+    typedef history::TimeStamped<Price> PnLHistoryPiece;
+
     TEST_CASE("PnL_test", "checking that PnL history works well")
     {
         Scheduler       scheduler;
