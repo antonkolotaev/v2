@@ -10,17 +10,33 @@
 namespace marketsim {
 namespace history {
 
+    /// a value with a time stamp; a pair (Time, T)
+    /// \param T - the value type
+    /// to be moved to history/time_stamped.h
     template <typename T>
-        struct TimeStamped : std::pair<Time, T>
+        struct TimeStamped 
         {
+            Time    time;
+            T       value;
+
             TimeStamped(Time t, T const &x)
-                :   std::pair<Time,T>(t,x)
+                :   time(t), value(x)
             {}
+
+            friend bool operator == (TimeStamped const & lhs, TimeStamped const & rhs)
+            {
+                return lhs.time == rhs.time && lhs.value == rhs.value;
+            }
+
+            friend bool operator != (TimeStamped const & lhs, TimeStamped const & rhs)
+            {
+                return !(lhs == rhs);
+            }
 
             template <typename Stream>
                 friend Stream& operator << (Stream &out, TimeStamped const & x)
                 {
-                    out << "{ t=" << x.first << " " << x.second << "}";
+                    out << "{ t=" << x.time << " " << x.value << "}";
                     return out;
                 }
 
@@ -34,8 +50,8 @@ namespace history {
                 ::py_register<T>();
 
                 class_<TimeStamped>(name.c_str(), init<Time, T>())
-                    .def_readonly("time",  &TimeStamped::first)
-                    .def_readonly("value", &TimeStamped::second)
+                    .def_readonly("time",  &TimeStamped::time)
+                    .def_readonly("value", &TimeStamped::value)
                     .def("__str__", &toStr<TimeStamped>)
                     .def("__repr__", &toStr<TimeStamped>)
                     ;
@@ -43,14 +59,15 @@ namespace history {
 #endif
         };
 
+    /// Time series of values of type T using std::deque as storage
     template <typename T>
-        struct TimeSerie
+        struct TimeSeries
             :   std::deque<TimeStamped<T> >
         {
 #ifdef MARKETSIM_BOOST_PYTHON
             static std::string py_name() 
             {
-                return "TimeSerie_" + T::py_name();
+                return "TimeSeries_" + T::py_name();
             }
 
             static void py_register(std::string const &name = py_name())
@@ -58,18 +75,19 @@ namespace history {
                 using namespace boost::python;
                 ::py_register<TimeStamped<T> >();
 
-                class_<TimeSerie>(name.c_str())
-                    .def("__iter__", boost::python::iterator<TimeSerie>())
+                class_<TimeSeries>(name.c_str())
+                    .def("__iter__", boost::python::iterator<TimeSeries>())
                     ;
             }
 #endif
         };
 
+    /// Aggregates historical values in std::deque
 	template <typename FieldType>
 		struct InDeque 
 		{
 			typedef TimeStamped<FieldType>        HistoryPiece;
-			typedef TimeSerie<FieldType>          HistoryStorage;
+			typedef TimeSeries<FieldType>         HistoryStorage;
 
 			InDeque() {}
 			template <typename T> 
@@ -190,7 +208,7 @@ namespace history {
 
                 CollectInDeque() {}
 
-                TimeSerie<FieldType> const & getHistory() 
+                TimeSeries<FieldType> const & getHistory() 
                 {
                     Base::flush();
                     return Base::getHistory();

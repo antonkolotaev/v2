@@ -4,7 +4,7 @@
 #include <queue>
 #include <boost/array.hpp>
 #include <boost/foreach.hpp>
-#include <marketsim/common_types.h>
+#include <marketsim/common/macros.h>
 
 namespace marketsim
 {

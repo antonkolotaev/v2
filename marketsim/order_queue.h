@@ -6,8 +6,10 @@
 #include <boost/type_traits/remove_pointer.hpp>
 #include <boost/mpl/if.hpp>
 
-#include <marketsim/common_types.h>
 #include <boost/optional.hpp>
+
+#include <marketsim/common_types.h>
+#include <marketsim/order/ordered_by_price.h>
 
 namespace marketsim 
 {
@@ -46,7 +48,7 @@ namespace marketsim
         template <class T>
             void push(T order)
         {
-            assert(order->volume > 0);
+            assert(!order->cancelled());
             base::push(order);
         }
 
@@ -86,7 +88,7 @@ namespace marketsim
             std::vector<Price>  p;
             BOOST_FOREACH(Order o, getSorted())
             {
-                p.push_back(o->price);
+                p.push_back(o->getPrice());
             }
             return p;
         }
@@ -96,7 +98,7 @@ namespace marketsim
             std::vector<Volume>  p;
             BOOST_FOREACH(Order o, getSorted())     // TODO: use transform_view
             {
-                p.push_back(o->volume);
+                p.push_back(o->getVolume());
             }
             return p;
         }
@@ -152,7 +154,7 @@ namespace marketsim
 			template <typename Order>
 				bool operator () (Order const & order)
 			{
-				result += order->volume;				
+				result += order->getVolume();				
 				return true;
 			}
 
@@ -170,14 +172,14 @@ namespace marketsim
 
 		Volume getBestVolume() const 
 		{
-			return empty() ? 0 : volumeForBetterPrices(top()->price);
+			return empty() ? 0 : volumeForBetterPrices(top()->getPrice());
 		}
 
         Price getBestPrice() const 
         {
             /// !!!! We should use a free meta function in order to get access to the real order type
             typedef typename Order::element_type  E;
-            return empty() ? E::worstPrice() : top()->price;
+            return empty() ? E::worstPrice() : top()->getPrice();
         }
 
 		struct IdxComparer
@@ -252,9 +254,9 @@ namespace marketsim
 			{
 				size_t idx = indices.top();
 
-				if (last.price != before_first[idx]->price)
+				if (last.price != before_first[idx]->getPrice())
 				{
-                    if (before_first[idx]->volume)
+                    if (!before_first[idx]->cancelled())
                     {
                         if (sent_1 && last.volume)
                             *out++ = last;
@@ -262,13 +264,13 @@ namespace marketsim
                         if (sent_1 == N)
                             return;
 
-                        last.price = before_first[idx]->price;
-                        last.volume = before_first[idx]->volume;
+                        last.price = before_first[idx]->getPrice();
+                        last.volume = before_first[idx]->getVolume();
                         ++sent_1;
                     }
 				}
 				else
-					last.volume += before_first[idx]->volume;
+					last.volume += before_first[idx]->getVolume();
 
 				indices.pop();
 

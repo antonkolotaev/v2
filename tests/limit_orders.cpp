@@ -16,7 +16,6 @@ namespace {
         limit_orders.push(new LimitOrderBuy(pv(105, 3)));
         limit_orders.push(new LimitOrderBuy(pv(107, 3)));
         limit_orders.push(new LimitOrderBuy(pv(100, 3)));
-		limit_orders.push(new LimitOrderBuy(pv(101, 0)));
 
 		REQUIRE(limit_orders.volumeForBetterPrices(90) == 15);
 		REQUIRE(limit_orders.volumeForBetterPrices(100) == 15);
@@ -36,7 +35,7 @@ namespace {
 		REQUIRE(best[4] == PriceVolume(100, 3));
 		REQUIRE(best.size() == 5);
 
-		REQUIRE(limit_orders.top()->price == 110);
+		REQUIRE(limit_orders.top()->getPrice() == 110);
     }
 
 
@@ -51,7 +50,6 @@ namespace {
 		limit_orders.push(new LimitOrderSell(pv(100, 3)));
         limit_orders.push(new LimitOrderSell(pv(107, 3)));
 		limit_orders.push(new LimitOrderSell(pv(100, 3)));
-		limit_orders.push(new LimitOrderSell(pv(101, 0)));
 
 		REQUIRE(limit_orders.volumeForBetterPrices(100) == 9);
 		REQUIRE(limit_orders.volumeForBetterPrices(101) == 9);
@@ -70,7 +68,7 @@ namespace {
 		REQUIRE(best[4] == PriceVolume(110, 3));
 		REQUIRE(best.size() == 5);
 
-        REQUIRE(limit_orders.top()->price == 100);
+        REQUIRE(limit_orders.top()->getPrice() == 100);
     }
 }}
 

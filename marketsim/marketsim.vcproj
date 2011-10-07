@@ -129,7 +129,31 @@
 				>
 			</File>
 			<File
+				RelativePath=".\order\limit_order_base.h"
+				>
+			</File>
+			<File
 				RelativePath=".\order\link_to_agent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\order\market_order_base.h"
+				>
+			</File>
+			<File
+				RelativePath=".\order\ordered_by_price.h"
+				>
+			</File>
+			<File
+				RelativePath=".\order\price_holder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\order\side.h"
+				>
+			</File>
+			<File
+				RelativePath=".\order\volume_holder.h"
 				>
 			</File>
 		</Filter>

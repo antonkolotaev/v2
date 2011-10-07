@@ -38,13 +38,13 @@ namespace {
 
         bool processOrder(MarketT<Buy> const & x)
         {
-            processed_ -= x.volume;
+            processed_ -= x.getVolume();
             return true;
         }
 
         bool processOrder(MarketT<Sell> const & x)
         {
-            processed_ += x.volume;
+            processed_ += x.getVolume();
             return true;
         }
 

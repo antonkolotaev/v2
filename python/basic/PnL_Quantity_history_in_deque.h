@@ -66,7 +66,7 @@ namespace marketsim
             :  RealBase(boost::make_tuple(x, dummy))
         {}
 
-        history::TimeSerie<PriceVolume> const & getHistory() const 
+        history::TimeSeries<PriceVolume> const & getHistory() const 
         {
             TAG * T = 0;
             const_cast<PnL_Quantity_History_InDeque*>(this)->getHandler(T).flush();

@@ -14,7 +14,7 @@ namespace marketsim
 
             typedef OnQueueTopChanged<TAG, Base> RealBase;
 
-            history::TimeSerie<PriceVolume> const & getHistory() const 
+            history::TimeSeries<PriceVolume> const & getHistory() const 
             {
                 TAG *tag = 0;
                 const_cast<WithHistoryInDeque*>(this)->getHandler(tag).flush();
@@ -33,7 +33,7 @@ namespace marketsim
                 static void py_visit(T & class_def)
                 {
                     using namespace boost::python;
-                    ::py_register<history::TimeSerie<PriceVolume> >();
+                    ::py_register<history::TimeSeries<PriceVolume> >();
                     RealBase::py_visit(class_def);        
                     class_def
                         .def("history", &WithHistoryInDeque::getHistory, return_internal_reference<>())

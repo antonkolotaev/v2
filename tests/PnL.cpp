@@ -55,7 +55,7 @@ namespace {
 	   template <typename T> 
 			static ValueType getValue(T x) 
 			{
-				return PriceVolume(x->top()->price, x->getBestVolume());
+				return PriceVolume(x->top()->getPrice(), x->getBestVolume());
 			}
    };
 
@@ -118,6 +118,7 @@ namespace {
     }
 
     typedef history::TimeStamped<Price> PnLHistoryPiece;
+    typedef history::TimeStamped<Volume>  QuantityHistoryPiece;
 
     TEST_CASE("PnL_test", "checking that PnL history works well")
     {
@@ -133,8 +134,8 @@ namespace {
 
         std::deque<history::TimeStamped<PriceVolume> > book_history = book.getHistory();
 
-		REQUIRE(book_history[0].first == 0);
-		REQUIRE(book_history[0].second == PriceVolume(100, 3));
+		REQUIRE(book_history[0].time == 0);
+		REQUIRE(book_history[0].value == PriceVolume(100, 3));
 		REQUIRE(book_history.size() == 1);
 
 		REQUIRE(trader.getPnL() == 0);
@@ -148,8 +149,8 @@ namespace {
 
 		book_history = book.getHistory();
 
-		REQUIRE(book_history[1].first == 1.5);
-		REQUIRE(book_history[1].second == PriceVolume(100, 2));
+		REQUIRE(book_history[1].time == 1.5);
+		REQUIRE(book_history[1].value == PriceVolume(100, 2));
 		REQUIRE(book_history.size() == 2);
 
         REQUIRE(trader.getPnL() == 100);
@@ -165,8 +166,8 @@ namespace {
 
 		book_history = book.getHistory();
 
-		REQUIRE(book_history[2].first == 3.5);
-		REQUIRE(book_history[2].second == PriceVolume(102, 4));
+		REQUIRE(book_history[2].time == 3.5);
+		REQUIRE(book_history[2].value == PriceVolume(102, 4));
 		REQUIRE(book_history.size() == 3);
 
 		REQUIRE(trader.getPnL() == 100 + 200 + 102);

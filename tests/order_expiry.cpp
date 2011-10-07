@@ -84,7 +84,7 @@ namespace {
 
         scheduler.workTill(1.);
 
-        REQUIRE(sell_orders.top()->volume == 978);
+        REQUIRE(sell_orders.top()->getVolume() == 978);
         REQUIRE(g_counter == 2);
         REQUIRE(!sell_orders.empty());
         scheduler.workTill(10.);
@@ -92,12 +92,12 @@ namespace {
         sell_orders.push(ls = new (pool.alloc()) LimitSell(pv(91, 555), 1., &pool, &sell_orders));
         REQUIRE(g_counter == 2);
         REQUIRE(!sell_orders.empty());
-        REQUIRE(sell_orders.top()->volume == 555);
+        REQUIRE(sell_orders.top()->getVolume() == 555);
 
         scheduler.workTill(12.);
         REQUIRE(g_counter == 1);
         REQUIRE(!sell_orders.empty());
-        REQUIRE(sell_orders.top()->volume == 123);
+        REQUIRE(sell_orders.top()->getVolume() == 123);
 
         scheduler.workTill(20.);
         REQUIRE(g_counter == 0);

@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <marketsim/match_order.h>
+#include <marketsim/order/ordered_by_price.h>
 #include "orders.h"
 
 namespace marketsim {
@@ -28,8 +29,8 @@ namespace {
         REQUIRE(matchOrder(limit_orders, m1));
         REQUIRE(m1.getExecutionHistory()[0] == pv(100u, 3u));
         REQUIRE(m1.getExecutionHistory()[1] == pv(102u, 2u));
-        REQUIRE(limit_orders.top()->price == 102);
-        REQUIRE(limit_orders.top()->volume == 1);
+        REQUIRE(limit_orders.top()->getPrice() == 102);
+        REQUIRE(limit_orders.top()->getVolume() == 1);
 
         LimitOrderBuy L1(pv(106, 10)); 
         REQUIRE(!matchOrder(limit_orders, L1));
@@ -37,13 +38,13 @@ namespace {
         REQUIRE(L1.getExecutionHistory()[0] == pv(102u,1u));
         REQUIRE(L1.getExecutionHistory()[1] == pv(105u,3u));
 
-        REQUIRE(L1.volume == 6);
-        REQUIRE(limit_orders.top()->price == 107);
+        REQUIRE(L1.getVolume() == 6);
+        REQUIRE(limit_orders.top()->getPrice() == 107);
 
         MarketOrderBuy m2 = (3);
         REQUIRE(matchOrder(limit_orders, m2));
         REQUIRE(m2.getExecutionHistory()[0] == pv(107u, 3u));
-        REQUIRE(limit_orders.top()->price == 110);
+        REQUIRE(limit_orders.top()->getPrice() == 110);
 
         MarketOrderBuy m3 = (5);
         REQUIRE(!matchOrder(limit_orders, m3));

@@ -56,7 +56,6 @@ namespace marketsim
     };
     
 
-    typedef std::pair<Time, Volume>  QuantityHistoryPiece;
 }
 
 #endif

@@ -18,7 +18,7 @@ namespace marketsim
         template <typename Order>
             void processOrder(Order order)
         {
-            assert(order->volume > 0);
+            assert(!order->cancelled());
             order->setCancelPosition(orders_issued_.size());
             orders_issued_.push_back(order);
             Base::processOrder(order);
