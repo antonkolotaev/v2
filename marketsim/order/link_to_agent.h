@@ -1,8 +1,8 @@
 #ifndef _marketsim_order_link_to_agent_h_included_
 #define _marketsim_order_link_to_agent_h_included_
 
-namespace marketsim 
-{
+namespace marketsim {
+namespace order {
     /// Base class for orders used to notify an agent created the order about order's events:
     /// - order partial filling:    void onOrderPartiallyFilled(Order*, PriceVolume const & trade);
     /// - order complete filling:   void onOrderFilled(Order*);
@@ -42,6 +42,6 @@ namespace marketsim
         private:
             AgentPtr  agent_;
         };
-}
+}}
 
 #endif

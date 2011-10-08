@@ -4,8 +4,9 @@
 #include <marketsim/order/base.h>
 #include <marketsim/order/execution_history.h>
 
-namespace marketsim
-{
+namespace marketsim {
+namespace order     {
+
     template <Side SIDE>
         struct LimitOrderT : 
             RefCounted<LimitOrderT<SIDE> >,
@@ -35,6 +36,6 @@ namespace marketsim
 
     typedef MarketOrderT<Buy>   MarketOrderBuy;
     typedef MarketOrderT<Sell>  MarketOrderSell;
-}
+}}
 
 #endif

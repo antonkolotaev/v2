@@ -3,8 +3,8 @@
 
 #include <marketsim/common/PriceVolume.h>
 
-namespace marketsim
-{
+namespace marketsim {
+namespace order     {
     /// Base class for orders encapsulating logic related to the volume of the order
     /// Holds volume of an order (market or limit)
     /// If order volume is 0 it is considered either as filled or cancelled
@@ -57,6 +57,6 @@ namespace marketsim
         Volume		volume_;
 	};
 
-}
+}}
 
 #endif

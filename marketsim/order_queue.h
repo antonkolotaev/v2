@@ -17,7 +17,7 @@ namespace marketsim
     //      Order is a pointer-like type
     //      order->cancelled() returns true iff the order is useless and thus may be removed
     template <typename Order, class Derived_t = boost::mpl::na>
-        struct OrderQueue : protected std::priority_queue<Order, std::vector<Order>, typename ordered_by_price<Order>::type>
+        struct OrderQueue : protected std::priority_queue<Order, std::vector<Order>, typename order::ordered_by_price<Order>::type>
     {
     private:
         OrderQueue(OrderQueue const &);
@@ -25,10 +25,10 @@ namespace marketsim
 
         typedef typename boost::mpl::if_na<Derived_t, OrderQueue>::type    Derived;
 
-		typedef typename ordered_by_price<Order>::type comparer_type;
+        typedef typename order::ordered_by_price<Order>::type comparer_type;
 
         typedef 
-            std::priority_queue<Order, std::vector<Order>, typename ordered_by_price<Order>::type>
+            std::priority_queue<Order, std::vector<Order>, typename order::ordered_by_price<Order>::type>
             base; 
 
 		OrderQueue() {}

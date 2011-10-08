@@ -3,8 +3,9 @@
 
 #include <marketsim/order/side.h>
 
-namespace marketsim
-{
+namespace marketsim {
+namespace order     {
+
     /// Base class for orders encapsulating logic related to the price of the order
 	template <Side SIDE>	
         struct PriceHolder : side_is<SIDE>
@@ -45,6 +46,6 @@ namespace marketsim
 		Price const	price_;  
 	};
 
-}
+}}
 
 #endif

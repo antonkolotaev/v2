@@ -5,8 +5,8 @@
 #include <marketsim/common_types.h>
 #include <marketsim/ref_counted.h>
 
-namespace marketsim
-{
+namespace marketsim {
+namespace order     {
     // The idea of this class is to provide non-virtual function on_released 
     // that calls 'free' method of a class indirectly defined by HolderFunc
 
@@ -59,6 +59,6 @@ namespace marketsim
         private:
             holder_t  holder_;
         };
-}
+}}
 
 #endif

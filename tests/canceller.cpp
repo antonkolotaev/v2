@@ -20,22 +20,29 @@ namespace {
 
     template <Side SIDE> struct AgentT;
 
-    template <Side SIDE>
-        struct LimitT : 
-                WithCancelPosition  <
-                WithLinkToAgent     <AgentT<SIDE>*,
-                InPool              <PlacedInPool, 
-                LimitOrderBase      <SIDE, 
-                LimitT              <SIDE
-                > > > > >
-        {
-            LimitT(PriceVolume const &x, object_pool<LimitT> * h, AgentT<SIDE> * agent) 
-                :   base(boost::make_tuple(boost::make_tuple(x, h), agent))
-            {}
-        };
+    namespace order {
+
+        using namespace marketsim::order;
+
+        template <Side SIDE>
+            struct LimitT : 
+                    WithCancelPosition  <
+                    WithLinkToAgent     <AgentT<SIDE>*,
+                    InPool              <PlacedInPool, 
+                    LimitOrderBase      <SIDE, 
+                    LimitT              <SIDE
+                    > > > > >
+            {
+                LimitT(PriceVolume const &x, object_pool<LimitT> * h, AgentT<SIDE> * agent) 
+                    :   base(boost::make_tuple(boost::make_tuple(x, h), agent))
+                {}
+            };
+
+            typedef MarketOrderBase<Buy> MarketBuy;
+    }
             
-   typedef LimitT<Buy>     LimitBuy;
-   typedef LimitT<Sell>    LimitSell;
+    typedef order::LimitT<Buy>     LimitBuy;
+    typedef order::LimitT<Sell>    LimitSell;
 
    typedef boost::intrusive_ptr<LimitBuy>   LimitBuyPtr;
    typedef boost::intrusive_ptr<LimitSell>  LimitSellPtr;
@@ -51,9 +58,9 @@ namespace {
 
    template <Side SIDE>
     struct AgentT :
-            OrderCanceller      < rng::Generator<Time>, boost::intrusive_ptr<LimitT<SIDE> >, 
+            OrderCanceller      < rng::Generator<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
             LinkToOrderBook     < OrderBook*, 
-            PrivateOrderPool    < LimitT<SIDE>, 
+            PrivateOrderPool    < order::LimitT<SIDE>, 
             AgentBase           < AgentT<SIDE> > 
             > >, always_0>
     {
@@ -61,19 +68,14 @@ namespace {
             : base(boost::make_tuple(boost::make_tuple(dummy, book), new rng::constant<Time, rng::IGenerator<Time> >(1.))) 
         {}
 
-        LimitT<SIDE> * sendOrder(Price p, Volume v)
+        order::LimitT<SIDE> * sendOrder(Price p, Volume v)
         {
-            LimitT<SIDE> * order = base::createOrder(pv(p,v));
+            order::LimitT<SIDE> * order = base::createOrder(pv(p,v));
 
             base::processOrder(order);
 
             return order;
         }
-    };
-
-    struct MarketBuy : MarketOrderBase<Buy, MarketBuy>
-    {
-        MarketBuy(Volume v) : base(v) {}
     };
 
     TEST_CASE("order_canceller", "")
@@ -91,50 +93,50 @@ namespace {
             LimitSellPtr L2 = agent.sendOrder(100, 5);
             LimitSellPtr L3 = agent.sendOrder(90, 5);
 
-            REQUIRE(!book.empty<Sell>());
-            REQUIRE(book.bestPrice<Sell>() == 90);
+            assert(!book.empty<Sell>());
+            assert(book.bestPrice<Sell>() == 90);
 
             scheduler.workTill(4.5);
 
             assert(!book.empty<Sell>());
-            REQUIRE(!book.empty<Sell>());
-            REQUIRE(book.bestPrice<Sell>() == 90);
+            assert(!book.empty<Sell>());
+            assert(book.bestPrice<Sell>() == 90);
 
             assert(L1->cancelled());
-            REQUIRE(L1->cancelled());
-            REQUIRE(!L2->cancelled());
-            REQUIRE(!L3->cancelled());
+            assert(L1->cancelled());
+            assert(!L2->cancelled());
+            assert(!L3->cancelled());
 
             scheduler.workTill(5.5);
 
-            REQUIRE(!book.empty<Sell>());
-            REQUIRE(book.bestPrice<Sell>() == 100);
-            REQUIRE(!L2->cancelled());
-            REQUIRE(L3->cancelled());
+            assert(!book.empty<Sell>());
+            assert(book.bestPrice<Sell>() == 100);
+            assert(!L2->cancelled());
+            assert(L3->cancelled());
 
             scheduler.workTill(6.5);
 
-            REQUIRE(book.empty<Sell>());
-            REQUIRE(L2->cancelled());
+            assert(book.empty<Sell>());
+            assert(L2->cancelled());
 
             // 3. Test a situation of order filling
             L1 = agent.sendOrder(90, 5);
             L2 = agent.sendOrder(105, 5);
             L3 = agent.sendOrder(100, 5);
 
-            book.processOrder(MarketBuy(5));
-            REQUIRE(!book.empty<Sell>());
-            REQUIRE(book.bestPrice<Sell>() == 100);
-            REQUIRE(L1->filled());
+            book.processOrder(order::MarketBuy(5));
+            assert(!book.empty<Sell>());
+            assert(book.bestPrice<Sell>() == 100);
+            assert(L1->filled());
 
             // 4. Test of an external order cancellation
             L3->onCancelled();
-            REQUIRE(!book.empty<Sell>());
-            REQUIRE(book.bestPrice<Sell>() == 105);
+            assert(!book.empty<Sell>());
+            assert(book.bestPrice<Sell>() == 105);
 
             scheduler.workTill(7.5);
-            REQUIRE(book.empty<Sell>());
-            REQUIRE(L2->filled());
+            assert(book.empty<Sell>());
+            assert(L2->filled());
         }
     }
 }}

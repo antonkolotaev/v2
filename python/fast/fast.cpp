@@ -34,8 +34,14 @@ namespace fast {
 
     using namespace boost::python;
 
+    template <Side SIDE> struct LiquidityProviderT;
+
     //-----------------------------------------  Orders
-    template <Side SIDE, typename Sender>
+    namespace order
+    {
+        using namespace  marketsim::order;
+
+        template <Side SIDE, typename Sender>
         struct MarketT : 
             WithLinkToAgent<Sender,
             MarketOrderBase<SIDE, MarketT<SIDE, Sender> 
@@ -44,15 +50,13 @@ namespace fast {
             MarketT(Volume v, Sender s) : base(boost::make_tuple(v,s)) {}
         };
 
-    template <Side SIDE> struct LiquidityProviderT;
-
-    template <Side SIDE>
+        template <Side SIDE>
         struct LimitT : 
-                WithCancelPosition  <
-                WithLinkToAgent     < LiquidityProviderT<SIDE>*,
-                InPool              < PlacedInPool, 
-                LimitOrderBase      < SIDE, 
-                LimitT              < SIDE
+            WithCancelPosition  <
+            WithLinkToAgent     < LiquidityProviderT<SIDE>*,
+            InPool              < PlacedInPool, 
+            LimitOrderBase      < SIDE, 
+            LimitT              < SIDE
             > > > > >
         {
             LimitT(PriceVolume const &x, object_pool<LimitT> * h, LiquidityProviderT<SIDE> * agent) 
@@ -61,9 +65,10 @@ namespace fast {
 
             // we don't export LimitT to Python since it seems to be not useful for fast simulation
         };
+    }
             
-   typedef LimitT<Buy>     LimitBuy;
-   typedef LimitT<Sell>    LimitSell;
+    typedef order::LimitT<Buy>     LimitBuy;
+    typedef order::LimitT<Sell>    LimitSell;
 
    typedef boost::intrusive_ptr<LimitBuy>   LimitBuyPtr;
    typedef boost::intrusive_ptr<LimitSell>  LimitSellPtr;
@@ -71,11 +76,11 @@ namespace fast {
    //---------------------------------------------- OrderBook
 
    template <Side SIDE>
-        struct queue_with_history
-            :   WithHistoryInDeque  <
-                OrderQueue          <   boost::intrusive_ptr<LimitT<SIDE> >,
-                queue_with_history  < SIDE
-                > > >
+        struct queue_with_history:   
+                WithHistoryInDeque  <
+                    OrderQueue          <   boost::intrusive_ptr<order::LimitT<SIDE> >,
+                    queue_with_history  < SIDE
+                    > > >
         {
             queue_with_history() {}
 
@@ -117,10 +122,10 @@ namespace fast {
    template <Side SIDE>
     struct LiquidityProviderT :
         LiquidityProvider   < rng::exponential<Time>, rng::normal<PriceF>, rng::exponential<VolumeF>, 
-        OrderCanceller      < rng::exponential<Time>, boost::intrusive_ptr<LimitT<SIDE> >, 
+        OrderCanceller      < rng::exponential<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
         PnL_Quantity_History_InDeque <
         LinkToOrderBook     < OrderBook*, 
-        PrivateOrderPool    < LimitT<SIDE>, 
+        PrivateOrderPool    < order::LimitT<SIDE>, 
         AgentBase           < LiquidityProviderT<SIDE> 
         > > > > > > 
     {
@@ -159,18 +164,16 @@ namespace fast {
 
         void sendOrder(Price p, Volume v)
         {
-            LimitT<SIDE> * order = base::createOrder(pv(p,v));
+            order::LimitT<SIDE> * o= base::createOrder(pv(p,v));
 
-            base::processOrder(order);
-// 
-//             return order;
+            base::processOrder(o);
         }
     };
 
     struct FV_Trader :
         PnL_Quantity_History_InDeque<
         FundamentalValueTrader  <rng::exponential<Time>, rng::exponential<VolumeF>, 
-        MarketOrderFactory      <MarketT<Buy, FV_Trader*>, MarketT<Sell, FV_Trader*>, 
+        MarketOrderFactory      <order::MarketT<Buy, FV_Trader*>, order::MarketT<Sell, FV_Trader*>, 
         LinkToOrderBook         <OrderBook*, 
         AgentBase               <FV_Trader
         > > > > >
@@ -195,7 +198,7 @@ namespace fast {
     struct Signal_Trader :
         PnL_Quantity_History_InDeque<
         SignalTrader        <rng::exponential<VolumeF>, 
-        MarketOrderFactory  <MarketT<Buy, Signal_Trader*>, MarketT<Sell, Signal_Trader*>, 
+        MarketOrderFactory  <order::MarketT<Buy, Signal_Trader*>, order::MarketT<Sell, Signal_Trader*>, 
         LinkToOrderBook     <OrderBook*, 
         AgentBase           <Signal_Trader> 
         > > > >
@@ -232,7 +235,7 @@ namespace fast {
     struct Noise_Trader :
         PnL_Quantity_History_InDeque<
         NoiseTrader         < rng::exponential<Time>,     rng::exponential<VolumeF>,
-        MarketOrderFactory  < MarketT<Buy,Noise_Trader*>, MarketT<Sell,Noise_Trader*>, 
+        MarketOrderFactory  < order::MarketT<Buy,Noise_Trader*>, order::MarketT<Sell,Noise_Trader*>, 
         LinkToOrderBook     < OrderBook*, 
         AgentBase           < Noise_Trader
         > > > > >

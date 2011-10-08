@@ -12,7 +12,7 @@ namespace {
 
     TEST_CASE("object_pool", "Object pool operations")
     {
-        REQUIRE(g_TestInstances == 0);
+        assert(g_TestInstances == 0);
         {
             object_pool<Test>    pool;
 
@@ -20,16 +20,16 @@ namespace {
             Test *p2 = new (pool.alloc()) Test(34);
             pool.free(p1);
             pool.free(p2);
-            REQUIRE(p1->x == 0xf00d);
-            REQUIRE(p2->x == 0xf00d);
+            assert(p1->x == 0xf00d);
+            assert(p2->x == 0xf00d);
             Test *p3 = new (pool.alloc()) Test(56);
             Test *p4 = new (pool.alloc()) Test(12);
             Test *p5 = new (pool.alloc()) Test(34);
-            REQUIRE(p3->x == 56);
-            REQUIRE(p4->x == 12);
-            REQUIRE(p5->x == 34);
-            REQUIRE(g_TestInstances == 3);
+            assert(p3->x == 56);
+            assert(p4->x == 12);
+            assert(p5->x == 34);
+            assert(g_TestInstances == 3);
         }
-        REQUIRE(g_TestInstances == 0);
+        assert(g_TestInstances == 0);
     }
 }}

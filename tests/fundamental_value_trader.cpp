@@ -10,16 +10,11 @@
 #include <marketsim/agent/market_order_factory.h>
 #include <marketsim/agent/fundamental_value_trader.h>
 
-// TODO:    1. PnL : Price -- the latest PnL
-//          2. PnL : std::queue<(Time * Price)>  -- PnLHistory
-//          3. Fees: doublePrice -- current fees
-//          4. Amount: Volume -- the latest balance
-
 namespace marketsim {
 namespace {
 
     template <Side SIDE>
-        struct MarketT : MarketOrderBase<SIDE, MarketT<SIDE> >
+        struct MarketT : order::MarketOrderBase<SIDE, MarketT<SIDE> >
         {
             template <typename X>
                 MarketT(Volume v, X) : base(v) {}
@@ -78,16 +73,16 @@ namespace {
         trader.setBid(95); trader.setAsk(105);
 
         scheduler.workTill(1.5);
-        REQUIRE(trader.getProcessed() == 0);
+        assert(trader.getProcessed() == 0);
 
         trader.setAsk(110);
 
         scheduler.workTill(2.5);
-        REQUIRE(trader.getProcessed() == 1);
+        assert(trader.getProcessed() == 1);
 
         trader.setBid(10);
 
         scheduler.workTill(3.5);
-        REQUIRE(trader.getProcessed() == 0);
+        assert(trader.getProcessed() == 0);
     }
 }}

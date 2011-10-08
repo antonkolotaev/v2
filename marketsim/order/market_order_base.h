@@ -7,8 +7,8 @@
 #include <marketsim/order/side.h>
 #include <marketsim/common/macros.h>
 
-namespace marketsim
-{
+namespace marketsim {
+namespace order     {
     /// Base class for limit orders
     /// \param SIDE side of the order
     /// \param Derived most derived class of the order; boost::mpl::na if there's no derived class
@@ -42,6 +42,6 @@ namespace marketsim
             return true;
         }
     };
-}
+}}
 
 #endif

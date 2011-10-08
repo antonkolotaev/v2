@@ -10,20 +10,26 @@
 namespace marketsim {
 namespace {
 
-    template <Side SIDE>
-       struct LimitT : 
-                InPool<PlacedInPool, 
-                    ExecutionHistory<
-                        LimitOrderBase<SIDE, 
-                            LimitT<SIDE> > > > 
+    namespace order 
     {
-        LimitT(Price p, Volume v, object_pool<LimitT> * h) 
-            :   base(boost::make_tuple(pv(p,v), h))
-        {}
-    };
+        using namespace marketsim::order;
 
-    typedef LimitT<Buy>     LimitBuy;
-    typedef LimitT<Sell>    LimitSell;
+        template <Side SIDE>
+           struct LimitT : 
+                    InPool           < PlacedInPool, 
+                    ExecutionHistory <
+                    LimitOrderBase   < SIDE, 
+                    LimitT           < SIDE
+                    > > > > 
+        {
+            LimitT(Price p, Volume v, object_pool<LimitT> * h) 
+                :   base(boost::make_tuple(pv(p,v), h))
+            {}
+        };
+    }
+
+    typedef order::LimitT<Buy>     LimitBuy;
+    typedef order::LimitT<Sell>    LimitSell;
 
     struct LimitSellPool : object_pool<LimitSell> {}; 
     struct LimitBuyPool  : object_pool<LimitBuy>  {};
@@ -46,59 +52,59 @@ namespace {
             book.processOrder(new (buy_orders.alloc()) LimitBuy   (95 + i, 6 - i, &buy_orders));
         }
 
-        REQUIRE(!book.empty<Sell>());
-        REQUIRE(!book.empty<Buy>());
+        assert(!book.empty<Sell>());
+        assert(!book.empty<Buy>());
 
-        REQUIRE(book.bestPrice<Sell>() == 100);
-        REQUIRE(book.bestVolume<Sell>() == 1);
+        assert(book.bestPrice<Sell>() == 100);
+        assert(book.bestVolume<Sell>() == 1);
 
-        REQUIRE(book.bestPrice<Buy>() == 99);
-        REQUIRE(book.bestVolume<Buy>() == 2);
+        assert(book.bestPrice<Buy>() == 99);
+        assert(book.bestVolume<Buy>() == 2);
 
-        ExecutionHistoryStorage::const_iterator it;
+        order::ExecutionHistoryStorage::const_iterator it;
 
         LimitBuy * lb;
         book.processOrder(lb = new (buy_orders.alloc()) LimitBuy   (100, 2, &buy_orders));
 
-        REQUIRE(book.bestPrice<Sell>() == 101);
-        REQUIRE(book.bestVolume<Sell>() == 2);
+        assert(book.bestPrice<Sell>() == 101);
+        assert(book.bestVolume<Sell>() == 2);
 
-        REQUIRE(book.bestPrice<Buy>() == 100);
-        REQUIRE(book.bestVolume<Buy>() == 1);
+        assert(book.bestPrice<Buy>() == 100);
+        assert(book.bestVolume<Buy>() == 1);
 
         it = lb->getExecutionHistory().begin();
-        REQUIRE(it[0].value == pv(100u,1u));
+        assert(it[0].value == pv(100u,1u));
 
         LimitSell * ls;
         book.processOrder(ls = new (sell_orders.alloc()) LimitSell   (99, 5, &sell_orders));
-        REQUIRE(book.bestPrice<Sell>() == 99);
-        REQUIRE(book.bestVolume<Sell>() == 2);
+        assert(book.bestPrice<Sell>() == 99);
+        assert(book.bestVolume<Sell>() == 2);
 
-        REQUIRE(book.bestPrice<Buy>() == 98);
-        REQUIRE(book.bestVolume<Buy>() == 3);
+        assert(book.bestPrice<Buy>() == 98);
+        assert(book.bestVolume<Buy>() == 3);
 
         it = ls->getExecutionHistory().begin();
-        REQUIRE(it[0].value == pv(100u,1u));
-        REQUIRE(it[1].value == pv(99u,2u));
+        assert(it[0].value == pv(100u,1u));
+        assert(it[1].value == pv(99u,2u));
 
-        MarketOrderSell ms(5);
+        order::MarketOrderSell ms(5);
         book.processOrder(&ms);
 
-        REQUIRE(book.bestPrice<Buy>() == 97);
-        REQUIRE(book.bestVolume<Buy>() == 2);
+        assert(book.bestPrice<Buy>() == 97);
+        assert(book.bestVolume<Buy>() == 2);
 
         it = ms.getExecutionHistory().begin();
-        REQUIRE(it[0].value == pv(98u,3u));
-        REQUIRE(it[1].value == pv(97u,2u));
+        assert(it[0].value == pv(98u,3u));
+        assert(it[1].value == pv(97u,2u));
 
-        MarketOrderBuy mb(3);
+        order::MarketOrderBuy mb(3);
         book.processOrder(&mb);
 
-        REQUIRE(book.bestPrice<Sell>() == 101);
-        REQUIRE(book.bestVolume<Sell>() == 1);
+        assert(book.bestPrice<Sell>() == 101);
+        assert(book.bestVolume<Sell>() == 1);
         it = mb->getExecutionHistory().begin();
-        REQUIRE(it[0].value == pv(99u,2u));
-        REQUIRE(it[1].value == pv(101u,1u));
+        assert(it[0].value == pv(99u,2u));
+        assert(it[1].value == pv(101u,1u));
 
         //std::cout << "-----\n";
     }

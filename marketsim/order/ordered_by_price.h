@@ -3,8 +3,8 @@
 
 #include <boost/intrusive_ptr.hpp>
 
-namespace marketsim 
-{
+namespace marketsim {
+namespace order     {
     /// -------------------- ordered_by_price 
 
     /// meta function returning a binary predicate for comparing Orders by price
@@ -35,6 +35,6 @@ namespace marketsim
 			}
         };
     };
-}
+}}
 
 #endif

@@ -5,8 +5,8 @@
 #include <marketsim/common/traits.h>
 #include <marketsim/common/PriceVolume.h>
 
-namespace marketsim
-{
+namespace marketsim {
+namespace order     {
     /// Base class for orders encapsulating logic related to the side of the order
     template <Side SIDE>	
         struct side_is
@@ -39,17 +39,19 @@ namespace marketsim
                 return SIDE == Buy ? 0 : std::numeric_limits<Price>::max();
             }
         };
+}}
 
+namespace marketsim
+{
 #ifdef MARKETSIM_BOOST_PYTHON
-        template <typename T> std::string py_name() // TO BE MOVED TO marketsim/python
-        {
-            return T::py_name();
-        }
+    template <typename T> std::string py_name() // TO BE MOVED TO marketsim/python
+    {
+        return T::py_name();
+    }
 
-        template <> std::string py_name<sell_tag>() { return "Sell"; }
-        template <> std::string py_name<buy_tag>() { return "Buy"; }
+    template <> std::string py_name<sell_tag>() { return "Sell"; }
+    template <> std::string py_name<buy_tag>() { return "Buy"; }
 #endif
-
 }
 
 #endif

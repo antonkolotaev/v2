@@ -7,8 +7,9 @@
 
 #include <marketsim/history.h>
 
-namespace marketsim
-{
+namespace marketsim {
+namespace order {
+
     /// We may want to collect history of trades for a given order
     /// For the moment we save (time, (Price,Volume)) for each trade
     typedef history::TimeStamped<PriceVolume>   ExecutionHistoryPiece;
@@ -53,7 +54,7 @@ namespace marketsim
 
     // maybe it has sense to extract class order::OnMatched and the rest of the class move to history namespace
 
-}
+}}
 
 
 #endif

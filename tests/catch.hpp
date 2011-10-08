@@ -6186,7 +6186,7 @@ int main (int argc, char * const argv[])
 
 //////
 
-#define REQUIRE( expr ) INTERNAL_CATCH_TEST( expr, false, true, "REQUIRE" )
+#define assert( expr ) INTERNAL_CATCH_TEST( expr, false, true, "assert" )
 #define REQUIRE_FALSE( expr ) INTERNAL_CATCH_TEST( expr, true, true, "REQUIRE_FALSE" )
 
 #define REQUIRE_THROWS( expr ) INTERNAL_CATCH_THROWS( expr, ..., true, "REQUIRE_THROWS" )

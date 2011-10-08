@@ -19,20 +19,25 @@
 namespace marketsim {
 namespace {
 
-    template <Side SIDE>
-       struct LimitT : 
-            InPool<PlacedInPool, 
-                LimitOrderBase<SIDE, 
-                    LimitT<SIDE> > > 
+    namespace order 
     {
-        template <typename X>
-            LimitT(PriceVolume x, object_pool<LimitT> * h, X) 
-                :   base(boost::make_tuple(x, h))
-        {}
-    };
+        using namespace marketsim::order;
 
-   typedef LimitT<Buy>     LimitBuy;
-   typedef LimitT<Sell>    LimitSell;
+        template <Side SIDE>
+           struct LimitT : 
+                InPool<PlacedInPool, 
+                    LimitOrderBase<SIDE, 
+                        LimitT<SIDE> > > 
+        {
+            template <typename X>
+                LimitT(PriceVolume x, object_pool<LimitT> * h, X) 
+                    :   base(boost::make_tuple(x, h))
+            {}
+        };
+    }
+
+    typedef order::LimitT<Buy>     LimitBuy;
+    typedef order::LimitT<Sell>    LimitSell;
 
    typedef boost::intrusive_ptr<LimitBuy>   LimitBuyPtr;
    typedef boost::intrusive_ptr<LimitSell>  LimitSellPtr;
@@ -40,16 +45,13 @@ namespace {
    typedef OrderBook<OrderQueue<LimitBuyPtr>, OrderQueue<LimitSellPtr> >    OrderBook;
 
 
-   // !!! TODO: Extract object_pool<Order> to PrivatePool<> and SharedPool<>
-   // it will also allow to use smart pointers to store orders and thus reduce potential errors
    template <Side SIDE>
    struct LiquidityProviderT : 
-       LiquidityProvider<rng::constant<Time>, rng::constant<Price>, rng::constant<Volume>,
-            LinkToOrderBook<OrderBook*, 
-                PrivateOrderPool<LimitT<SIDE>, 
-                    AgentBase<LiquidityProviderT<SIDE> > >
-            >
-       >
+            LiquidityProvider   < rng::constant<Time>, rng::constant<Price>, rng::constant<Volume>,
+            LinkToOrderBook     < OrderBook*, 
+            PrivateOrderPool    < order::LimitT<SIDE>, 
+            AgentBase           < LiquidityProviderT<SIDE> 
+            > > > >
    {
         LiquidityProviderT(OrderBook *book) 
             :  base(boost::make_tuple(boost::make_tuple(dummy, book),
@@ -61,10 +63,7 @@ namespace {
 
    };
 
-   struct MarketBuy : MarketOrderBase<Buy, MarketBuy>
-   {
-       MarketBuy(Volume v) : base(v) {}
-   };
+   typedef order::MarketOrderBase<Buy> MarketBuy;
 
    TEST_CASE("liquidity_provider", "An agent sending limit orders")
    {
@@ -74,15 +73,15 @@ namespace {
 
        scheduler.workTill(3.5);
 
-       REQUIRE(!orderBook.empty<Sell>());
-       REQUIRE(orderBook.bestPrice<Sell>() == 102);
+       assert(!orderBook.empty<Sell>());
+       assert(orderBook.bestPrice<Sell>() == 102);
 
        orderBook.processOrder(MarketBuy(10));
 
-       REQUIRE(orderBook.bestPrice<Sell>() == 104);
+       assert(orderBook.bestPrice<Sell>() == 104);
        scheduler.workTill(4.5);
        
        orderBook.processOrder(MarketBuy(5));
-       REQUIRE(orderBook.bestPrice<Sell>() == 106);
+       assert(orderBook.bestPrice<Sell>() == 106);
    }
 }}  

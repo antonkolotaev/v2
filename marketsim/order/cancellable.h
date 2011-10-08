@@ -1,8 +1,8 @@
 #ifndef _marketsim_order_cancellable_h_included_
 #define _marketsim_order_cancellable_h_included_
 
-namespace marketsim 
-{
+namespace marketsim {
+namespace order     {
     /// Base class for orders that are to stored in OrdersSubmittedInVector
     /// We will store index of the order in the vector
     /// providing thus fast search and remove operations
@@ -24,6 +24,6 @@ namespace marketsim
         int     pos_;
     };
 
-}
+}}
 
 #endif

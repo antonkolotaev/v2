@@ -120,33 +120,38 @@ namespace basic {
     };
 
     //-----------------------------------------  Orders
-    template <Side SIDE, typename Sender>
-        struct MarketT : 
-            WithLinkToAgent<Sender,
-            MarketOrderBase<SIDE, MarketT<SIDE, Sender> 
-            > >
-        {
-            MarketT(Volume v, Sender s) : base(boost::make_tuple(v,s)) {}
-        };
+    namespace order 
+    {
+        using namespace marketsim::order;
 
-    template <Side SIDE>
-        struct LimitT : 
-                WithCancelPosition  <
-                WithLinkToAgent     < IAgentForOrder<LimitT<SIDE> >*,
-                InPool              < PlacedInPool, 
-                LimitOrderBase      < SIDE, 
-                LimitT              < SIDE
-            > > > > >
-        {
-            LimitT(PriceVolume const &x, object_pool<LimitT> * h, IAgentForOrder<LimitT<SIDE> > * agent) 
-                :   base(boost::make_tuple(boost::make_tuple(x, h), agent))
-            {}
+        template <Side SIDE, typename Sender>
+            struct MarketT : 
+                WithLinkToAgent<Sender,
+                MarketOrderBase<SIDE, MarketT<SIDE, Sender> 
+                > >
+            {
+                MarketT(Volume v, Sender s) : base(boost::make_tuple(v,s)) {}
+            };
 
-            // we don't export LimitT to Python since it seems to be not useful for fast simulation
-        };
+        template <Side SIDE>
+            struct LimitT : 
+                    WithCancelPosition  <
+                    WithLinkToAgent     < IAgentForOrder<LimitT<SIDE> >*,
+                    InPool              < PlacedInPool, 
+                    LimitOrderBase      < SIDE, 
+                    LimitT              < SIDE
+                > > > > >
+            {
+                LimitT(PriceVolume const &x, object_pool<LimitT> * h, IAgentForOrder<LimitT<SIDE> > * agent) 
+                    :   base(boost::make_tuple(boost::make_tuple(x, h), agent))
+                {}
+
+                // we don't export LimitT to Python since it seems to be not useful for fast simulation
+            };
+    }
             
-   typedef LimitT<Buy>     LimitBuy;
-   typedef LimitT<Sell>    LimitSell;
+    typedef order::LimitT<Buy>     LimitBuy;
+    typedef order::LimitT<Sell>    LimitSell;
 
    typedef boost::intrusive_ptr<LimitBuy>   LimitBuyPtr;
    typedef boost::intrusive_ptr<LimitSell>  LimitSellPtr;
@@ -154,9 +159,9 @@ namespace basic {
    //---------------------------------------------- OrderBook
 
    template <Side SIDE>
-        struct queue_with_callback
-            :   OnQueueTopChanged   < py_callback,
-                OrderQueue          < boost::intrusive_ptr<LimitT<SIDE> >, 
+        struct queue_with_callback  :   
+                OnQueueTopChanged   < py_callback,
+                OrderQueue          < boost::intrusive_ptr<order::LimitT<SIDE> >, 
                 queue_with_callback < SIDE
                 > > > 
         {
@@ -197,13 +202,13 @@ namespace basic {
 
    template <Side SIDE>
     struct LimitOrderTraderT :
-        IAgentForOrderImpl      < LimitT<SIDE>,
+        IAgentForOrderImpl      < order::LimitT<SIDE>,
         OnPartiallyFilled       < py_callback, 
-        OrdersSubmittedInVector < boost::intrusive_ptr<LimitT<SIDE> >, 
+        OrdersSubmittedInVector < boost::intrusive_ptr<order::LimitT<SIDE> >, 
         PnL_Holder              <
         Quantity_Holder         <
         LinkToOrderBook         < OrderBook*, 
-        PrivateOrderPool        < LimitT<SIDE>, 
+        PrivateOrderPool        < order::LimitT<SIDE>, 
         AgentBase               < LimitOrderTraderT<SIDE> 
         > > > > > > > >
     {
@@ -232,24 +237,22 @@ namespace basic {
         {
             if (v > 0)
             {
-                LimitT<SIDE> * order = base::createOrder(pv(p,v));
+                order::LimitT<SIDE> * order = base::createOrder(pv(p,v));
 
                 base::processOrder(order);
             }
-// 
-//             return order;
         }
     };
 
 
    template <Side SIDE>
     struct LiquidityProviderT :
-        IAgentForOrderImpl  < LimitT<SIDE>,
+        IAgentForOrderImpl  < order::LimitT<SIDE>,
         LiquidityProvider   < py_value<Time>, py_value<PriceF>, py_value<VolumeF>, 
-        OrderCanceller      < py_value<Time>, boost::intrusive_ptr<LimitT<SIDE> >, 
+        OrderCanceller      < py_value<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
         PnL_Quantity_History_InDeque <
         LinkToOrderBook     < OrderBook*, 
-        PrivateOrderPool    < LimitT<SIDE>, 
+        PrivateOrderPool    < order::LimitT<SIDE>, 
         AgentBase           < LiquidityProviderT<SIDE> 
         > > > > > > >
     {
@@ -290,12 +293,10 @@ namespace basic {
         {
             if (v > 0)
             {
-                LimitT<SIDE> * order = base::createOrder(pv(p,v));
+                order::LimitT<SIDE> * o = base::createOrder(pv(p,v));
 
-                base::processOrder(order);
+                base::processOrder(o);
             }
-// 
-//             return order;
         }
     };
 
@@ -309,7 +310,7 @@ namespace basic {
         OnPartiallyFilled       < py_callback,
         PnL_Holder              <
         Quantity_Holder         <
-        MarketOrderFactory      < MarketT<Buy, MarketOrderTrader*>, MarketT<Sell, MarketOrderTrader*>, 
+        MarketOrderFactory      < order::MarketT<Buy, MarketOrderTrader*>, order::MarketT<Sell, MarketOrderTrader*>, 
         LinkToOrderBook         < OrderBook*, 
         AgentBase               < MarketOrderTrader
         > > > > > >
@@ -329,7 +330,7 @@ namespace basic {
         OnPartiallyFilled       < py_callback,
         PnL_Quantity_History_InDeque<
         FundamentalValueTrader  < py_value<Time>, py_value<VolumeF>, 
-        MarketOrderFactory      < MarketT<Buy, FV_Trader*>, MarketT<Sell, FV_Trader*>, 
+        MarketOrderFactory      < order::MarketT<Buy, FV_Trader*>, order::MarketT<Sell, FV_Trader*>, 
         LinkToOrderBook         < OrderBook*, 
         AgentBase               < FV_Trader
         > > > > > >
@@ -355,10 +356,10 @@ namespace basic {
 
     struct Signal_Trader :
         PnL_Quantity_History_InDeque<
-        SignalTrader        <py_value<VolumeF>, 
-        MarketOrderFactory  <MarketT<Buy, Signal_Trader*>, MarketT<Sell, Signal_Trader*>, 
-        LinkToOrderBook     <OrderBook*, 
-        AgentBase           <Signal_Trader> 
+        SignalTrader                < py_value<VolumeF>, 
+        MarketOrderFactory          < order::MarketT<Buy, Signal_Trader*>, order::MarketT<Sell, Signal_Trader*>, 
+        LinkToOrderBook             < OrderBook*, 
+        AgentBase                   < Signal_Trader> 
         > > > >
     {
         Signal_Trader(OrderBook * book, py_object volumeDist, double threshold)
@@ -393,7 +394,7 @@ namespace basic {
     struct Noise_Trader :
         PnL_Quantity_History_InDeque<
         NoiseTrader         < py_value<Time>, py_value<VolumeF>,
-        MarketOrderFactory  < MarketT<Buy,Noise_Trader*>, MarketT<Sell,Noise_Trader*>, 
+        MarketOrderFactory  < order::MarketT<Buy,Noise_Trader*>, order::MarketT<Sell,Noise_Trader*>, 
         LinkToOrderBook     < OrderBook*, 
         AgentBase           < Noise_Trader
         > > > > >

@@ -16,7 +16,7 @@ namespace marketsim {
 namespace {
 
     template <Side SIDE>
-        struct MarketT : MarketOrderBase<SIDE, MarketT<SIDE> >
+        struct MarketT : order::MarketOrderBase<SIDE, MarketT<SIDE> >
         {
             template <typename X>
                 MarketT(Volume v, X) : base(v) {}
@@ -71,23 +71,23 @@ namespace {
         SignalTraderTester      trader;
 
         scheduler.workTill(1.5);
-        REQUIRE(trader.getProcessed() == 0);
+        assert(trader.getProcessed() == 0);
 
         trader.setDelta(1.);
 
         scheduler.workTill(3.5);
-        REQUIRE(trader.getProcessed() == 2);
+        assert(trader.getProcessed() == 2);
 
         trader.setDelta(-1.);
 
         scheduler.workTill(4.5);
-        REQUIRE(trader.getProcessed() == 3);
+        assert(trader.getProcessed() == 3);
 
         scheduler.workTill(5.5);
-        REQUIRE(trader.getProcessed() == 3);
+        assert(trader.getProcessed() == 3);
         
         scheduler.workTill(7.5);
-        REQUIRE(trader.getProcessed() == 1);
+        assert(trader.getProcessed() == 1);
     }
 
 }}
