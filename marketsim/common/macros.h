@@ -46,4 +46,13 @@
 /// This macro eases access to base class from derived concrete classes
 #define DECLARE_BASE(X) typedef X base; 
 
+namespace marketsim
+{
+    template <class Derived>
+        struct derived_is
+        {
+            DECLARE_ARROW(Derived);
+        };
+}
+
 #endif

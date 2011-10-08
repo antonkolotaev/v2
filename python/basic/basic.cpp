@@ -24,6 +24,7 @@
 #include <marketsim/agent/signal.h>
 #include <marketsim/agent/signal_trader.h>
 #include <marketsim/agent/noise_trader.h>
+#include <marketsim/agent/agent_for_order.h>
 
 #include <marketsim/history.h>
 

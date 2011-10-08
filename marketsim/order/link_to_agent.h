@@ -3,60 +3,36 @@
 
 namespace marketsim 
 {
-    template <typename Order>
-        struct IAgentForOrder 
-    {
-        virtual void onOrderPartiallyFilled(Order *, PriceVolume const &) = 0;
-        virtual void onOrderFilled   (Order *) = 0;
-        virtual void onOrderCancelled(Order *) = 0;
-    };
-
-    template <typename Order, typename Base>
-        struct IAgentForOrderImpl : Base, IAgentForOrder<Order>
-        {
-            template <class T>
-                IAgentForOrderImpl(T const & x)
-                    :   Base(x)
-                {}
-
-            DECLARE_BASE(IAgentForOrderImpl);
-
-            void onOrderPartiallyFilled(Order * order, PriceVolume const & x) 
-            {
-                Base::onOrderPartiallyFilled(order, x);
-            }
-
-            void onOrderFilled(Order *order)
-            {
-                Base::onOrderFilled(order);
-            }
-
-            void onOrderCancelled(Order * order)
-            {
-                Base::onOrderCancelled(order);
-            }
-        };
-
+    /// Base class for orders used to notify an agent created the order about order's events:
+    /// - order partial filling:    void onOrderPartiallyFilled(Order*, PriceVolume const & trade);
+    /// - order complete filling:   void onOrderFilled(Order*);
+    /// - order cancellation:       void onOrderCancelled(Order*);
     template <typename AgentPtr, typename Base>
         struct WithLinkToAgent : Base 
         {
+            /// 0-th argument is an initializer for the base class
+            /// 1-th argument is a pointer to the agent to be notified about changes in the order
             template <typename T>
                 WithLinkToAgent(T const & x)
                     :   Base  (boost::get<0>(x))
                     ,   agent_(boost::get<1>(x))
                 {}
 
-        typedef WithLinkToAgent base; // for derived typenamees
+        DECLARE_BASE(WithLinkToAgent);
 
+        /// Called when order is matched with another one
+        /// \param x trade (Price,Volume)
+        /// \param o reference to the other order (usually not used)
         template <typename OtherOrder>
             void onMatched(PriceVolume const & x, OtherOrder const &o)
         {
             Base::onMatched(x,o);
             agent_->onOrderPartiallyFilled(self(), x);
-            if (filled())
+            if (this->filled())
                 agent_->onOrderFilled(self());
         }
 
+        /// Called when order is cancelled
         void onCancelled()
         {
             Base::onCancelled();

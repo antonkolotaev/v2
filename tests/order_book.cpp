@@ -33,6 +33,8 @@ namespace {
 
     TEST_CASE("order_book", "Order book matching")
     {
+        Scheduler scheduler;
+
         LimitSellPool  sell_orders;
         LimitBuyPool   buy_orders;
 
@@ -65,7 +67,7 @@ namespace {
         REQUIRE(book.bestVolume<Buy>() == 1);
 
         it = lb->getExecutionHistory().begin();
-        REQUIRE(lb->getExecutionHistory()[0] == pv(100u,1u));
+        REQUIRE(it[0].value == pv(100u,1u));
 
         LimitSell * ls;
         book.processOrder(ls = new (sell_orders.alloc()) LimitSell   (99, 5, &sell_orders));
@@ -75,8 +77,9 @@ namespace {
         REQUIRE(book.bestPrice<Buy>() == 98);
         REQUIRE(book.bestVolume<Buy>() == 3);
 
-        REQUIRE(ls->getExecutionHistory()[0] == pv(100u,1u));
-        REQUIRE(ls->getExecutionHistory()[1] == pv(99u,2u));
+        it = ls->getExecutionHistory().begin();
+        REQUIRE(it[0].value == pv(100u,1u));
+        REQUIRE(it[1].value == pv(99u,2u));
 
         MarketOrderSell ms(5);
         book.processOrder(&ms);
@@ -84,16 +87,18 @@ namespace {
         REQUIRE(book.bestPrice<Buy>() == 97);
         REQUIRE(book.bestVolume<Buy>() == 2);
 
-        REQUIRE(ms.getExecutionHistory()[0] == pv(98u,3u));
-        REQUIRE(ms.getExecutionHistory()[1] == pv(97u,2u));
+        it = ms.getExecutionHistory().begin();
+        REQUIRE(it[0].value == pv(98u,3u));
+        REQUIRE(it[1].value == pv(97u,2u));
 
         MarketOrderBuy mb(3);
         book.processOrder(&mb);
 
         REQUIRE(book.bestPrice<Sell>() == 101);
         REQUIRE(book.bestVolume<Sell>() == 1);
-        REQUIRE(mb.getExecutionHistory()[0] == pv(99u,2u));
-        REQUIRE(mb.getExecutionHistory()[1] == pv(101u,1u));
+        it = mb->getExecutionHistory().begin();
+        REQUIRE(it[0].value == pv(99u,2u));
+        REQUIRE(it[1].value == pv(101u,1u));
 
         //std::cout << "-----\n";
     }

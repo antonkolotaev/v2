@@ -3,12 +3,19 @@
 
 namespace marketsim 
 {
+    /// Base class for orders that are to stored in OrdersSubmittedInVector
+    /// We will store index of the order in the vector
+    /// providing thus fast search and remove operations
     template <typename Base>
         struct WithCancelPosition : Base 
     {
-        template <typename T> WithCancelPosition(T const & x) : Base(x), pos_(-1) {}
+        template <typename T> 
+            WithCancelPosition(T const & x) 
+                :   Base(x)
+                ,   pos_(-1) 
+            {}
 
-        typedef WithCancelPosition  base; // for derived typenamees
+        DECLARE_BASE(WithCancelPosition);
 
         void setCancelPosition(int p) { pos_ = p; }
         int  getCancelPosition() const { return pos_; }

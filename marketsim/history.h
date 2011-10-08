@@ -106,7 +106,6 @@ namespace history {
                 }
 #endif
 
-		protected:
 			void write(Time t, FieldType const & x)
 			{
 				history_.push_back(HistoryPiece(t,x));

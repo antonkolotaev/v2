@@ -15,6 +15,14 @@ namespace marketsim
         return (std::stringstream() << x).str();
     }
 
+    template <typename Stream, typename T>  
+        Stream & operator << (Stream &out, boost::intrusive_ptr<T> const & p)
+        {
+            out << *p;
+            return out;
+        }
+
+
     /// ------------------------------- miscellaneous
     /// an empty base class
 	struct Empty {};

@@ -12,15 +12,4 @@
 #include <marketsim/order/limit_order_base.h>
 #include <marketsim/order/market_order_base.h>
 
-namespace marketsim
-{
-
-    template <typename T>  
-        std::ostream & operator << (std::ostream &out, boost::intrusive_ptr<T> const & p)
-        {
-            return out << *p;
-        }
-
-}
-
 #endif

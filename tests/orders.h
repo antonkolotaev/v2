@@ -2,7 +2,7 @@
 #define _marketsim_test_orders_h_included_
 
 #include <marketsim/order/base.h>
-#include <marketsim/order/filling.h>
+#include <marketsim/order/execution_history.h>
 
 namespace marketsim
 {

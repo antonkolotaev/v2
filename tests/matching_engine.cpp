@@ -11,6 +11,8 @@ namespace {
 
     TEST_CASE("matching_engine", "Matching logic in an order queue")
     {
+        Scheduler scheduler;
+
         std::priority_queue<
             boost::intrusive_ptr<LimitOrderSell>, 
             std::vector<boost::intrusive_ptr<LimitOrderSell> >, 
@@ -27,28 +29,28 @@ namespace {
         MarketOrderBuy m1 = 5;
 
         REQUIRE(matchOrder(limit_orders, m1));
-        REQUIRE(m1.getExecutionHistory()[0] == pv(100u, 3u));
-        REQUIRE(m1.getExecutionHistory()[1] == pv(102u, 2u));
+        REQUIRE(m1.getExecutionHistory()[0].value == pv(100u, 3u));
+        REQUIRE(m1.getExecutionHistory()[1].value == pv(102u, 2u));
         REQUIRE(limit_orders.top()->getPrice() == 102);
         REQUIRE(limit_orders.top()->getVolume() == 1);
 
         LimitOrderBuy L1(pv(106, 10)); 
         REQUIRE(!matchOrder(limit_orders, L1));
 
-        REQUIRE(L1.getExecutionHistory()[0] == pv(102u,1u));
-        REQUIRE(L1.getExecutionHistory()[1] == pv(105u,3u));
+        REQUIRE(L1.getExecutionHistory()[0].value == pv(102u,1u));
+        REQUIRE(L1.getExecutionHistory()[1].value == pv(105u,3u));
 
         REQUIRE(L1.getVolume() == 6);
         REQUIRE(limit_orders.top()->getPrice() == 107);
 
         MarketOrderBuy m2 = (3);
         REQUIRE(matchOrder(limit_orders, m2));
-        REQUIRE(m2.getExecutionHistory()[0] == pv(107u, 3u));
+        REQUIRE(m2.getExecutionHistory()[0].value == pv(107u, 3u));
         REQUIRE(limit_orders.top()->getPrice() == 110);
 
         MarketOrderBuy m3 = (5);
         REQUIRE(!matchOrder(limit_orders, m3));
-        REQUIRE(m3.getExecutionHistory()[0] == pv(110u, 3u));
+        REQUIRE(m3.getExecutionHistory()[0].value == pv(110u, 3u));
         REQUIRE(limit_orders.empty());
     }
 }}

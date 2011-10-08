@@ -220,7 +220,7 @@ namespace marketsim
         struct BelongsTo {
             BelongsTo(PoolPtr a) : a(a) {}
             template <typename OrderPtr> bool operator () (OrderPtr o) const {
-                return o->is_my_pool(a);
+                return o->is_in_my_pool(a);
             }
             PoolPtr a;
         };

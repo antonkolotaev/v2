@@ -121,7 +121,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\order\filling.h"
+				RelativePath=".\order\execution_history.h"
 				>
 			</File>
 			<File
@@ -160,6 +160,10 @@
 		<Filter
 			Name="agent"
 			>
+			<File
+				RelativePath=".\agent\agent_for_order.h"
+				>
+			</File>
 			<File
 				RelativePath=".\agent\base.h"
 				>
