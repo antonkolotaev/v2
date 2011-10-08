@@ -3,31 +3,41 @@
 
 namespace marketsim
 {
-    template <typename MarketBuy, typename MarketSell, typename Base>
+    /// Base class for agents sending market orders
+    /// It serves as a factory for market orders
+    /// Since they are to be executed immediately we pass it by value but not as reference
+    /// It also defines two functions for convenience for sending orders
+    /// TODO: use meta class defining market order types
+    template <
+        typename MarketBuy,     // type of market buy orders to create. it should have a ctor(T const&, AgentType*)
+        typename MarketSell,    // type of market sell orders to create. it should have a ctor(T const&, AgentType*)
+        typename Base
+    >
         struct MarketOrderFactory : Base 
         {
             template <typename T> MarketOrderFactory(T const x) : Base(x) {}
 
+            /// creates a buy market order
+            /// \param T usually it is order volume
             template <typename T>
                 MarketBuy  createOrder(T const &x, buy_tag) 
                 { 
                     return MarketBuy(x, self()); 
                 }
 
+            /// creates a sell market order
+            /// \param T usually it is order volume
             template <typename T>
                 MarketSell createOrder(T const &x, sell_tag) 
                 { 
                     return MarketSell(x, self()); 
                 }
 
-            void sendBuyOrder(Volume x)
+            /// a shortcut for sending market orders of the given volume
+            template <Side SIDE>
+                void sendMarketOrder(Volume x)
             {
-                self()->processOrder(createOrder(x, buy_tag()));
-            }
-
-            void sendSellOrder(Volume x)
-            {
-                self()->processOrder(createOrder(x, sell_tag()));
+                self()->processOrder(createOrder(x, side_tag<SIDE>()));
             }
 
 #ifdef MARKETSIM_BOOST_PYTHON
@@ -35,8 +45,8 @@ namespace marketsim
             template <typename T>
                 static void py_visit(T & c)
                 {
-                    c.def("sendBuyOrder", &MarketOrderFactory::sendBuyOrder);
-                    c.def("sendSellOrder",&MarketOrderFactory::sendSellOrder);
+                    c.def("sendBuyOrder", &MarketOrderFactory::sendMarketOrder<Buy>);
+                    c.def("sendSellOrder",&MarketOrderFactory::sendMarketOrder<Sell>);
                 }
 
 #endif

@@ -8,22 +8,29 @@
 
 namespace marketsim
 {
+    /// This base class for agent keeps a vector of orders issued
+    /// This vector can be used, for example, to cancel arbitrary orders
+    /// Orders must provide functions (set/get)CancelPosition in order to speed up look up (see order::WithCancelPosition)
+    /// \param Order type for storing a pointer to order (usually boost::intrusive_ptr<Order>)
     template <typename Order, typename Base>
         struct OrdersSubmittedInVector : Base 
     {
         template <typename T> OrdersSubmittedInVector(T const & x) : Base(x) {}
 
-        const static int cancelledIdx = -0xbad;
-
+        /// remembers an order just created
         template <typename Order>
             void processOrder(Order order)
         {
             assert(!order->cancelled());
+            // store its position in our vector
             order->setCancelPosition(orders_issued_.size());
+            // store the order in the vector
             orders_issued_.push_back(order);
+            // continue processing
             Base::processOrder(order);
         }
 
+        /// removes order from the vector
         template <typename Order>
             void onOrderFilled(Order order)
         {
@@ -31,6 +38,7 @@ namespace marketsim
             Base::onOrderFilled(order);
         }
 
+        /// removes order from the vector
         template <typename Order>
             void onOrderCancelled(Order order)
         {
@@ -40,52 +48,61 @@ namespace marketsim
 
     protected:
 
+        /// Orders issued count
         size_t ordersIssuedCount() const 
         {
             return orders_issued_.size();
         }
 
+        /// Getting access to an order with 'idx' position 
         Order& getIssuedOrder(size_t idx) 
         {
             return orders_issued_[idx];
         }
 
+        /// \return (Price,Volume) for the idx-th order
         PriceVolume getIssuedOrderPV(size_t idx) const 
         {
             return orders_issued_[idx]->getPV();
         }
 
+        /// removes order from the vector
+        /// it must be in the vector
         template <typename Order>
             void removeOrder(Order order)
         {
             size_t pos = order->getCancelPosition();
 
-            if (pos != cancelledIdx)
-            {
-                assert(orders_issued_[pos] == order);
-                erase(pos);
-            }
+            assert(orders_issued_[pos] == order);
+            erase(pos);
         }
 
-        void erase(int pos) 
+        /// erases order with 'idx' position in the vector
+        void erase(int idx) 
         {
-            assert((size_t)pos < orders_issued_.size());
+            assert((size_t)idx < orders_issued_.size());
 
+            // if there are at least two orders
             if (orders_issued_.size() > 1)
             {
-                orders_issued_[pos] = orders_issued_.back();
-                orders_issued_[pos]->setCancelPosition(pos);
+                // copy the last one to 'idx' position
+                orders_issued_[idx] = orders_issued_.back();
+                // ... and update its cancel position
+                orders_issued_[idx]->setCancelPosition(idx);
             }
 
+            // remove the last order that's not needed anymore
             orders_issued_.pop_back();
         }
 
+        /// sends a cancellation signal to idx-th order
         void cancelOrder(size_t idx)
         {
             assert(idx < orders_issued_.size());
             orders_issued_[idx]->onCancelled();
         }
 
+#ifdef MARKETSIM_BOOST_PYTHON
         template <typename T>
             static void py_visit(T & c)
             {
@@ -94,7 +111,9 @@ namespace marketsim
                 c.def("getIssuedOrderPV", &OrdersSubmittedInVector::getIssuedOrderPV);
                 c.def("cancelOrder", &OrdersSubmittedInVector::cancelOrder);
             }
+#endif
 
+        /// Checking that all orders in the vector are not cancelled
         void check_all_orders_in_queue()
         {
             BOOST_FOREACH(Order order, orders_issued_)
@@ -107,12 +126,18 @@ namespace marketsim
         std::vector<Order>     orders_issued_;
     };
 
+    /// Base class for agents implementing random order cancellation
+    /// In moments of time given by CancelInterval distribution 
+    /// it chooses an integer i using IndexChooser distribution
+    /// and sends a cancellation signal for i-th order
     template <typename CancelInterval, typename Order, typename Base, typename IndexChooser = rng::uniform_smallint<> >
         struct OrderCanceller : OrdersSubmittedInVector<Order, Base>
     {
         typedef Timer<OrderCanceller, CancelInterval>   timer_t;
         typedef OrdersSubmittedInVector<Order, Base>    RealBase;
 
+        /// 0-th argument is passed to the base class
+        /// 1-th argument defines interval distribution between order cancellations
         template <typename T>  OrderCanceller(T const & x) 
             : RealBase (boost::get<0>(x))
             , timer_   (*self(), &OrderCanceller::cancelAnOrder, boost::get<1>(x))
@@ -123,13 +148,14 @@ namespace marketsim
         
     protected:
 
+        /// cancels a randomly chosen order
         void cancelAnOrder()
         {
             if (size_t n = RealBase::ordersIssuedCount())
             {
-                int pos = IndexChooser(0, n - 1)();
+                int idx = IndexChooser(0, n - 1)();
 
-                RealBase::getIssuedOrder(pos)->onCancelled();
+                RealBase::getIssuedOrder(idx)->onCancelled();
             }
         }
 

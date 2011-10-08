@@ -8,17 +8,24 @@
 
 namespace marketsim
 {
+    /// Base class for agents tracking available amount of agent's assets
     template <typename Base>       
         struct Quantity_Holder : Base
     {
         template <typename T>
-            Quantity_Holder(T const & x) : Base(x), quantity_(0) {}
+            Quantity_Holder(T const & x) 
+                :   Base     (x)
+                ,   quantity_(0) 
+            {}
 
         DECLARE_BASE(Quantity_Holder);
 
+        /// changes current assets quantity
         void setQuantity(Volume v) { quantity_ = v; }
+        /// \returns current assets quantity
         Volume getQuantity() const { return quantity_; }
 
+        /// amount of assets available is updated when an order issued by the agent is partially filled
         template <typename Order>
             void onOrderPartiallyFilled(Order order, PriceVolume const & x)
         {
@@ -38,6 +45,7 @@ namespace marketsim
         Volume  quantity_;
     };
 
+    /// A traits class use to tell to statistics classes how to extract amount of assets available from an agent
     struct Quantity 
     {
         typedef Volume  ValueType;
@@ -47,12 +55,6 @@ namespace marketsim
             {
                 return x->getQuantity();
             }
-
-        template <typename Base>
-            struct base 
-        {
-            typedef Quantity_Holder<Base>   type;
-        };
     };
     
 

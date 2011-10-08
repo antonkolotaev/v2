@@ -52,6 +52,8 @@ namespace {
             return true;
         }
 
+        template <Side SIDE> bool empty() const { return false; }
+
         Price bestPriceImpl(sell_tag) const { return ask_; }
         Price bestPriceImpl(buy_tag) const { return bid_; }
 

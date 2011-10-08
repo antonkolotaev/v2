@@ -5,9 +5,11 @@
 
 namespace marketsim
 {
+    /// The most base class for agents
     template <typename Derived>
         struct AgentBase 
     {
+        /// no meaningful parameters should be passed here
         AgentBase() {}
         AgentBase(Dummy) {}
         AgentBase(boost::tuples::tuple<>) {}
@@ -16,6 +18,7 @@ namespace marketsim
 
         DECLARE_ARROW(Derived);
 
+        //------------------- default implementation for handlers for events from orders
         template <typename T>
             void onOrderFilled(T x) 
         {}

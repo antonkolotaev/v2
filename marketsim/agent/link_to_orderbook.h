@@ -3,23 +3,29 @@
 
 namespace marketsim
 {
+    /// This base class for agents holds a link to order book where the agent sends orders
     template <typename BookPtr, typename Base>
         struct LinkToOrderBook : Base
     {
+        /// 0-th argument is passed to the base class
+        /// 1-th argument holds a pointer to the order book
         template <typename T>
             LinkToOrderBook(T const & x) 
             :   Base       (boost::get<0>(x))
             ,   order_book_(boost::get<1>(x))
         {}
 
+        /// \returns pointer to the order book
         BookPtr getOrderBook() { return order_book_; }
 
+        /// transfers an order to the order book
         template <typename T>
             void processOrder(T x)
             {
                 order_book_->processOrder(x);
             }
 
+        /// notifies the order book about an order cancellation
         template <typename T>
             void onOrderCancelled(T x) 
         {
@@ -35,7 +41,6 @@ namespace marketsim
                 c.def("orderBook", &LinkToOrderBook::getOrderBook, return_internal_reference<>());
             }
 #endif
-
 
     private:
         BookPtr    order_book_;

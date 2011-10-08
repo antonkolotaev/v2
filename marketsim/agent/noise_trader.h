@@ -6,28 +6,28 @@
 
 namespace marketsim
 {
-    // VolumeDistr -- volume distribution. if >0 the trader sells, if <0 the trader buys
-    template <typename IntervalDistr, typename VolumeDistr, typename Base>
+    /// Base class for agents encapsulating logic for noise trading
+    /// In periods of time defined by IntervalDistr
+    /// it generates a volume to trade using VolumeDistr 
+    /// if this volume is positive it sells, if negative it buys
+    template <
+        typename IntervalDistr,     // generator for intervals between order generation
+        typename VolumeDistr,       // generator for order volumes
+        typename Base
+    >
         struct NoiseTrader : Base 
     {
         DECLARE_BASE(NoiseTrader);
 
+        /// 0-th argument is passed to the base class
+        /// 1-th argument defines interval distribution between order generation
+        /// 2-th argument defines order size distribution
         template <typename T>
             NoiseTrader(T const & x) 
-                :   Base(boost::get<0>(x))
-                ,   timer_(*self(), &NoiseTrader::createOrder, boost::get<1>(x))
-                ,   volume_(boost::get<2>(x))
+                :   Base    (boost::get<0>(x))
+                ,   timer_  (*self(), &NoiseTrader::createOrder, boost::get<1>(x))
+                ,   volume_ (boost::get<2>(x))
             {}
-
-#ifdef MARKETSIM_BOOST_PYTHON
-
-        template <typename T>
-            static void py_visit(T &c)
-            {
-                Base::py_visit(c);
-            }
-
-#endif
 
     private:
         void createOrder()
@@ -35,10 +35,10 @@ namespace marketsim
             Volume v = (Volume)volume_();
 
             if (v > 0)
-                self()->sendSellOrder(v);
+                self()->sendMarketOrder<Sell>(v);
 
             if (v < 0)
-                self()->sendBuyOrder(-v);
+                self()->sendMarketOrder<Buy>(-v);
         }
 
     private:

@@ -149,7 +149,7 @@ namespace fast {
 
         static std::string py_name() 
         {
-            return "LiquidityProvider_" + marketsim::py_name<side_tag<SIDE> >();
+            return "LiquidityProvider_" + marketsim::py_name<side_tag>();
         }
 
         static void py_register(std::string const &name = py_name())

@@ -5,10 +5,11 @@
 
 namespace marketsim
 {
+    /// Base class for agents tracking P&L for the agent
     template <typename Base>
         struct PnL_Holder : Base 
         {
-            typedef PnL_Holder     base;   // for derived typenamees
+            DECLARE_BASE(PnL_Holder);
 
             template <typename T>
                 PnL_Holder(T const x) 
@@ -16,6 +17,7 @@ namespace marketsim
                     ,   PnL_(0)
                 {}
 
+            /// P&L value is updated when an order issued by the agent is partially filled
             template <typename Order>
                 void onOrderPartiallyFilled(Order order, PriceVolume const & x)
             {
@@ -23,6 +25,7 @@ namespace marketsim
                 Base::onOrderPartiallyFilled(order, x);
             }
 
+            /// \return current P&L value
             Price getPnL() const { return PnL_; }
 
 #ifdef MARKETSIM_BOOST_PYTHON
@@ -38,8 +41,7 @@ namespace marketsim
             Price   PnL_;
         };
 
-    //typedef std::pair<Time, Price>  PnLHistoryPiece;
-
+    /// A traits class use to tell to statistics classes how to extract P&L value from an agent
     struct PnL 
     {
         typedef Price  ValueType;
@@ -49,12 +51,6 @@ namespace marketsim
             {
                 return x->getPnL();
             }
-
-        template <typename Base>
-            struct base 
-        {
-            typedef PnL_Holder<Base>   type;
-        };
     };
 
 }

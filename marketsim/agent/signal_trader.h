@@ -3,11 +3,21 @@
 
 namespace marketsim
 {
-    template <typename VolumeDistr, typename Base>
+    /// Base class for agents encapsulating signal trading logic
+    /// if a value of a signal is greater than some threshold, the trader sells
+    /// if a value of a signal is less than -threshold, the trader buys
+    /// Amount of assets traded is defined by VolumeDistr
+    template <
+        typename VolumeDistr,       /// generator for order volumes
+        typename Base
+    >
         struct SignalTrader : Base
     {
         DECLARE_BASE(SignalTrader);
 
+        /// 0-th argument is passed to the base class
+        /// 1-th argument defines order size distribution
+        /// 2-th argument defines The Threshold
         template <typename T>
             SignalTrader(T const & x)
                 :   Base        (boost::get<0>(x))
@@ -19,12 +29,12 @@ namespace marketsim
         {
             if (x > threshold_)
             {
-                self()->sendSellOrder((Volume)volume_());
+                self()->sendMarketOrder<Sell>((Volume)volume_());
             }
 
             if (x < -threshold_)
             {
-                self()->sendBuyOrder((Volume)volume_());
+                self()->sendMarketOrder<Buy>((Volume)volume_());
             }
         }
 
