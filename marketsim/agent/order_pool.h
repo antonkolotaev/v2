@@ -3,7 +3,8 @@
 
 #include <marketsim/object_pool.h>
 
-namespace marketsim
+namespace marketsim {
+namespace agent
 {
     /// Base class for agents that use a pool to create orders in
     /// This pool is private for each agent; we might use a shared pool thus diminished memory footprint
@@ -42,6 +43,6 @@ namespace marketsim
    private:
        object_pool<Order>   pool_;
    };
-}
+}}
 
 #endif

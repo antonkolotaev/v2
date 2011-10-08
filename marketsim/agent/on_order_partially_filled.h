@@ -3,7 +3,8 @@
 
 #include <marketsim/common_types.h>
 
-namespace marketsim
+namespace marketsim {
+namespace agent 
 {
     /// Base class for agents 
     /// Defines an extension point for handling order's onOrderPartiallyFilled event
@@ -55,6 +56,6 @@ namespace marketsim
         Handler     handler_;
     };
 
-}
+}}
 
 #endif

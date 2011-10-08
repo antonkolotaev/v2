@@ -23,10 +23,11 @@ namespace {
 
 
     struct NoiseTraderTester :
-        NoiseTrader<rng::constant<Time>, NoiseTraderTester&, 
-            MarketOrderFactory<MarketT<Buy>, MarketT<Sell>, 
-                LinkToOrderBook<NoiseTraderTester*, 
-                    AgentBase<NoiseTraderTester> > > >
+            agent::NoiseTrader          < rng::constant<Time>, NoiseTraderTester&, 
+            agent::MarketOrderFactory   < MarketT<Buy>, MarketT<Sell>, 
+            agent::LinkToOrderBook      < NoiseTraderTester*, 
+            agent::AgentBase            < NoiseTraderTester
+            > > > >
     {
         NoiseTraderTester()
             :   base(boost::make_tuple(boost::make_tuple(dummy, this), rng::constant<double>(1.), boost::ref(*self())))

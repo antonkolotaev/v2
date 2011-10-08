@@ -21,7 +21,9 @@
 namespace marketsim {
 namespace {
 
-    template <Side SIDE> struct AgentT;
+    namespace agent {
+        template <Side SIDE> struct AgentT;
+    }
 
     namespace order {
 
@@ -36,14 +38,14 @@ namespace {
 
         template <Side SIDE>
             struct LimitT : 
-                    WithLinkToAgent < AgentT<SIDE>*,
+                    WithLinkToAgent < agent::AgentT<SIDE>*,
                     InPool          < PlacedInPool, 
                     LimitOrderBase  < SIDE, 
                     LimitT          < SIDE
                     > > > > 
             {
-                LimitT(PriceVolume const &x, object_pool<LimitT> * h, AgentT<SIDE> * agent) 
-                    :   base(boost::make_tuple(boost::make_tuple(x, h), agent))
+                LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::AgentT<SIDE> * a) 
+                    :   base(boost::make_tuple(boost::make_tuple(x, h), a))
                 {}
             };
 
@@ -80,44 +82,49 @@ namespace {
 	   }
    };
 
-   template <Side SIDE>
-    struct AgentT :
-        OnPartiallyFilled   < history::Collector<PnL, history::InDeque<Price> >,
-        OnPartiallyFilled   < history::Collector<Quantity, history::InDeque<Volume> >,
-        OnPartiallyFilled   < history::Collector<PnL, history::InFile>,  
-        PnL_Holder          <
-        Quantity_Holder     <
-        LinkToOrderBook     < OrderBook*, 
-        PrivateOrderPool    < order::LimitT<SIDE>, 
-        AgentBase           < AgentT<SIDE> > 
-        > > > > > > > 
-    {
-		AgentT(OrderBook* book) : base(
-            boost::make_tuple(
+   namespace agent {
+
+       using namespace marketsim::agent;
+
+       template <Side SIDE>
+        struct AgentT :
+            OnPartiallyFilled   < history::Collector<PnL, history::InDeque<Price> >,
+            OnPartiallyFilled   < history::Collector<Quantity, history::InDeque<Volume> >,
+            OnPartiallyFilled   < history::Collector<PnL, history::InFile>,  
+            PnL_Holder          <
+            Quantity_Holder     <
+            LinkToOrderBook     < OrderBook*, 
+            PrivateOrderPool    < order::LimitT<SIDE>, 
+            AgentBase           < AgentT<SIDE> > 
+            > > > > > > > 
+        {
+		    AgentT(OrderBook* book) : base(
                 boost::make_tuple(
                     boost::make_tuple(
-                        boost::make_tuple(dummy, book), 
-                        "history.log"), 
-                    dummy), 
-                dummy)) 
-        {}
+                        boost::make_tuple(
+                            boost::make_tuple(dummy, book), 
+                            "history.log"), 
+                        dummy), 
+                    dummy)) 
+            {}
 
-		template <typename TAG>
-            std::deque<history::TimeStamped<typename TAG::ValueType> > const & getHistory() 
-			{
-				getHandler((history::Collector<TAG, history::InDeque<typename TAG::ValueType> >*)0).flush();
-				return getHandler((history::Collector<TAG, history::InDeque<typename TAG::ValueType> >*)0).getHistory();
-			}
+		    template <typename TAG>
+                std::deque<history::TimeStamped<typename TAG::ValueType> > const & getHistory() 
+			    {
+				    getHandler((history::Collector<TAG, history::InDeque<typename TAG::ValueType> >*)0).flush();
+				    return getHandler((history::Collector<TAG, history::InDeque<typename TAG::ValueType> >*)0).getHistory();
+			    }
 
-        order::LimitT<SIDE> * sendOrder(Price p, Volume v)
-        {
-            order::LimitT<SIDE> * o = base::createOrder(pv(p,v));
+            order::LimitT<SIDE> * sendOrder(Price p, Volume v)
+            {
+                order::LimitT<SIDE> * o = base::createOrder(pv(p,v));
 
-            base::processOrder(o);
+                base::processOrder(o);
 
-            return o;
-        }
-    };
+                return o;
+            }
+        };
+   }
 
     inline order::MarketT<Buy> buy(Volume v)
     {
@@ -129,9 +136,9 @@ namespace {
 
     TEST_CASE("PnL_test", "checking that PnL history works well")
     {
-        Scheduler       scheduler;
-        OrderBook       book;
-        AgentT<Sell>    trader(&book);
+        Scheduler           scheduler;
+        OrderBook           book;
+        agent::AgentT<Sell> trader(&book);
 
         trader.setQuantity(0);
 
@@ -140,6 +147,9 @@ namespace {
         trader.sendOrder(105, 7);
 
         std::deque<history::TimeStamped<PriceVolume> > book_history = book.getHistory();
+
+        using agent::PnL;
+        using agent::Quantity;
 
 		assert(book_history[0].time == 0);
 		assert(book_history[0].value == PriceVolume(100, 3));

@@ -18,8 +18,9 @@
 namespace marketsim {
 namespace {
 
-    template <Side SIDE> struct AgentT;
-
+    namespace agent {
+        template <Side SIDE> struct AgentT;
+    }
     namespace order {
 
         using namespace marketsim::order;
@@ -27,14 +28,14 @@ namespace {
         template <Side SIDE>
             struct LimitT : 
                     WithCancelPosition  <
-                    WithLinkToAgent     <AgentT<SIDE>*,
+                    WithLinkToAgent     <agent::AgentT<SIDE>*,
                     InPool              <PlacedInPool, 
                     LimitOrderBase      <SIDE, 
                     LimitT              <SIDE
                     > > > > >
             {
-                LimitT(PriceVolume const &x, object_pool<LimitT> * h, AgentT<SIDE> * agent) 
-                    :   base(boost::make_tuple(boost::make_tuple(x, h), agent))
+                LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::AgentT<SIDE> * a) 
+                    :   base(boost::make_tuple(boost::make_tuple(x, h), a))
                 {}
             };
 
@@ -56,42 +57,46 @@ namespace {
        int operator () () const { return 0; }
    };
 
-   template <Side SIDE>
-    struct AgentT :
-            OrderCanceller      < rng::Generator<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
-            LinkToOrderBook     < OrderBook*, 
-            PrivateOrderPool    < order::LimitT<SIDE>, 
-            AgentBase           < AgentT<SIDE> > 
-            > >, always_0>
-    {
-        AgentT(OrderBook * book) 
-            : base(boost::make_tuple(boost::make_tuple(dummy, book), new rng::constant<Time, rng::IGenerator<Time> >(1.))) 
-        {}
+   namespace agent {
+       using namespace marketsim::agent;
 
-        order::LimitT<SIDE> * sendOrder(Price p, Volume v)
+       template <Side SIDE>
+        struct AgentT :
+                OrderCanceller      < rng::Generator<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
+                LinkToOrderBook     < OrderBook*, 
+                PrivateOrderPool    < order::LimitT<SIDE>, 
+                AgentBase           < AgentT<SIDE> > 
+                > >, always_0>
         {
-            order::LimitT<SIDE> * order = base::createOrder(pv(p,v));
+            AgentT(OrderBook * book) 
+                : base(boost::make_tuple(boost::make_tuple(dummy, book), new rng::constant<Time, rng::IGenerator<Time> >(1.))) 
+            {}
 
-            base::processOrder(order);
+            order::LimitT<SIDE> * sendOrder(Price p, Volume v)
+            {
+                order::LimitT<SIDE> * order = base::createOrder(pv(p,v));
 
-            return order;
-        }
-    };
+                base::processOrder(order);
+
+                return order;
+            }
+        };
+   }
 
     TEST_CASE("order_canceller", "")
     {
-        Scheduler       scheduler;
-        OrderBook       book;
-        AgentT<Sell>    agent(&book);
+        Scheduler               scheduler;
+        OrderBook               book;
+        agent::AgentT<Sell>     ag(&book);
 
         {
             // 1. Testing empty order book
             scheduler.workTill(3.5);
 
             // 2. Testing cancellations
-            LimitSellPtr L1 = agent.sendOrder(105, 5);
-            LimitSellPtr L2 = agent.sendOrder(100, 5);
-            LimitSellPtr L3 = agent.sendOrder(90, 5);
+            LimitSellPtr L1 = ag.sendOrder(105, 5);
+            LimitSellPtr L2 = ag.sendOrder(100, 5);
+            LimitSellPtr L3 = ag.sendOrder(90, 5);
 
             assert(!book.empty<Sell>());
             assert(book.bestPrice<Sell>() == 90);
@@ -120,9 +125,9 @@ namespace {
             assert(L2->cancelled());
 
             // 3. Test a situation of order filling
-            L1 = agent.sendOrder(90, 5);
-            L2 = agent.sendOrder(105, 5);
-            L3 = agent.sendOrder(100, 5);
+            L1 = ag.sendOrder(90, 5);
+            L2 = ag.sendOrder(105, 5);
+            L3 = ag.sendOrder(100, 5);
 
             book.processOrder(order::MarketBuy(5));
             assert(!book.empty<Sell>());

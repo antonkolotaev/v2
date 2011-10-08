@@ -3,7 +3,8 @@
 
 #include <marketsim/common_types.h>
 
-namespace marketsim
+namespace marketsim {
+namespace agent 
 {
     /// Base class for agents tracking P&L for the agent
     template <typename Base>
@@ -53,6 +54,6 @@ namespace marketsim
             }
     };
 
-}
+}}
 
 #endif

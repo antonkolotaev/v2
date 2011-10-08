@@ -4,7 +4,8 @@
 #include <marketsim/common_types.h>
 #include <marketsim/scheduler.h>
 
-namespace marketsim
+namespace marketsim {
+namespace agent 
 {
     /// Base class for agents encapsulating logic for noise trading
     /// In periods of time defined by IntervalDistr
@@ -48,6 +49,6 @@ namespace marketsim
         VolumeDistr volume_;
     };
 
-}
+}}
 
 #endif

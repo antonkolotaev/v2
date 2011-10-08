@@ -1,7 +1,8 @@
 #ifndef _marketsim_agent_market_order_factory_h_included_
 #define _marketsim_agent_market_order_factory_h_included_
 
-namespace marketsim
+namespace marketsim {
+namespace agent 
 {
     /// Base class for agents sending market orders
     /// It serves as a factory for market orders
@@ -52,6 +53,6 @@ namespace marketsim
 #endif
         };
 
-}
+}}
 
 #endif

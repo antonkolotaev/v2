@@ -4,8 +4,9 @@
 #include <marketsim/common_types.h>
 #include <marketsim/scheduler.h>
 
-namespace marketsim 
-{
+namespace marketsim {
+namespace agent     {
+
     /// This base class for agents encapsulates a logic for fundamental value trading
     /// In moments of times defined by distribution IntervalDistr
     /// it estimates middle price in the market, generates using VolumeDistr an amount to be traded
@@ -70,6 +71,6 @@ namespace marketsim
         VolumeDistr   volume_;
         Price const   fundamentalValue2_;
     };
-}
+}}
 
 #endif

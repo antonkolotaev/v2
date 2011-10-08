@@ -6,8 +6,9 @@
 #include <marketsim/rng.h>
 #include <boost/foreach.hpp>
 
-namespace marketsim
-{
+namespace marketsim {
+namespace agent     {
+
     /// This base class for agent keeps a vector of orders issued
     /// This vector can be used, for example, to cancel arbitrary orders
     /// Orders must provide functions (set/get)CancelPosition in order to speed up look up (see order::WithCancelPosition)
@@ -164,6 +165,6 @@ namespace marketsim
     };
 
 
-}
+}}
 
 #endif

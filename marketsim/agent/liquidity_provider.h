@@ -5,7 +5,8 @@
 #include <marketsim/common_types.h>
 #include <marketsim/scheduler.h>
 
-namespace marketsim
+namespace marketsim {
+namespace agent 
 {
     /// Base class for agents encapsulating logic of a one-side liquidity provider
     /// In some periods of time (given by GenerationPeriod) 
@@ -59,6 +60,6 @@ namespace marketsim
         Price const         initialPrice_;
     };
 
-}
+}}
 
 #endif

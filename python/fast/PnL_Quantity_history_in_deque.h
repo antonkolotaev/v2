@@ -20,54 +20,55 @@ namespace marketsim
        }
    };
 
-   template <typename Base>
-    struct PnL_Quantity_History_InDeque : 
-       OnPartiallyFilled   < history::Collector<Get_PnL_Quantity, history::InDeque<PriceVolume> >,
-       PnL_Holder          <
-       Quantity_Holder     < Base 
-       > > >
-   {
-       typedef history::Collector<Get_PnL_Quantity, history::InDeque<PriceVolume> >  TAG;
-
-       typedef 
-           OnPartiallyFilled   < TAG,
+   namespace agent {
+       template <typename Base>
+        struct PnL_Quantity_History_InDeque : 
+           OnPartiallyFilled   < history::Collector<Get_PnL_Quantity, history::InDeque<PriceVolume> >,
            PnL_Holder          <
            Quantity_Holder     < Base 
            > > >
-           RealBase;
+       {
+           typedef history::Collector<Get_PnL_Quantity, history::InDeque<PriceVolume> >  TAG;
 
-       DECLARE_BASE(PnL_Quantity_History_InDeque);
+           typedef 
+               OnPartiallyFilled   < TAG,
+               PnL_Holder          <
+               Quantity_Holder     < Base 
+               > > >
+               RealBase;
 
-       template <typename T> 
-        PnL_Quantity_History_InDeque(T const & x)
-            :  RealBase(boost::make_tuple(x, dummy))
-        {}
+           DECLARE_BASE(PnL_Quantity_History_InDeque);
 
-        history::TimeSeries<PriceVolume> const & getHistory() const 
-        {
-            TAG * T = 0;
-            const_cast<PnL_Quantity_History_InDeque*>(this)->getHandler(T).flush();
-            return getHandler(T).getHistory();
-        }
+           template <typename T> 
+            PnL_Quantity_History_InDeque(T const & x)
+                :  RealBase(boost::make_tuple(x, dummy))
+            {}
 
-        void recordHistory(bool b)
-        {
-            getHandler((TAG*)0).recordHistory(b);
-        }
-
-#ifdef MARKETSIM_BOOST_PYTHON
-        template <typename T>
-            static void py_visit(T & class_def)
+            history::TimeSeries<PriceVolume> const & getHistory() const 
             {
-                RealBase::py_visit(class_def);
-                class_def
-                    .def("PnL_Quantity_History", &PnL_Quantity_History_InDeque::getHistory, return_internal_reference<>())
-                    .def("record_PnL_Quantity_History", &PnL_Quantity_History_InDeque::recordHistory)
-                    ;
+                TAG * T = 0;
+                const_cast<PnL_Quantity_History_InDeque*>(this)->getHandler(T).flush();
+                return getHandler(T).getHistory();
             }
-#endif
-   };
 
+            void recordHistory(bool b)
+            {
+                getHandler((TAG*)0).recordHistory(b);
+            }
+
+    #ifdef MARKETSIM_BOOST_PYTHON
+            template <typename T>
+                static void py_visit(T & class_def)
+                {
+                    RealBase::py_visit(class_def);
+                    class_def
+                        .def("PnL_Quantity_History", &PnL_Quantity_History_InDeque::getHistory, return_internal_reference<>())
+                        .def("record_PnL_Quantity_History", &PnL_Quantity_History_InDeque::recordHistory)
+                        ;
+                }
+    #endif
+       };
+   }
 }
 
 #endif

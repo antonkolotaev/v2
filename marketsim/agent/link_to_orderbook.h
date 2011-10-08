@@ -1,8 +1,9 @@
 #ifndef _marketsim_agent_link_to_orderbook_h_included_
 #define _marketsim_agent_link_to_orderbook_h_included_
 
-namespace marketsim
-{
+namespace marketsim {
+namespace agent {
+
     /// This base class for agents holds a link to order book where the agent sends orders
     template <typename BookPtr, typename Base>
         struct LinkToOrderBook : Base
@@ -46,6 +47,6 @@ namespace marketsim
         BookPtr    order_book_;
     };
 
-}
+}}
 
 #endif

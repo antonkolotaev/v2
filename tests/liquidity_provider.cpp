@@ -44,32 +44,36 @@ namespace {
 
    typedef OrderBook<OrderQueue<LimitBuyPtr>, OrderQueue<LimitSellPtr> >    OrderBook;
 
-
-   template <Side SIDE>
-   struct LiquidityProviderT : 
-            LiquidityProvider   < rng::constant<Time>, rng::constant<Price>, rng::constant<Volume>,
-            LinkToOrderBook     < OrderBook*, 
-            PrivateOrderPool    < order::LimitT<SIDE>, 
-            AgentBase           < LiquidityProviderT<SIDE> 
-            > > > >
+   namespace agent 
    {
-        LiquidityProviderT(OrderBook *book) 
-            :  base(boost::make_tuple(boost::make_tuple(dummy, book),
-                                     rng::constant<Time>(1.), 
-                                     rng::constant<Price>(2), 
-                                     rng::constant<Volume>(5), 
-                                     100))
-        {}
+       using namespace marketsim::agent;
 
-   };
+       template <Side SIDE>
+       struct LiquidityProviderT : 
+                LiquidityProvider   < rng::constant<Time>, rng::constant<Price>, rng::constant<Volume>,
+                LinkToOrderBook     < OrderBook*, 
+                PrivateOrderPool    < order::LimitT<SIDE>, 
+                AgentBase           < LiquidityProviderT<SIDE> 
+                > > > >
+       {
+            LiquidityProviderT(OrderBook *book) 
+                :  base(boost::make_tuple(boost::make_tuple(dummy, book),
+                                         rng::constant<Time>(1.), 
+                                         rng::constant<Price>(2), 
+                                         rng::constant<Volume>(5), 
+                                         100))
+            {}
+
+       };
+   }
 
    typedef order::MarketOrderBase<Buy> MarketBuy;
 
    TEST_CASE("liquidity_provider", "An agent sending limit orders")
    {
-       Scheduler                    scheduler;
-       OrderBook                    orderBook(2);
-       LiquidityProviderT<Sell>     trader(&orderBook);
+       Scheduler                        scheduler;
+       OrderBook                        orderBook(2);
+       agent::LiquidityProviderT<Sell>  trader(&orderBook);
 
        scheduler.workTill(3.5);
 

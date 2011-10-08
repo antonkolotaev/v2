@@ -136,14 +136,14 @@ namespace basic {
         template <Side SIDE>
             struct LimitT : 
                     WithCancelPosition  <
-                    WithLinkToAgent     < IAgentForOrder<LimitT<SIDE> >*,
+                    WithLinkToAgent     < agent::IAgentForOrder<LimitT<SIDE> >*,
                     InPool              < PlacedInPool, 
                     LimitOrderBase      < SIDE, 
                     LimitT              < SIDE
                 > > > > >
             {
-                LimitT(PriceVolume const &x, object_pool<LimitT> * h, IAgentForOrder<LimitT<SIDE> > * agent) 
-                    :   base(boost::make_tuple(boost::make_tuple(x, h), agent))
+                LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::IAgentForOrder<LimitT<SIDE> > * ag) 
+                    :   base(boost::make_tuple(boost::make_tuple(x, h), ag))
                 {}
 
                 // we don't export LimitT to Python since it seems to be not useful for fast simulation
@@ -200,220 +200,226 @@ namespace basic {
 
    //--------------------------------------------------------------- Agents
 
-   template <Side SIDE>
-    struct LimitOrderTraderT :
-        IAgentForOrderImpl      < order::LimitT<SIDE>,
-        OnPartiallyFilled       < py_callback, 
-        OrdersSubmittedInVector < boost::intrusive_ptr<order::LimitT<SIDE> >, 
-        PnL_Holder              <
-        Quantity_Holder         <
-        LinkToOrderBook         < OrderBook*, 
-        PrivateOrderPool        < order::LimitT<SIDE>, 
-        AgentBase               < LimitOrderTraderT<SIDE> 
-        > > > > > > > >
-    {
-		LimitOrderTraderT(OrderBook * book) 
-            : base(
-                    boost::make_tuple(
-                        boost::make_tuple(dummy, book), 
-                        dummy))
-        {}
+   namespace agent 
+   {
+       using namespace marketsim::agent;
 
-        static std::string py_name() 
+       template <Side SIDE>
+        struct LimitOrderTraderT :
+            IAgentForOrderImpl      < order::LimitT<SIDE>,
+            OnPartiallyFilled       < py_callback, 
+            OrdersSubmittedInVector < boost::intrusive_ptr<order::LimitT<SIDE> >, 
+            PnL_Holder              <
+            Quantity_Holder         <
+            LinkToOrderBook         < OrderBook*, 
+            PrivateOrderPool        < order::LimitT<SIDE>, 
+            AgentBase               < LimitOrderTraderT<SIDE> 
+            > > > > > > > >
         {
-            return "LimitOrderTrader_" + marketsim::py_name<side_tag<SIDE> >();
-        }
+		    LimitOrderTraderT(OrderBook * book) 
+                : base(
+                        boost::make_tuple(
+                            boost::make_tuple(dummy, book), 
+                            dummy))
+            {}
 
-        static void py_register()
-        {
-            class_<LimitOrderTraderT, boost::noncopyable> c(py_name().c_str(), init<OrderBook*>());
-
-            base::py_visit(c);
-
-            c.def("sendOrder", &LimitOrderTraderT::sendOrder);
-        }
-
-        void sendOrder(Price p, Volume v)
-        {
-            if (v > 0)
+            static std::string py_name() 
             {
-                order::LimitT<SIDE> * order = base::createOrder(pv(p,v));
-
-                base::processOrder(order);
+                return "LimitOrderTrader_" + marketsim::py_name<side_tag<SIDE> >();
             }
-        }
-    };
 
-
-   template <Side SIDE>
-    struct LiquidityProviderT :
-        IAgentForOrderImpl  < order::LimitT<SIDE>,
-        LiquidityProvider   < py_value<Time>, py_value<PriceF>, py_value<VolumeF>, 
-        OrderCanceller      < py_value<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
-        PnL_Quantity_History_InDeque <
-        LinkToOrderBook     < OrderBook*, 
-        PrivateOrderPool    < order::LimitT<SIDE>, 
-        AgentBase           < LiquidityProviderT<SIDE> 
-        > > > > > > >
-    {
-		LiquidityProviderT( OrderBook * book, 
-                py_object   creationTimeDistr, 
-                py_object   cancelTimeDistr, 
-                py_object   priceDistr,
-                py_object   volumeDistr, 
-                Price       initialPrice) 
-            : base(
-                boost::make_tuple(
-                    boost::make_tuple(
-                        boost::make_tuple(dummy, book), 
-                        cancelTimeDistr),
-                    creationTimeDistr, 
-                    priceDistr, 
-                    volumeDistr, 
-                    initialPrice
-                ))
-        {}
-
-        static std::string py_name() 
-        {
-            return "LiquidityProvider_" + marketsim::py_name<side_tag>();
-        }
-
-        static void py_register(std::string const &name = py_name())
-        {
-            class_<LiquidityProviderT, boost::noncopyable> c(name.c_str(), init<OrderBook*, py_object, py_object, py_object, py_object, Price>());
-
-            base::py_visit(c);
-
-            c.def("sendOrder", &LiquidityProviderT::sendOrder);
-        }
-
-
-        void sendOrder(Price p, Volume v)
-        {
-            if (v > 0)
+            static void py_register()
             {
-                order::LimitT<SIDE> * o = base::createOrder(pv(p,v));
+                class_<LimitOrderTraderT, boost::noncopyable> c(py_name().c_str(), init<OrderBook*>());
 
-                base::processOrder(o);
+                base::py_visit(c);
+
+                c.def("sendOrder", &LimitOrderTraderT::sendOrder);
             }
-        }
-    };
 
-    struct PnL_Quantity_History_Collector 
-        :   history::Collector<Get_PnL_Quantity, history::InDeque<PriceVolume> >
-    {
-        
-    };
+            void sendOrder(Price p, Volume v)
+            {
+                if (v > 0)
+                {
+                    order::LimitT<SIDE> * order = base::createOrder(pv(p,v));
 
-    struct MarketOrderTrader :
-        OnPartiallyFilled       < py_callback,
-        PnL_Holder              <
-        Quantity_Holder         <
-        MarketOrderFactory      < order::MarketT<Buy, MarketOrderTrader*>, order::MarketT<Sell, MarketOrderTrader*>, 
-        LinkToOrderBook         < OrderBook*, 
-        AgentBase               < MarketOrderTrader
-        > > > > > >
-    {
-        MarketOrderTrader(OrderBook * book)
-            :   base(boost::make_tuple(boost::make_tuple(dummy, book), dummy))
-        {}
+                    base::processOrder(order);
+                }
+            }
+        };
 
-        static void py_register()
+
+       template <Side SIDE>
+        struct LiquidityProviderT :
+            IAgentForOrderImpl  < order::LimitT<SIDE>,
+            LiquidityProvider   < py_value<Time>, py_value<PriceF>, py_value<VolumeF>, 
+            OrderCanceller      < py_value<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
+            PnL_Quantity_History_InDeque <
+            LinkToOrderBook     < OrderBook*, 
+            PrivateOrderPool    < order::LimitT<SIDE>, 
+            AgentBase           < LiquidityProviderT<SIDE> 
+            > > > > > > >
         {
-            class_<MarketOrderTrader, boost::noncopyable > c("MarketOrderTrader", init<OrderBook*>());
-            base::py_visit(c);
-        }
-    };
-
-    struct FV_Trader :
-        OnPartiallyFilled       < py_callback,
-        PnL_Quantity_History_InDeque<
-        FundamentalValueTrader  < py_value<Time>, py_value<VolumeF>, 
-        MarketOrderFactory      < order::MarketT<Buy, FV_Trader*>, order::MarketT<Sell, FV_Trader*>, 
-        LinkToOrderBook         < OrderBook*, 
-        AgentBase               < FV_Trader
-        > > > > > >
-    {
-        FV_Trader(OrderBook *book, Price FV, py_object intervalDist, py_object volumeDist)
-            :   base(
+		    LiquidityProviderT( OrderBook * book, 
+                    py_object   creationTimeDistr, 
+                    py_object   cancelTimeDistr, 
+                    py_object   priceDistr,
+                    py_object   volumeDistr, 
+                    Price       initialPrice) 
+                : base(
                     boost::make_tuple(
                         boost::make_tuple(
                             boost::make_tuple(dummy, book), 
-                            intervalDist, 
+                            cancelTimeDistr),
+                        creationTimeDistr, 
+                        priceDistr, 
+                        volumeDistr, 
+                        initialPrice
+                    ))
+            {}
+
+            static std::string py_name() 
+            {
+                return "LiquidityProvider_" + marketsim::py_name<side_tag>();
+            }
+
+            static void py_register(std::string const &name = py_name())
+            {
+                class_<LiquidityProviderT, boost::noncopyable> c(name.c_str(), init<OrderBook*, py_object, py_object, py_object, py_object, Price>());
+
+                base::py_visit(c);
+
+                c.def("sendOrder", &LiquidityProviderT::sendOrder);
+            }
+
+
+            void sendOrder(Price p, Volume v)
+            {
+                if (v > 0)
+                {
+                    order::LimitT<SIDE> * o = base::createOrder(pv(p,v));
+
+                    base::processOrder(o);
+                }
+            }
+        };
+
+        struct PnL_Quantity_History_Collector 
+            :   history::Collector<Get_PnL_Quantity, history::InDeque<PriceVolume> >
+        {
+            
+        };
+
+        struct MarketOrderTrader :
+            OnPartiallyFilled       < py_callback,
+            PnL_Holder              <
+            Quantity_Holder         <
+            MarketOrderFactory      < order::MarketT<Buy, MarketOrderTrader*>, order::MarketT<Sell, MarketOrderTrader*>, 
+            LinkToOrderBook         < OrderBook*, 
+            AgentBase               < MarketOrderTrader
+            > > > > > >
+        {
+            MarketOrderTrader(OrderBook * book)
+                :   base(boost::make_tuple(boost::make_tuple(dummy, book), dummy))
+            {}
+
+            static void py_register()
+            {
+                class_<MarketOrderTrader, boost::noncopyable > c("MarketOrderTrader", init<OrderBook*>());
+                base::py_visit(c);
+            }
+        };
+
+        struct FV_Trader :
+            OnPartiallyFilled       < py_callback,
+            PnL_Quantity_History_InDeque<
+            FundamentalValueTrader  < py_value<Time>, py_value<VolumeF>, 
+            MarketOrderFactory      < order::MarketT<Buy, FV_Trader*>, order::MarketT<Sell, FV_Trader*>, 
+            LinkToOrderBook         < OrderBook*, 
+            AgentBase               < FV_Trader
+            > > > > > >
+        {
+            FV_Trader(OrderBook *book, Price FV, py_object intervalDist, py_object volumeDist)
+                :   base(
+                        boost::make_tuple(
+                            boost::make_tuple(
+                                boost::make_tuple(dummy, book), 
+                                intervalDist, 
+                                volumeDist, 
+                                FV),
+                            dummy)
+                        )
+            {}
+
+            static void py_register(const char * name)
+            {
+                class_<FV_Trader, boost::noncopyable > c(name, init<OrderBook*, Price, py_object, py_object>());
+                base::py_visit(c);
+            }
+        };
+
+        struct Signal_Trader :
+            PnL_Quantity_History_InDeque<
+            SignalTrader                < py_value<VolumeF>, 
+            MarketOrderFactory          < order::MarketT<Buy, Signal_Trader*>, order::MarketT<Sell, Signal_Trader*>, 
+            LinkToOrderBook             < OrderBook*, 
+            AgentBase                   < Signal_Trader> 
+            > > > >
+        {
+            Signal_Trader(OrderBook * book, py_object volumeDist, double threshold)
+                :   base(
+                        boost::make_tuple(
+                            boost::make_tuple(dummy, book), 
                             volumeDist, 
-                            FV),
-                        dummy)
-                    )
-        {}
+                            threshold
+                        ))
+            {}
 
-        static void py_register(const char * name)
+            static void py_register(const char * name)
+            {
+                class_<Signal_Trader, boost::noncopyable> c(name, init<OrderBook*, py_object, double>());
+                base::py_visit(c);
+            }
+        };
+
+        struct Signal : marketsim::agent::Signal<py_value<Time>, py_value<double>, Signal_Trader*>
         {
-            class_<FV_Trader, boost::noncopyable > c(name, init<OrderBook*, Price, py_object, py_object>());
-            base::py_visit(c);
-        }
-    };
+            Signal(Signal_Trader * trader, py_object updateDist, py_object signalDist)
+                :   base(updateDist, signalDist, trader)
+            {}
 
-    struct Signal_Trader :
-        PnL_Quantity_History_InDeque<
-        SignalTrader                < py_value<VolumeF>, 
-        MarketOrderFactory          < order::MarketT<Buy, Signal_Trader*>, order::MarketT<Sell, Signal_Trader*>, 
-        LinkToOrderBook             < OrderBook*, 
-        AgentBase                   < Signal_Trader> 
-        > > > >
-    {
-        Signal_Trader(OrderBook * book, py_object volumeDist, double threshold)
-            :   base(
-                    boost::make_tuple(
-                        boost::make_tuple(dummy, book), 
-                        volumeDist, 
-                        threshold
-                    ))
-        {}
+            static void py_register(const char * name)
+            {
+                class_<Signal, boost::noncopyable> c(name, init<Signal_Trader*, py_object, py_object>());
+                base::py_visit(c);
+            }
+        };
 
-        static void py_register(const char * name)
+        struct Noise_Trader :
+            PnL_Quantity_History_InDeque<
+            NoiseTrader         < py_value<Time>, py_value<VolumeF>,
+            MarketOrderFactory  < order::MarketT<Buy,Noise_Trader*>, order::MarketT<Sell,Noise_Trader*>, 
+            LinkToOrderBook     < OrderBook*, 
+            AgentBase           < Noise_Trader
+            > > > > >
         {
-            class_<Signal_Trader, boost::noncopyable> c(name, init<OrderBook*, py_object, double>());
-            base::py_visit(c);
-        }
-    };
+            Noise_Trader(OrderBook * book, py_object interval, py_object meanVolume)
+                :   base(
+                        boost::make_tuple(
+                            boost::make_tuple(dummy, book), 
+                            interval, 
+                            meanVolume
+                        ))
+            {}
 
-    struct Signal : marketsim::Signal<py_value<Time>, py_value<double>, Signal_Trader*>
-    {
-        Signal(Signal_Trader * trader, py_object updateDist, py_object signalDist)
-            :   base(updateDist, signalDist, trader)
-        {}
+            static void py_register(const char * name)
+            {
+                class_<Noise_Trader, boost::noncopyable> c(name, init<OrderBook*, py_object, py_object>());
+                base::py_visit(c);
+            }
+        };
 
-        static void py_register(const char * name)
-        {
-            class_<Signal, boost::noncopyable> c(name, init<Signal_Trader*, py_object, py_object>());
-            base::py_visit(c);
-        }
-    };
-
-    struct Noise_Trader :
-        PnL_Quantity_History_InDeque<
-        NoiseTrader         < py_value<Time>, py_value<VolumeF>,
-        MarketOrderFactory  < order::MarketT<Buy,Noise_Trader*>, order::MarketT<Sell,Noise_Trader*>, 
-        LinkToOrderBook     < OrderBook*, 
-        AgentBase           < Noise_Trader
-        > > > > >
-    {
-        Noise_Trader(OrderBook * book, py_object interval, py_object meanVolume)
-            :   base(
-                    boost::make_tuple(
-                        boost::make_tuple(dummy, book), 
-                        interval, 
-                        meanVolume
-                    ))
-        {}
-
-        static void py_register(const char * name)
-        {
-            class_<Noise_Trader, boost::noncopyable> c(name, init<OrderBook*, py_object, py_object>());
-            base::py_visit(c);
-        }
-    };
+   }
 
     struct ScheduledEvent : EventHandler
     {
@@ -511,18 +517,18 @@ BOOST_PYTHON_MODULE(basic)
 
     py_register<OrderBook>();
 
-    py_register<LiquidityProviderT<Sell> >();
-    py_register<LiquidityProviderT<Buy> >();
+    py_register<agent::LiquidityProviderT<Sell> >();
+    py_register<agent::LiquidityProviderT<Buy> >();
 
-    py_register<LimitOrderTraderT<Sell> >();
-    py_register<LimitOrderTraderT<Buy> >();
+    py_register<agent::LimitOrderTraderT<Sell> >();
+    py_register<agent::LimitOrderTraderT<Buy> >();
 
-    py_register<FV_Trader>("FV_Trader");
-    py_register<Signal_Trader>("Signal_Trader");
-    py_register<Signal>("Signal");
-    py_register<Noise_Trader>("Noise_Trader");
+    py_register<agent::FV_Trader>("FV_Trader");
+    py_register<agent::Signal_Trader>("Signal_Trader");
+    py_register<agent::Signal>("Signal");
+    py_register<agent::Noise_Trader>("Noise_Trader");
 
-    py_register<MarketOrderTrader>();
+    py_register<agent::MarketOrderTrader>();
 
     py_register<marketsim::rng::exponential<> >();
     py_register<marketsim::rng::constant<> >();

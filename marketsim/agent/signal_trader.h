@@ -1,7 +1,8 @@
 #ifndef _marketsim_agent_signal_trader_h_included_
 #define _marketsim_agent_signal_trader_h_included_
 
-namespace marketsim
+namespace marketsim {
+namespace agent 
 {
     /// Base class for agents encapsulating signal trading logic
     /// if a value of a signal is greater than some threshold, the trader sells
@@ -42,6 +43,6 @@ namespace marketsim
         VolumeDistr     volume_;
         double          threshold_;
     };
-}
+}}
 
 #endif

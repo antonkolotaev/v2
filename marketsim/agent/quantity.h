@@ -6,7 +6,8 @@
 #include <marketsim/common_types.h>
 #include <marketsim/scheduler.h>
 
-namespace marketsim
+namespace marketsim {
+namespace agent 
 {
     /// Base class for agents tracking available amount of agent's assets
     template <typename Base>       
@@ -58,6 +59,6 @@ namespace marketsim
     };
     
 
-}
+}}
 
 #endif

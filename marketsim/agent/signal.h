@@ -3,7 +3,8 @@
 
 #include <marketsim/scheduler.h>
 
-namespace marketsim
+namespace marketsim {
+namespace agent 
 {
     /// Class that generates a signal in some moments of time
     /// TODO: inversion of control: a signal trader is parametrized by signal and subscribes to onSignal
@@ -53,6 +54,6 @@ namespace marketsim
         double          value_;
     };
 
-}
+}}
 
 #endif

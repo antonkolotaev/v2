@@ -5,7 +5,8 @@
 #include <marketsim/common_types.h>
 #include <marketsim/scheduler.h>
 
-namespace marketsim
+namespace marketsim {
+namespace agent 
 {
     /// Base class for agents encapsulating logic for a trend follower trader
     /// In some moments of time (defined by IntervalDistr)
@@ -65,6 +66,6 @@ namespace marketsim
         boost::optional<Price>  lastPrice_;
     };
 
-}
+}}
 
 #endif

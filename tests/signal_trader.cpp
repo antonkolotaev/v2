@@ -23,10 +23,10 @@ namespace {
         };
 
     struct SignalTraderTester :
-                SignalTrader        <rng::constant<Volume>, 
-                MarketOrderFactory  <MarketT<Buy>, MarketT<Sell>, 
-                LinkToOrderBook     <SignalTraderTester*, 
-                AgentBase           <SignalTraderTester> 
+            agent::SignalTrader        <rng::constant<Volume>, 
+            agent::MarketOrderFactory  <MarketT<Buy>, MarketT<Sell>, 
+            agent::LinkToOrderBook     <SignalTraderTester*, 
+            agent::AgentBase           <SignalTraderTester> 
             > > >
     {
         SignalTraderTester()
@@ -58,7 +58,7 @@ namespace {
         Volume getProcessed() const { return processed_; }
 
     private:
-        typedef Signal<rng::constant<Time>, SignalTraderTester&, SignalTraderTester*>   signal_t;
+        typedef marketsim::agent::Signal<rng::constant<Time>, SignalTraderTester&, SignalTraderTester*>   signal_t;
 
         signal_t    signal_;
         Volume      processed_;

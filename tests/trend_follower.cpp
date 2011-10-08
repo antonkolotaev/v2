@@ -22,10 +22,10 @@ namespace {
         };
 
     struct TrendFollowerTester :
-                TrendFollower       <rng::constant<Time>, rng::constant<Volume>, 
-                MarketOrderFactory  <MarketT<Buy>, MarketT<Sell>, 
-                LinkToOrderBook     <TrendFollowerTester*, 
-                AgentBase           <TrendFollowerTester>
+            agent::TrendFollower       <rng::constant<Time>, rng::constant<Volume>, 
+            agent::MarketOrderFactory  <MarketT<Buy>, MarketT<Sell>, 
+            agent::LinkToOrderBook     <TrendFollowerTester*, 
+            agent::AgentBase           <TrendFollowerTester>
             > > >
     {
         TrendFollowerTester()

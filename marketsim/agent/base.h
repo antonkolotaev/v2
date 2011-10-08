@@ -3,8 +3,8 @@
 
 #include <marketsim/common_types.h>
 
-namespace marketsim
-{
+namespace marketsim {
+namespace agent {
     /// The most base class for agents
     template <typename Derived>
         struct AgentBase 
@@ -39,6 +39,6 @@ namespace marketsim
             {}
 #endif
     };
-}
+}}
 
 #endif
