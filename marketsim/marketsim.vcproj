@@ -141,6 +141,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\order\match_order.h"
+				>
+			</File>
+			<File
 				RelativePath=".\order\ordered_by_price.h"
 				>
 			</File>
@@ -237,16 +241,44 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="order_queue"
+			>
+		</Filter>
+		<Filter
+			Name="history"
+			>
+			<File
+				RelativePath=".\history\collect_in_deque.h"
+				>
+			</File>
+			<File
+				RelativePath=".\history\collector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\history\in_deque.h"
+				>
+			</File>
+			<File
+				RelativePath=".\history\in_file.h"
+				>
+			</File>
+			<File
+				RelativePath=".\history\time_series.h"
+				>
+			</File>
+			<File
+				RelativePath=".\history\time_stamped.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\common_types.h"
 			>
 		</File>
 		<File
 			RelativePath=".\history.h"
-			>
-		</File>
-		<File
-			RelativePath=".\match_order.h"
 			>
 		</File>
 		<File

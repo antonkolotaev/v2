@@ -2,7 +2,7 @@
 #include "catch.hpp"
 
 #include <queue>
-#include <marketsim/match_order.h>
+#include <marketsim/order/match_order.h>
 #include <marketsim/order/ordered_by_price.h>
 #include "orders.h"
 

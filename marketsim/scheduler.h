@@ -179,6 +179,7 @@ namespace marketsim
             : parent_(parent), handler_(h), delay_(d)
         {
             schedule(delay_());
+            /// TODO: add_ref for parent
         }
 
         void process()
@@ -188,7 +189,9 @@ namespace marketsim
         }
 
         void on_released() 
-        {}
+        {
+            /// TODO: release for parent
+        }
 
         ~Timer()
         {
