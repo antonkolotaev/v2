@@ -77,14 +77,18 @@ namespace fast {
 
    //---------------------------------------------- OrderBook
 
-   template <Side SIDE>
-        struct queue_with_history:   
+   namespace order_queue 
+   {
+       using namespace marketsim::order_queue;
+   
+       template <Side SIDE>
+        struct with_history:   
                 WithHistoryInDeque  <
-                    OrderQueue          <   boost::intrusive_ptr<order::LimitT<SIDE> >,
-                    queue_with_history  < SIDE
+                    OrderQueue      <   boost::intrusive_ptr<order::LimitT<SIDE> >,
+                    with_history    < SIDE
                     > > >
         {
-            queue_with_history() {}
+            with_history() {}
 
             static std::string py_name() 
             {
@@ -93,16 +97,17 @@ namespace fast {
 
             static void py_register(std::string const & name = py_name())
             {
-                class_<queue_with_history, boost::noncopyable> c(name.c_str());
+                class_<with_history, boost::noncopyable> c(name.c_str());
 
                 base::py_visit(c);
             }
         private:
-            queue_with_history(queue_with_history const &);
+            with_history(with_history const &);
         };
+   }
 
    struct OrderBook 
-	   : marketsim::OrderBook<queue_with_history<Buy>, queue_with_history<Sell> >    
+       : marketsim::OrderBook<order_queue::with_history<Buy>, order_queue::with_history<Sell> >    
    {
        OrderBook() {}
 
@@ -291,8 +296,8 @@ BOOST_PYTHON_MODULE(fast)
 	using marketsim::Sell;
 	using marketsim::Buy;
 
-    py_register<queue_with_history<Buy> >();
-    py_register<queue_with_history<Sell> >();
+    py_register<order_queue::with_history<Buy> >();
+    py_register<order_queue::with_history<Sell> >();
 
     py_register<OrderBook>();
 

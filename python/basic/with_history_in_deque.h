@@ -1,10 +1,13 @@
 #ifndef _marketsim_python_fast_with_history_in_deque_h_included_
 #define _marketsim_python_fast_with_history_in_deque_h_included_
 
-#include <marketsim/order_queue.h>
+#include <marketsim/order_queue/order_queue.h>
+#include <marketsim/order_queue/best_price_and_volume.h>
 #include <marketsim/history.h>
+#include <marketsim/order_queue/on_queue_top_changed.h>
 
-namespace marketsim
+namespace marketsim {
+namespace order_queue
 {
    template <typename Base>
         struct WithHistoryInDeque : 
@@ -43,6 +46,6 @@ namespace marketsim
 #endif
         };
 
-}
+}}
 
 #endif

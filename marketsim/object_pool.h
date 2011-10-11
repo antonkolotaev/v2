@@ -8,6 +8,9 @@
 
 namespace marketsim
 {
+    /// This class may be used to avoid excessive memory allocations/deallocations
+    /// It allocates memory in std::deque of fixed-size chunks
+    /// and manages singly linked list of released chunks
     template <typename T>
         struct object_pool : boost::noncopyable
     {
@@ -17,9 +20,11 @@ namespace marketsim
 
             T * getValue() { return reinterpret_cast<T*>(&buffer_[0]); }
 
+            /// buffer that holds values of type T
             Buffer   buffer_;
+
+            /// pointer to next free chunk if any
             Chunk    * next_free; 
-            //bool     freed;
         };
 
         DECLARE_ARROW(object_pool);
@@ -28,6 +33,7 @@ namespace marketsim
 
         ~object_pool()
         {
+            // marking all released chunks
             for (Chunk * p = first_free_chunk_; p;)
             {
                 Chunk * t = p->next_free;
@@ -39,6 +45,7 @@ namespace marketsim
 
             BOOST_FOREACH(Chunk & chunk, chunks_)
             {
+                /// if a chunk is not released, call destructor for its value
                 if (chunk.next_free == 0)
                 {
                     chunk.getValue()->~T();
@@ -46,31 +53,42 @@ namespace marketsim
             }
         }
 
+        /// allocates a memory for a new T; should be used with placement new
         T *  alloc()
         {
+            /// if there are released chunks
             if (first_free_chunk_)
             {
+                // take the first one
                 Chunk * p = first_free_chunk_;
-                //assert(p->freed);
+                // remove it from the list
                 first_free_chunk_ = first_free_chunk_->next_free;
+                // mark it as occupied
                 p->next_free = 0;
-                //p->freed = false;
+                // return memory where to create a T value
                 return p->getValue();
             }
-
-            chunks_.push_back(Chunk());
-            chunks_.back().next_free = 0;
-            //chunks_.back().freed = false;
-            return chunks_.back().getValue();
+            else // we have no free chunks
+            {
+                /// so let's create a new one
+                chunks_.push_back(Chunk());
+                /// mark it as occupied
+                chunks_.back().next_free = 0;
+                /// return memory where to create a T value
+                return chunks_.back().getValue();
+            }
         }
 
+        /// frees memory occupied by *x
         void free(T * x)
         {
+            /// getting a chunk from the pointer to value
             Chunk * p = reinterpret_cast<Chunk*>(x);
-            //assert(p->freed == false);
+            /// calling destructor
             p->getValue()->~T();
-            //p->freed = true;
+            /// inserting the chunk into... 
             p->next_free = first_free_chunk_;
+            /// the head of list of released chunks
             first_free_chunk_ = p;
         }
 

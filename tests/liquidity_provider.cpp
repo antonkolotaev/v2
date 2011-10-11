@@ -42,7 +42,12 @@ namespace {
    typedef boost::intrusive_ptr<LimitBuy>   LimitBuyPtr;
    typedef boost::intrusive_ptr<LimitSell>  LimitSellPtr;
 
-   typedef OrderBook<OrderQueue<LimitBuyPtr>, OrderQueue<LimitSellPtr> >    OrderBook;
+   typedef 
+       OrderBook<
+            order_queue::OrderQueue<LimitBuyPtr>, 
+            order_queue::OrderQueue<LimitSellPtr> 
+       >    
+       OrderBook;
 
    namespace agent 
    {

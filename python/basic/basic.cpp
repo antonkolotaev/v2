@@ -158,32 +158,36 @@ namespace basic {
 
    //---------------------------------------------- OrderBook
 
-   template <Side SIDE>
-        struct queue_with_callback  :   
-                OnQueueTopChanged   < py_callback,
-                OrderQueue          < boost::intrusive_ptr<order::LimitT<SIDE> >, 
-                queue_with_callback < SIDE
-                > > > 
-        {
-            queue_with_callback() {}
-
-            static std::string py_name() 
+   namespace order_queue
+   {
+       using namespace marketsim::order_queue;
+       template <Side SIDE>
+            struct with_callback  :   
+                    OnQueueTopChanged   < py_callback,
+                    OrderQueue          < boost::intrusive_ptr<order::LimitT<SIDE> >, 
+                    with_callback       < SIDE
+                    > > > 
             {
-                return "OrderQueue_" + marketsim::py_name<side_tag<SIDE> >();
-            }
+                with_callback() {}
 
-            static void py_register(std::string const & name = py_name())
-            {
-                class_<queue_with_callback, boost::noncopyable> c(name.c_str());
+                static std::string py_name() 
+                {
+                    return "OrderQueue_" + marketsim::py_name<side_tag<SIDE> >();
+                }
 
-                base::py_visit(c);
-            }
-        private:
-            queue_with_callback(queue_with_callback const &);
-        };
+                static void py_register(std::string const & name = py_name())
+                {
+                    class_<with_callback, boost::noncopyable> c(name.c_str());
+
+                    base::py_visit(c);
+                }
+            private:
+                with_callback(with_callback const &);
+            };
+   }
 
    struct OrderBook 
-	   : marketsim::OrderBook<queue_with_callback<Buy>, queue_with_callback<Sell> >    
+       : marketsim::OrderBook<order_queue::with_callback<Buy>, order_queue::with_callback<Sell> >    
    {
        OrderBook() {}
 
@@ -512,8 +516,8 @@ BOOST_PYTHON_MODULE(basic)
 	using marketsim::Sell;
 	using marketsim::Buy;
 
-    py_register<queue_with_callback<Buy> >();
-    py_register<queue_with_callback<Sell> >();
+    py_register<order_queue::with_callback<Buy> >();
+    py_register<order_queue::with_callback<Sell> >();
 
     py_register<OrderBook>();
 
@@ -542,7 +546,7 @@ BOOST_PYTHON_MODULE(basic)
     py_register<py_callback>();
 
     py_register<marketsim::history::CollectInDeque<marketsim::py_PnL_Quantity> >();
-    py_register<marketsim::history::CollectInDeque<marketsim::py_BestPriceAndVolume> >();
+    py_register<marketsim::history::CollectInDeque<marketsim::order_queue::py_BestPriceAndVolume> >();
 
     py_register<ScheduledEvent>();
     py_register<Timer>();

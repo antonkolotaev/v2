@@ -5,7 +5,7 @@
 #include "orders.h"
 #include <marketsim/scheduler.h>
 #include <marketsim/object_pool.h>
-#include <marketsim/order_queue.h>
+#include <marketsim/order_queue/order_queue.h>
 #include <marketsim/order/in_pool.h>
 
 namespace marketsim{
@@ -44,7 +44,7 @@ namespace {
                                 LimitT<SIDE> >
                         > > >
             {
-                LimitT(PriceVolume const & x, TimeInterval life_time, object_pool<LimitT> * h, OrderQueue<boost::intrusive_ptr<LimitT> >  * queue)
+                LimitT(PriceVolume const & x, TimeInterval life_time, object_pool<LimitT> * h, order_queue::OrderQueue<boost::intrusive_ptr<LimitT> >  * queue)
                     :   base(boost::make_tuple(boost::make_tuple(x, life_time), h)), queue_(queue)
                 {
                     ++g_counter;
@@ -67,7 +67,7 @@ namespace {
     //                     << "Destroyed " << volume << "@" << price << " with killtime at " << this->getActionTime() << std::endl;
                 }
             private:
-                OrderQueue<boost::intrusive_ptr<LimitT> >  * queue_;
+                order_queue::OrderQueue<boost::intrusive_ptr<LimitT> >  * queue_;
             };
     }
 
@@ -81,7 +81,7 @@ namespace {
         Scheduler                   scheduler;
         object_pool<LimitSell>      pool;
 
-        OrderQueue<LimitSellPtr>    sell_orders;
+        order_queue::OrderQueue<LimitSellPtr>    sell_orders;
 
         LimitSell * ls;
 

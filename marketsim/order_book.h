@@ -1,7 +1,7 @@
 #ifndef _marketsim_order_book_h_included_
 #define _marketsim_order_book_h_included_
 
-#include <marketsim/order_queue.h>
+#include <marketsim/order_queue/order_queue.h>
 #include <marketsim/order/match_order.h>
 
 namespace marketsim

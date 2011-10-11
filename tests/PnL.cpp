@@ -17,6 +17,7 @@
 #include <marketsim/agent/on_order_partially_filled.h>
 
 #include <marketsim/history.h>
+#include <marketsim/order_queue/on_queue_top_changed.h>
 
 namespace marketsim {
 namespace {
@@ -69,9 +70,9 @@ namespace {
    };
 
    struct OrderBook : marketsim::OrderBook<
-	   OrderQueue<LimitBuyPtr>, 
-	   OnQueueTopChanged<history::Collector<BestPriceAndVolume, history::InDeque<PriceVolume> >, 
-			OrderQueue<LimitSellPtr> 
+       order_queue::OrderQueue<LimitBuyPtr>, 
+       order_queue::OnQueueTopChanged<history::Collector<BestPriceAndVolume, history::InDeque<PriceVolume> >, 
+            order_queue::OrderQueue<LimitSellPtr> 
 	   > 
    >    
    {

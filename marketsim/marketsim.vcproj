@@ -244,6 +244,26 @@
 		<Filter
 			Name="order_queue"
 			>
+			<File
+				RelativePath=".\order_queue\best_price_and_volume.h"
+				>
+			</File>
+			<File
+				RelativePath=".\order_queue\for_best_n.h"
+				>
+			</File>
+			<File
+				RelativePath=".\order_queue\for_keys_better_than.h"
+				>
+			</File>
+			<File
+				RelativePath=".\order_queue\on_queue_top_changed.h"
+				>
+			</File>
+			<File
+				RelativePath=".\order_queue\order_queue.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="history"
@@ -287,10 +307,6 @@
 		</File>
 		<File
 			RelativePath=".\order_book.h"
-			>
-		</File>
-		<File
-			RelativePath=".\order_queue.h"
 			>
 		</File>
 		<File

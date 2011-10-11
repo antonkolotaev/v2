@@ -1,7 +1,7 @@
 
 #include "catch.hpp"
 
-#include <marketsim\order_queue.h>
+#include <marketsim/order_queue/order_queue.h>
 #include "orders.h"
 
 namespace marketsim {
@@ -11,7 +11,7 @@ namespace {
     {
         using order::LimitOrderBuy;
 
-        OrderQueue<boost::intrusive_ptr<LimitOrderBuy> >	limit_orders;
+        order_queue::OrderQueue<boost::intrusive_ptr<LimitOrderBuy> >	limit_orders;
 
         limit_orders.push(new LimitOrderBuy(pv(110, 3)));
         limit_orders.push(new LimitOrderBuy(pv(102, 3)));
@@ -45,7 +45,7 @@ namespace {
     {
         using order::LimitOrderSell;
 
-        OrderQueue<boost::intrusive_ptr<LimitOrderSell> >	limit_orders;
+        order_queue::OrderQueue<boost::intrusive_ptr<LimitOrderSell> >	limit_orders;
 
         limit_orders.push(new LimitOrderSell(pv(110, 3)));
 		limit_orders.push(new LimitOrderSell(pv(100, 3)));
