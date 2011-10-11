@@ -6,70 +6,43 @@
 
 namespace marketsim
 {
+    /// OrderBook as a pair of a sell-side order queue and a buy-side order queue
+    /// Also it has a tick size (which can be factored out to a another class)
     template <
-        typename QueueBuySide, 
+        typename QueueBuySide,  
         typename QueueSellSide
     >
         struct OrderBook
     {
         OrderBook(Price tickSize = 1) : tick_size_(tickSize) {}
 
+        /// floors a floating point price to the closest tick
         Price floorPrice(PriceF p) const 
         {
             return Price(floor(p / tick_size_)) * tick_size_;
         }
 
+        /// ceils a floating point price to the closest tick
         Price ceilPrice(PriceF p) const 
         {
             return Price(ceil(p / tick_size_)) * tick_size_;
         }
 
-		typedef OrderBook	base;
+		DECLARE_BASE(OrderBook);
 
-		typedef typename QueueBuySide :: value_type		LimitOrderBuy;
-		typedef typename QueueSellSide:: value_type		LimitOrderSell;
-
+        /// \return the tick size 
         Price getTickSize() const { return tick_size_; }
 
 		DECLARE_ARROW(OrderBook);	// to be replaced by derived
 
-        template <typename Order>
-            bool processOrder_impl(Order order, limit_order_tag)
-            {
-                typedef typename order_side<Order> :: type      side;
-                typedef typename opposite_side<side> :: type    opposite;
-
-                if (!matchOrder(orderQueue(opposite()), order, self()))
-                {
-                    orderQueue(side()).push(order);
-                    return false;
-                }
-
-                return true;
-            }
-
-        template <typename Order>
-            bool processOrder_impl(Order order, market_order_tag)
-            {
-                typedef typename order_side<Order> :: type      side;
-                typedef typename opposite_side<side> :: type    opposite;
-
-                return matchOrder(orderQueue(opposite()), order, self());
-            }
-
+        /// processes an order (matches and stores it if it is a limit one)
         template <typename Order>
             bool processOrder(Order order)
             {
                 return processOrder_impl(order, typename order_category<Order>::type());
             }
 
-        template <typename Order>
-            void onOrderCancelled(Order order, limit_order_tag)
-            {
-                typedef typename order_side<Order> :: type      side;
-                orderQueue(side()).onOrderCancelled(order);
-            }
-
+        /// notification that an order has been cancelled
         template <typename Order>
             void onOrderCancelled(Order order)
             {
@@ -85,11 +58,23 @@ namespace marketsim
 			}
 
 
-        template <Side SIDE> bool   empty(side_tag<SIDE> x = side_tag<SIDE>()) /*const*/ { return orderQueue(side_tag<SIDE>()).empty(); }
+        /// \return true if order queue of the given side is empty
+        template <Side SIDE> bool   empty(side_tag<SIDE> x = side_tag<SIDE>()) /*const*/ 
+        {
+            return orderQueue(side_tag<SIDE>()).empty(); 
+        }
 
-        // 
-        template <Side SIDE> Volume bestVolume(side_tag<SIDE> x = side_tag<SIDE>()) /*const*/ { return orderQueue(side_tag<SIDE>()).getBestVolume(); }
-        template <Side SIDE> Price  bestPrice(side_tag<SIDE> x = side_tag<SIDE>()) /*const*/ { return orderQueue(side_tag<SIDE>()).getBestPrice(); }
+        // \return volume of orders with the best price at the queue of the given price
+        template <Side SIDE> Volume bestVolume(side_tag<SIDE> x = side_tag<SIDE>()) /*const*/ 
+        {
+            return orderQueue(side_tag<SIDE>()).getBestVolume(); 
+        }
+        
+        // \return price of the best order at the queue of the given price
+        template <Side SIDE> Price  bestPrice(side_tag<SIDE> x = side_tag<SIDE>()) /*const*/ 
+        { 
+            return orderQueue(side_tag<SIDE>()).getBestPrice(); 
+        }
 
         QueueBuySide  & orderQueue(buy_tag) { return buy_side_; }
         QueueSellSide & orderQueue(sell_tag){ return sell_side_; }
@@ -112,6 +97,43 @@ namespace marketsim
 #endif
     private:
         OrderBook(OrderBook const&);
+
+        /// processes limit orders
+        template <typename Order>
+            bool processOrder_impl(Order order, limit_order_tag)
+            {
+                /// a tag for the order's side
+                typedef typename order_side<Order> :: type      side;
+                typedef typename opposite_side<side> :: type    opposite;
+
+                if (!matchOrder(orderQueue(opposite()), order, self()))
+                {
+                    orderQueue(side()).push(order);
+                    return false;
+                }
+
+                return true;
+            }
+
+        /// processes market orders
+        template <typename Order>
+            bool processOrder_impl(Order order, market_order_tag)
+            {
+                typedef typename order_side<Order> :: type      side;
+                typedef typename opposite_side<side> :: type    opposite;
+
+                return matchOrder(orderQueue(opposite()), order, self());
+            }
+
+        /// cancels a limit order
+        template <typename Order>
+            void onOrderCancelled(Order order, limit_order_tag)
+            {
+                typedef typename order_side<Order> :: type      side;
+                orderQueue(side()).onOrderCancelled(order);
+            }
+
+
     private:
         Price           tick_size_;
         QueueBuySide    buy_side_;
