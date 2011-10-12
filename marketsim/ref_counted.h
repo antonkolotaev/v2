@@ -5,16 +5,24 @@
 
 namespace marketsim
 {
-    template <typename Derived>   
+    /// base class for objects managed through boost::intrusive_ptr
+    /// in order to make it as fast as possible we have no virtual functions here
+    /// Derived class must define on_released() function with
+    /// reaction on ref_counter == 0 (destroying itself)
+    template <
+        typename Derived  // class defining on_released function
+    >   
         struct RefCounted : boost::noncopyable
     {
         RefCounted() : counter_(0) {}
 
+        /// increments reference counter
         void add_ref() 
         {
             ++counter_; 
         }
 
+        /// decrements reference counter
         void release() 
         {
             if (--counter_ == 0)

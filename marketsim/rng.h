@@ -11,6 +11,7 @@ namespace marketsim
 {
     namespace rng 
     {
+        /// interface for random number generators managed by boost::intrusive_ptr
 		template <typename T>
 		struct IGenerator : RefCounted<IGenerator<T> >
 		{
