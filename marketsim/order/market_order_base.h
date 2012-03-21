@@ -34,7 +34,7 @@ namespace order     {
         /// (Price,Volume) of the possible trade is put to matching
         template <typename OtherOrderDerived>
             bool canBeMatched(
-                LimitOrderBase<OTHER_SIDE, OtherOrderDerived> const & best_limit, 
+                LimitOrderBase<side_is<SIDE>::OTHER_SIDE, OtherOrderDerived> const & best_limit, 
                 PriceVolume                                         & matching) const 
         {
             matching.volume = std::min(this->getVolume(), best_limit.getVolume());

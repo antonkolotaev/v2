@@ -15,14 +15,17 @@ namespace order     {
     template <Side SIDE, typename Derived = boost::mpl::na>
         struct LimitOrderBase : VolumeHolder, PriceHolder<SIDE>
     {
+        typedef PriceHolder<SIDE> PH;
+        typedef VolumeHolder      VH;
+        
         /// constructs a limit order for (Price,Volume) pair
         explicit LimitOrderBase(PriceVolume const & pv) 
-            :   PriceHolder<SIDE>(pv.price)
-            ,   VolumeHolder     (pv.volume) 
+            :   PH(pv.price)
+            ,   VH(pv.volume) 
         {}
 
         /// \return (Price,Volume) pair for the order
-        PriceVolume getPV() const { return PriceVolume(getPrice(), getVolume()); }
+        PriceVolume getPV() const { return PriceVolume(PH::getPrice(), VH::getVolume()); }
 
         /// category of the order: limit
         typedef limit_order_tag category;
@@ -38,7 +41,7 @@ namespace order     {
         /// in this case (Price,Volume) of the possible trade is put to matching
         template <typename OtherOrderDerived>
             bool canBeMatched(
-                LimitOrderBase<OTHER_SIDE, OtherOrderDerived> const & best_limit, 
+                LimitOrderBase<PH::OTHER_SIDE, OtherOrderDerived> const & best_limit, 
                 PriceVolume                                         & matching) const 
         {
             if (!compare_prices(this->getPrice(), best_limit.getPrice()))

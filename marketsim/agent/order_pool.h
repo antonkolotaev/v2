@@ -30,14 +30,14 @@ namespace agent
         template <typename T>
             order_ptr_t createOrder(T const & x)
             {
-                return new (pool_.alloc()) Order(x, &pool_, self());
+                return new (pool_.alloc()) Order(x, &pool_, this->self());
             }
 
         /// Since all orders a stored in an order queue, we ask the order queue to remove all our orders
         /// it is reasonable since without agent (which is about to be destroyed) its orders have no sense
         ~PrivateOrderPool()
         {
-            self()->getOrderBook()->orderQueue(typename order_side<Order>::type()).remove_all_pool_orders(&pool_);
+            this->self()->getOrderBook()->orderQueue(typename order_side<Order>::type()).remove_all_pool_orders(&pool_);
         }
 
    private:

@@ -34,7 +34,9 @@ namespace order     {
 
             DECLARE_BASE(InPool);
 
-            typedef typename HolderPtrF::apply<base::derived_t>::type  holder_t;
+            typedef 
+               typename HolderPtrF::template apply<base::derived_t>::type 
+               holder_t;
 
             /// \return true iff the order is allocated in the given pool
             bool is_in_my_pool(holder_t h) const 
@@ -51,7 +53,7 @@ namespace order     {
             void on_released()
             {
                 // notify the pool that the memory used by the order may be freed
-                holder_->free(self());
+                holder_->free(this->self());
             }
 
             friend struct RefCounted<typename Base::derived_t>;
