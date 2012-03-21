@@ -119,8 +119,8 @@ namespace order_queue
         /// a functor accumulating order volumes
 		struct AccVolume 
 		{
-			template <typename Order>
-				bool operator () (Order const & order)
+			template <typename OrderT>
+				bool operator () (OrderT const & order)
 			{
 				result += order->getVolume();				
 				return true;
@@ -181,8 +181,8 @@ namespace order_queue
             }
 
         /// reaction on a partial filling of an order
-		template <typename Order>
-			void onPartiallyFilled(Order const & order, PriceVolume const & trade)
+		template <typename OrderT>
+			void onPartiallyFilled(OrderT const & order, PriceVolume const & trade)
 			{
                 /// just remember this trade
                 lastTrade_ = trade;

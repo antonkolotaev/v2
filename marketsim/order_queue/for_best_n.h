@@ -37,14 +37,22 @@ namespace order_queue {
         // current (Price,Volume)
 		PriceVolume		last(-1,-1);
         // number of orders sent + 1
-		int  			sent_1 = 0;
+      int  			sent_1 = 0;
 
         if (c.empty())
             return;
 
-        typedef typename PriorityQueue :: value_type const *        const_iterator;
-        typedef typename IdxComparerT<Comparer, const_iterator>                         IdxComparer;
-        typedef typename std::priority_queue<size_t, std::vector<size_t>, IdxComparer>  IndicesQueue;
+        typedef 
+           typename PriorityQueue :: value_type const *
+           const_iterator;
+           
+        typedef 
+           IdxComparerT<Comparer,const_iterator> 
+           IdxComparer;
+           
+        typedef 
+           typename std::priority_queue<size_t, std::vector<size_t>, IdxComparer>  
+           IndicesQueue;
 
         // it is convenient to index a heap from 1 but not from 0
 		const_iterator before_first = &c[0] - 1;
