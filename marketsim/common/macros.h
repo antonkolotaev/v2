@@ -51,6 +51,7 @@ namespace marketsim
     template <class Derived>
         struct derived_is
         {
+            typedef Derived derived_t;
             DECLARE_ARROW(Derived);
         };
 }

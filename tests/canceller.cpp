@@ -31,16 +31,18 @@ namespace {
                     WithLinkToAgent     <agent::AgentT<SIDE>*,
                     InPool              <PlacedInPool, 
                     LimitOrderBase      <SIDE, 
+                    derived_is          <
                     LimitT              <SIDE
-                    > > > > >
+                    > > > > > >
             {
                 typedef 
                     WithCancelPosition  <
                     WithLinkToAgent     <agent::AgentT<SIDE>*,
                     InPool              <PlacedInPool, 
                     LimitOrderBase      <SIDE, 
+                    derived_is          <
                     LimitT              <SIDE
-                    > > > > >
+                    > > > > > >
                      base; 
                                                  
                 LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::AgentT<SIDE> * a) 

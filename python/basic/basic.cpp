@@ -139,8 +139,9 @@ namespace basic {
                     WithLinkToAgent     < agent::IAgentForOrder<LimitT<SIDE> >*,
                     InPool              < PlacedInPool, 
                     LimitOrderBase      < SIDE, 
+                    derived_is          <
                     LimitT              < SIDE
-                > > > > >
+                > > > > > >
             {
                 LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::IAgentForOrder<LimitT<SIDE> > * ag) 
                     :   base(boost::make_tuple(boost::make_tuple(x, h), ag))

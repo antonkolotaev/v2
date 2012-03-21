@@ -11,13 +11,17 @@ namespace order     {
         struct LimitOrderT : 
             RefCounted<LimitOrderT<SIDE> >,
             ExecutionHistory<
-                LimitOrderBase<SIDE, 
-                    LimitOrderT<SIDE> > >    
+            LimitOrderBase  <SIDE, 
+            derived_is      <
+            LimitOrderT     <SIDE> 
+            > > >   
     {
         typedef 
             ExecutionHistory<
-                LimitOrderBase<SIDE, 
-                    LimitOrderT<SIDE> > >    
+            LimitOrderBase  <SIDE, 
+            derived_is      <
+            LimitOrderT     <SIDE> 
+            > > >   
             base;
                 
         LimitOrderT(PriceVolume const & x) : base(x) {}

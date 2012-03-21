@@ -58,8 +58,9 @@ namespace fast {
             WithLinkToAgent     < agent::LiquidityProviderT<SIDE>*,
             InPool              < PlacedInPool, 
             LimitOrderBase      < SIDE, 
+            derived_is          <
             LimitT              < SIDE
-            > > > > >
+            > > > > > >
         {
             LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::LiquidityProviderT<SIDE> * a) 
                 :   base(boost::make_tuple(boost::make_tuple(x, h), a))

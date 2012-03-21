@@ -12,8 +12,8 @@ namespace order     {
     /// Base class for limit orders
     /// \param SIDE side of the order
     /// \param Derived most derived class of the order; boost::mpl::na if there's no derived class
-    template <Side SIDE, typename Derived = boost::mpl::na>
-        struct LimitOrderBase : VolumeHolder, PriceHolder<SIDE>
+    template <Side SIDE, typename Base>
+        struct LimitOrderBase : VolumeHolder, PriceHolder<SIDE>, Base
     {
         typedef PriceHolder<SIDE> PH;
         typedef VolumeHolder      VH;
@@ -31,9 +31,9 @@ namespace order     {
         typedef limit_order_tag category;
 
         /// the most derived class
-        typedef typename boost::mpl::if_na<Derived, LimitOrderBase>::type derived_t;
+        //typedef typename boost::mpl::if_na<Derived, LimitOrderBase>::type derived_t;
 
-        DECLARE_ARROW(derived_t);
+        //DECLARE_ARROW(derived_t);
 
         /// Tries to match this order with another limit order
         /// Matching can be done iff they have crossing prices

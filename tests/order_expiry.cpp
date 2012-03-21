@@ -39,20 +39,22 @@ namespace {
 
         template <Side SIDE>
             struct LimitT :
-                InPool<PlacedInPool,
-                    WithExpiration<
-                        ExecutionHistory<
-                            LimitOrderBase<SIDE, 
-                                LimitT<SIDE> >
-                        > > >
+                InPool          <PlacedInPool,
+                WithExpiration  <
+                ExecutionHistory<
+                LimitOrderBase  <SIDE, 
+                derived_is      <
+                LimitT          <SIDE> 
+                > > > > >
             {
                typedef 
-                InPool<PlacedInPool,
-                    WithExpiration<
-                        ExecutionHistory<
-                            LimitOrderBase<SIDE, 
-                                LimitT<SIDE> >
-                        > > >
+                   InPool          <PlacedInPool,
+                   WithExpiration  <
+                   ExecutionHistory<
+                   LimitOrderBase  <SIDE, 
+                   derived_is      <
+                   LimitT          <SIDE> 
+                   > > > > >
                   base;
                                  
                 LimitT(PriceVolume const & x, TimeInterval life_time, object_pool<LimitT> * h, order_queue::OrderQueue<boost::intrusive_ptr<LimitT> >  * queue)
@@ -81,8 +83,8 @@ namespace {
                 order_queue::OrderQueue<boost::intrusive_ptr<LimitT> >  * queue_;
             };
             
-            template <Side SIDE> void intrusive_ptr_add_ref(LimitT<SIDE> *p) { p->add_ref(); }
-            template <Side SIDE> void intrusive_ptr_release(LimitT<SIDE> *p) { p->release(); }
+            //template <Side SIDE> void intrusive_ptr_add_ref(LimitT<SIDE> *p) { p->add_ref(); }
+            //template <Side SIDE> void intrusive_ptr_release(LimitT<SIDE> *p) { p->release(); }
     }
     
 

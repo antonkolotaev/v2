@@ -19,15 +19,17 @@ namespace {
                     InPool           < PlacedInPool, 
                     ExecutionHistory <
                     LimitOrderBase   < SIDE, 
+                    derived_is       <
                     LimitT           < SIDE
-                    > > > > 
+                    > > > > >
         {
             typedef 
                     InPool           < PlacedInPool, 
                     ExecutionHistory <
                     LimitOrderBase   < SIDE, 
+                    derived_is       <
                     LimitT           < SIDE
-                    > > > > 
+                    > > > > >
                   base;
                               
             LimitT(Price p, Volume v, object_pool<LimitT> * h) 

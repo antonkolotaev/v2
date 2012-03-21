@@ -25,14 +25,18 @@ namespace {
 
         template <Side SIDE>
            struct LimitT : 
-                InPool<PlacedInPool, 
-                    LimitOrderBase<SIDE, 
-                        LimitT<SIDE> > > 
+                    InPool        <PlacedInPool, 
+                    LimitOrderBase<SIDE,
+                    derived_is    <
+                    LimitT        <SIDE> 
+                    > > >
         {
             typedef 
-                InPool<PlacedInPool, 
-                    LimitOrderBase<SIDE, 
-                        LimitT<SIDE> > > 
+                InPool        <PlacedInPool, 
+                LimitOrderBase<SIDE,
+                derived_is    <
+                LimitT        <SIDE> 
+                > > >
                 base;
                             
             template <typename X>
