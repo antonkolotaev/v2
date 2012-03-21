@@ -26,17 +26,24 @@ namespace order_queue
         typename Order,     /// Order storage type (usually it a smart pointer to order type)
         typename Derived_t = boost::mpl::na     /// the most derived class if any
     >
-        struct OrderQueue : 
-            protected std::priority_queue
-            <
-                Order, 
-                std::vector<Order>, 
-                typename order::ordered_by_price<Order>::type
-            >
+        struct OrderQueue 
     {
     private:
         OrderQueue(OrderQueue const &);
+    protected:
+        typedef std::vector<Order>  _Container;
+        typedef typename order::ordered_by_price<Order>::type _Pr;
+        typedef _Container container_type;
+
+        _Container c;	// the underlying container
+        _Pr comp;	// the comparator functor
+
     public:
+
+        typedef typename _Container::value_type value_type;
+        typedef typename _Container::size_type size_type;
+        typedef typename _Container::reference reference;
+        typedef typename _Container::const_reference const_reference;
 
         /// the most derived type 
         typedef typename boost::mpl::if_na<Derived_t, OrderQueue>::type    Derived;
@@ -44,22 +51,50 @@ namespace order_queue
         /// the order comparer type 
         typedef typename order::ordered_by_price<Order>::type comparer_type;
 
-        typedef 
-            std::priority_queue<Order, std::vector<Order>, typename order::ordered_by_price<Order>::type>
-            base; 
-
 		OrderQueue() {}
 
 		OrderQueue(Dummy) {}
 
-        using base::reference;
-        using base::top;
-		using base::value_type;
+        bool empty() const
+        {	// test if queue is empty
+            return (c.empty());
+        }
+
+        size_type size() const
+        {	// return length of queue
+            return (c.size());
+        }
+
+        const_reference top() const
+        {	// return highest-priority element
+            return (c.front());
+        }
+
+        reference top()
+        {	// return mutable highest-priority element (retained)
+            return (c.front());
+        }
+
+    private:
+
+        void push_impl(const value_type& _Pred)
+        {	// insert value in priority order
+            c.push_back(_Pred);
+            push_heap(c.begin(), c.end(), comp);
+        }
+
+        void pop_impl()
+        {	// erase highest-priority element
+            pop_heap(c.begin(), c.end(), comp);
+            c.pop_back();
+        }
+
+    public:
 
         /// pops the best order from the queue
         void pop() // we suppose that the order on top is valid
         { 
-            base::pop(); 
+            pop_impl(); 
             make_valid();
         }
 
@@ -68,13 +103,7 @@ namespace order_queue
             void push(T order)
         {
             assert(!order->cancelled());
-            base::push(order);
-        }
-
-        /// \return true iff the queue is empty
-        bool empty() const 
-        {
-            return base::empty();
+            push_impl(order);
         }
 
         /// functor returning true iff an order is cancelled
@@ -235,11 +264,11 @@ namespace order_queue
         /// makes the queue either empty, either with the valid top order
         void make_valid()
         {
-            while (!base::empty())
+            while (!empty())
             {
-                reference t = base::top();
+                reference t = top();
                 if (t->cancelled())
-                    base::pop();
+                    pop_impl();
                 else break;
             }
         }
