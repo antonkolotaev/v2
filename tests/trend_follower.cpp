@@ -15,8 +15,19 @@ namespace marketsim {
 namespace {
 
     template <Side SIDE>
-        struct MarketT : order::MarketOrderBase<SIDE, MarketT<SIDE> >
+        struct MarketT : 
+            order::MarketOrderBase  <SIDE, 
+            derived_is              <
+            MarketT                 <SIDE> 
+            > >
         {
+            typedef 
+                order::MarketOrderBase  <SIDE, 
+                derived_is              <
+                MarketT                 <SIDE> 
+                > >
+                base;
+
             template <typename X>
                 MarketT(Volume v, X) : base(v) {}
         };

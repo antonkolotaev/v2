@@ -45,9 +45,11 @@ namespace fast {
 
         template <Side SIDE, typename Sender>
         struct MarketT : 
-            WithLinkToAgent<Sender,
-            MarketOrderBase<SIDE, MarketT<SIDE, Sender> 
-            > >
+            WithLinkToAgent <Sender,
+            MarketOrderBase <SIDE, 
+            derived_is      <
+            MarketT         <SIDE, Sender> 
+            > > >
         {
             MarketT(Volume v, Sender s) : base(boost::make_tuple(v,s)) {}
         };

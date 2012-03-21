@@ -37,14 +37,18 @@ namespace order     {
 
     template <Side SIDE>
         struct MarketOrderT : 
-            ExecutionHistory<
-                MarketOrderBase<SIDE, 
-                    MarketOrderT<SIDE> > >    
+                ExecutionHistory<
+                MarketOrderBase <SIDE, 
+                derived_is      <
+                MarketOrderT    <SIDE> 
+                > > >   
     {
         typedef 
             ExecutionHistory<
-                MarketOrderBase<SIDE, 
-                    MarketOrderT<SIDE> > >    
+            MarketOrderBase <SIDE, 
+            derived_is      <
+            MarketOrderT    <SIDE> 
+            > > >   
             base;
                     
         MarketOrderT(Price x) : base(x) {}

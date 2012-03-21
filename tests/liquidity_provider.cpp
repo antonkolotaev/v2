@@ -90,7 +90,11 @@ namespace {
        };
    }
 
-   typedef order::MarketOrderBase<Buy> MarketBuy;
+   struct MarketBuy 
+       : order::MarketOrderBase<Buy, derived_is <MarketBuy> >
+   {
+       MarketBuy(Volume v) : base(v) {}
+   };
 
    TEST_CASE("liquidity_provider", "An agent sending limit orders")
    {

@@ -50,7 +50,11 @@ namespace {
                 {}
             };
 
-            typedef MarketOrderBase<Buy> MarketBuy;
+            struct MarketBuy 
+                : MarketOrderBase<Buy, derived_is <MarketBuy> >
+            {
+                MarketBuy(Volume v) : base(v) {}
+            };
     }
             
     typedef order::LimitT<Buy>     LimitBuy;
