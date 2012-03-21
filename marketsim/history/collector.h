@@ -44,7 +44,7 @@ namespace history   {
 				if (lastT_ != t)
 				{
 					if (last_)
-                        write(lastT_, *last_);  // storage_ << TimeStamped(lastT_, *last_)
+                        this->write(lastT_, *last_);  // storage_ << TimeStamped(lastT_, *last_)
 				}
 				last_ = p;
 				lastT_ = t;
@@ -56,7 +56,7 @@ namespace history   {
 		{
 			if (last_)
 			{
-				write(lastT_, *last_);
+				this->write(lastT_, *last_);
 				last_.reset(); lastT_ = -1;
 			}
 		}

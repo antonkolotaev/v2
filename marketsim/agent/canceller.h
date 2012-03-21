@@ -19,8 +19,8 @@ namespace agent     {
         template <typename T> OrdersSubmittedInVector(T const & x) : Base(x) {}
 
         /// remembers an order just created
-        template <typename Order>
-            void processOrder(Order order)
+        template <typename OrderT>
+            void processOrder(OrderT order)
         {
             assert(!order->cancelled());
             // store its position in our vector
@@ -32,16 +32,16 @@ namespace agent     {
         }
 
         /// removes order from the vector
-        template <typename Order>
-            void onOrderFilled(Order order)
+        template <typename OrderT>
+            void onOrderFilled(OrderT order)
         {
             removeOrder(order);
             Base::onOrderFilled(order);
         }
 
         /// removes order from the vector
-        template <typename Order>
-            void onOrderCancelled(Order order)
+        template <typename OrderT>
+            void onOrderCancelled(OrderT order)
         {
             removeOrder(order);
             Base::onOrderCancelled(order);
@@ -69,8 +69,8 @@ namespace agent     {
 
         /// removes order from the vector
         /// it must be in the vector
-        template <typename Order>
-            void removeOrder(Order order)
+        template <typename OrderT>
+            void removeOrder(OrderT order)
         {
             size_t pos = order->getCancelPosition();
 
@@ -141,7 +141,7 @@ namespace agent     {
         /// 1-th argument defines interval distribution between order cancellations
         template <typename T>  OrderCanceller(T const & x) 
             : RealBase (boost::get<0>(x))
-            , timer_   (*self(), &OrderCanceller::cancelAnOrder, boost::get<1>(x))
+            , timer_   (*this->self(), &OrderCanceller::cancelAnOrder, boost::get<1>(x))
         {
         }
 

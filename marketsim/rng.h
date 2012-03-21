@@ -27,7 +27,7 @@ namespace marketsim
 
 			Generator() : Base() {}
 
-			template <typename T> Generator(T x) : Base(x) {}
+			template <typename U> Generator(U x) : Base(x) {}
 
 			T operator () () { return Base::operator *() (); }
 		};
@@ -115,10 +115,10 @@ namespace marketsim
         {
             typedef boost::exponential_distribution<T> base;
 
-            explicit exponential(result_type lambda_arg = result_type(1))
+            explicit exponential(T lambda_arg = T(1))
                 : base(lambda_arg) {}
 
-			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
+			T operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
 
 #ifdef MARKETSIM_BOOST_PYTHON
             static void py_register()
@@ -137,11 +137,11 @@ namespace marketsim
         {
             typedef boost::normal_distribution<T> base;
 
-            explicit normal(const result_type& mean_arg = result_type(0),
-                const result_type& sigma_arg = result_type(1))
+            explicit normal(const T& mean_arg = T(0),
+                const T& sigma_arg = T(1))
                 : base(mean_arg, sigma_arg) {}
 
-			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
+			T operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
 
 #ifdef MARKETSIM_BOOST_PYTHON
             static void py_register()
@@ -160,11 +160,11 @@ namespace marketsim
         {
             typedef boost::lognormal_distribution<T> base;
 
-            explicit lognormal(result_type mean_arg = result_type(1),
-                result_type sigma_arg = result_type(1))
+            explicit lognormal(T mean_arg = T(1),
+                T sigma_arg = T(1))
                 : base(mean_arg, sigma_arg) {}
 
-			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
+			T operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
 
 #ifdef MARKETSIM_BOOST_PYTHON
             static void py_register()
@@ -184,9 +184,9 @@ namespace marketsim
         {
             typedef boost::gamma_distribution<T> base;
 
-            explicit gamma(const result_type& alpha_arg = result_type(1)) : base(alpha_arg) {}
+            explicit gamma(const T& alpha_arg = T(1)) : base(alpha_arg) {}
 
-			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
+			T operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
 
 #ifdef MARKETSIM_BOOST_PYTHON
             static void py_register()
@@ -210,7 +210,7 @@ namespace marketsim
                 double max_arg = 1) 
                 :  base(min_arg, max_arg) {}
 
-			result_type operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
+			T operator () () { return base::operator ()(RngHolder<0>::g_RNG); }
 
 #ifdef MARKETSIM_BOOST_PYTHON
             static void py_register()

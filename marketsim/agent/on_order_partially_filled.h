@@ -19,7 +19,7 @@ namespace agent
         /// 1-th argument is initializer for Handler
         template <typename T>
             OnPartiallyFilled(T const & x)
-				:   Base    (boost::get<0>(x)) 
+				:   Base   (boost::get<0>(x)) 
 				,	handler_(boost::get<1>(x))
 			{}
 
@@ -28,17 +28,17 @@ namespace agent
         /// Grants access to the handler
         /// Since there might be several handlers in an agent
         /// we use a tag type (Handler*) to differentiate between them
-		Handler         & getHandler(Handler*)       { return handler_; }
-		Handler const   & getHandler(Handler*) const { return handler_; }
+        Handler         & getHandler(Handler*)       { return handler_; }
+        Handler const   & getHandler(Handler*) const { return handler_; }
 
-		using Base::getHandler;
+        using Base::getHandler;
 
         /// calls Handler 
         template <typename Order>
             void onOrderPartiallyFilled(Order order, PriceVolume const & x)
         {
             Base::onOrderPartiallyFilled(order, x);
-            handler_(self());            
+            handler_(this->self());            
         }
 
 #ifdef MARKETSIM_BOOST_PYTHON

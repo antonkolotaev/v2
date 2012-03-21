@@ -31,7 +31,7 @@ namespace {
 
                 void process()
                 {
-                    self()->onCancelled();
+                    this->self()->onCancelled();
                 }
             };
 
@@ -46,6 +46,15 @@ namespace {
                                 LimitT<SIDE> >
                         > > >
             {
+               typedef 
+                InPool<PlacedInPool,
+                    WithExpiration<
+                        ExecutionHistory<
+                            LimitOrderBase<SIDE, 
+                                LimitT<SIDE> >
+                        > > >
+                  base;
+                                 
                 LimitT(PriceVolume const & x, TimeInterval life_time, object_pool<LimitT> * h, order_queue::OrderQueue<boost::intrusive_ptr<LimitT> >  * queue)
                     :   base(boost::make_tuple(boost::make_tuple(x, life_time), h)), queue_(queue)
                 {
@@ -71,7 +80,11 @@ namespace {
             private:
                 order_queue::OrderQueue<boost::intrusive_ptr<LimitT> >  * queue_;
             };
+            
+            template <Side SIDE> void intrusive_ptr_add_ref(LimitT<SIDE> *p) { p->add_ref(); }
+            template <Side SIDE> void intrusive_ptr_release(LimitT<SIDE> *p) { p->release(); }
     }
+    
 
     typedef order::LimitT<Sell>    LimitSell;
 

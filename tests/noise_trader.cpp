@@ -17,6 +17,10 @@ namespace {
     template <Side SIDE>
         struct MarketT : order::MarketOrderBase<SIDE, MarketT<SIDE> >
         {
+            typedef 
+               order::MarketOrderBase<SIDE, MarketT<SIDE> >
+               base;
+               
             template <typename X>
                 MarketT(Volume v, X) : base(v) {}
         };

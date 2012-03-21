@@ -20,7 +20,12 @@ namespace marketsim
 		    PriceVolume	matching;
 
             /// take the best one
-            typename OrderPriorityQueue :: reference   limit_order = limit_orders.top();
+          typedef 
+            typename OrderPriorityQueue :: reference   
+            order_reference;
+            
+          order_reference limit_order = 
+               const_cast<order_reference>(limit_orders.top());
 
             /// if it can be matched with the incoming order
             /// remember (Price,Volume) of the trade

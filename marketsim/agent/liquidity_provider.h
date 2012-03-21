@@ -28,7 +28,7 @@ namespace agent
         template <typename T> 
             LiquidityProvider(T const & x) 
             :   Base         (boost::get<0>(x))
-            ,   timer_       (*self(), &LiquidityProvider::sendOrder, boost::get<1>(x))
+            ,   timer_       (*this->self(), &LiquidityProvider::sendOrder, boost::get<1>(x))
             ,   lag_         (boost::get<2>(x))
             ,   volume_      (boost::get<3>(x))
             ,   initialPrice_(boost::get<4>(x)) 
@@ -42,9 +42,9 @@ namespace agent
 
         void sendOrder()
         {
-            Price bp = getOrderBook()->empty(side_tag()) ? initialPrice_ : getOrderBook()->bestPrice(side_tag());
-            Price delta = getOrderBook()->ceilPrice(lag_());
-            Price p = std::max(Price(1), side_tag::value == Sell ? bp + delta : bp - delta);
+            Price bp = this->getOrderBook()->empty(side_tag()) ? initialPrice_ : this->getOrderBook()->bestPrice(side_tag());
+            Price delta = this->getOrderBook()->ceilPrice(lag_());
+            Price p = std::max(Price(1), (Side)side_tag::value == Sell ? bp + delta : bp - delta);
             
             Volume v = std::max(Volume(1), static_cast<Volume>(volume_()));
 

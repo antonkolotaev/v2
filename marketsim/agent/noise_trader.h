@@ -26,7 +26,7 @@ namespace agent
         template <typename T>
             NoiseTrader(T const & x) 
                 :   Base    (boost::get<0>(x))
-                ,   timer_  (*self(), &NoiseTrader::createOrder, boost::get<1>(x))
+                ,   timer_  (*this->self(), &NoiseTrader::createOrder, boost::get<1>(x))
                 ,   volume_ (boost::get<2>(x))
             {}
 
@@ -36,10 +36,10 @@ namespace agent
             Volume v = (Volume)volume_();
 
             if (v > 0)
-                self()->sendMarketOrder<Sell>(v);
+                this->self()->template sendMarketOrder<Sell>(v);
 
             if (v < 0)
-                self()->sendMarketOrder<Buy>(-v);
+                this->self()->template sendMarketOrder<Buy>(-v);
         }
 
     private:

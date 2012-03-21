@@ -35,7 +35,7 @@ namespace order     {
             DECLARE_BASE(InPool);
 
             typedef 
-               typename HolderPtrF::template apply<base::derived_t>::type 
+               typename HolderPtrF::template apply<typename Base::derived_t>::type 
                holder_t;
 
             /// \return true iff the order is allocated in the given pool

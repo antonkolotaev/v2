@@ -23,7 +23,7 @@ namespace agent
             template <typename T>
                 MarketBuy  createOrder(T const &x, buy_tag) 
                 { 
-                    return MarketBuy(x, self()); 
+                    return MarketBuy(x, this->self()); 
                 }
 
             /// creates a sell market order
@@ -31,14 +31,14 @@ namespace agent
             template <typename T>
                 MarketSell createOrder(T const &x, sell_tag) 
                 { 
-                    return MarketSell(x, self()); 
+                    return MarketSell(x, this->self()); 
                 }
 
             /// a shortcut for sending market orders of the given volume
             template <Side SIDE>
                 void sendMarketOrder(Volume x)
             {
-                self()->processOrder(createOrder(x, side_tag<SIDE>()));
+                this->self()->processOrder(createOrder(x, side_tag<SIDE>()));
             }
 
 #ifdef MARKETSIM_BOOST_PYTHON

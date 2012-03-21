@@ -34,6 +34,15 @@ namespace {
                     LimitT              <SIDE
                     > > > > >
             {
+                typedef 
+                    WithCancelPosition  <
+                    WithLinkToAgent     <agent::AgentT<SIDE>*,
+                    InPool              <PlacedInPool, 
+                    LimitOrderBase      <SIDE, 
+                    LimitT              <SIDE
+                    > > > > >
+                     base; 
+                                                 
                 LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::AgentT<SIDE> * a) 
                     :   base(boost::make_tuple(boost::make_tuple(x, h), a))
                 {}
@@ -68,6 +77,14 @@ namespace {
                 AgentBase           < AgentT<SIDE> > 
                 > >, always_0>
         {
+            typedef 
+                OrderCanceller      < rng::Generator<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
+                LinkToOrderBook     < OrderBook*, 
+                PrivateOrderPool    < order::LimitT<SIDE>, 
+                AgentBase           < AgentT<SIDE> > 
+                > >, always_0>
+                  base;
+                              
             AgentT(OrderBook * book) 
                 : base(boost::make_tuple(boost::make_tuple(dummy, book), new rng::constant<Time, rng::IGenerator<Time> >(1.))) 
             {}

@@ -19,25 +19,25 @@ namespace order_queue
 			void push(T x)
 			{
 				Base::push(x);
-				if (!comp(x, top()))
-					handler_(self());
+				if (!comp(x, this->top()))
+					handler_(this->self());
 			}
 
         /// If the order on the top of the queue is cancelled, call the handler
 		template <typename T>
 			void onOrderCancelled(T x)
 			{
-				bool better = !comp(x, top());
+				bool better = !comp(x, this->top());
 				Base::onOrderCancelled(x);
 				if (better)
-					handler_(self());		
+					handler_(this->self());		
 			}
 
         /// if the best order is popped from the queue, the handler is called
 		void pop() 
 		{
 			Base::pop();
-			handler_(self());
+			handler_(this->self());
 		}
 
         /// onPartiallyFilled is called when volume of the best order is changed,
@@ -46,7 +46,7 @@ namespace order_queue
 			void onPartiallyFilled(Order const & order, PriceVolume const & trade)
 		{
 			Base::onPartiallyFilled(order, trade);
-			handler_(self());
+			handler_(this->self());
 		}
 
 		Handler const & getHandler(Handler *) const { return handler_; }

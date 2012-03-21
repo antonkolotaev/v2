@@ -34,32 +34,32 @@ namespace agent     {
         {
             Volume v = (Volume)volume_();
 
-            if (!Base::getOrderBook()->empty<Sell>() && !Base::getOrderBook()->empty<Buy>())
+            if (!Base::getOrderBook()->template empty<Sell>() && !Base::getOrderBook()->template empty<Buy>())
             {
                 Price midPrice2 = 
-                    Base::getOrderBook()->bestPrice<Sell>() + 
-                    base::getOrderBook()->bestPrice<Buy>();
+                    Base::getOrderBook()->template bestPrice<Sell>() + 
+                    base::getOrderBook()->template bestPrice<Buy>();
 
                 Price delta = midPrice2 - fundamentalValue2_;
 
                 if (delta < 0)
-                    self()->sendMarketOrder<Buy>(v);
+                    this->self()->template sendMarketOrder<Buy>(v);
 
                 if (delta > 0)
-                    self()->sendMarketOrder<Sell>(v);
+                    this->self()->template sendMarketOrder<Sell>(v);
             } 
-            else if (!Base::getOrderBook()->empty<Sell>())
+            else if (!Base::getOrderBook()->template empty<Sell>())
             {
-                if (Base::getOrderBook()->bestPrice<Sell>()*2 < fundamentalValue2_)
+                if (Base::getOrderBook()->template bestPrice<Sell>()*2 < fundamentalValue2_)
                 {
-                    self()->sendMarketOrder<Buy>(v);
+                    this->self()->template sendMarketOrder<Buy>(v);
                 }
             } 
-            else if (!Base::getOrderBook()->empty<Buy>())
+            else if (!Base::getOrderBook()->template empty<Buy>())
             {
-                if (Base::getOrderBook()->bestPrice<Buy>()*2 > fundamentalValue2_)
+                if (Base::getOrderBook()->template bestPrice<Buy>()*2 > fundamentalValue2_)
                 {
-                    self()->sendMarketOrder<Sell>(v);
+                    this->self()->template sendMarketOrder<Sell>(v);
                 }
             }
         }

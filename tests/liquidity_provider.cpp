@@ -29,6 +29,12 @@ namespace {
                     LimitOrderBase<SIDE, 
                         LimitT<SIDE> > > 
         {
+            typedef 
+                InPool<PlacedInPool, 
+                    LimitOrderBase<SIDE, 
+                        LimitT<SIDE> > > 
+                base;
+                            
             template <typename X>
                 LimitT(PriceVolume x, object_pool<LimitT> * h, X) 
                     :   base(boost::make_tuple(x, h))
@@ -61,6 +67,14 @@ namespace {
                 AgentBase           < LiquidityProviderT<SIDE> 
                 > > > >
        {
+            typedef 
+                LiquidityProvider   < rng::constant<Time>, rng::constant<Price>, rng::constant<Volume>,
+                LinkToOrderBook     < OrderBook*, 
+                PrivateOrderPool    < order::LimitT<SIDE>, 
+                AgentBase           < LiquidityProviderT<SIDE> 
+                > > > >
+                base;
+                            
             LiquidityProviderT(OrderBook *book) 
                 :  base(boost::make_tuple(boost::make_tuple(dummy, book),
                                          rng::constant<Time>(1.), 

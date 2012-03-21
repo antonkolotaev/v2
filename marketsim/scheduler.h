@@ -168,10 +168,10 @@ namespace marketsim
             workTill(currentTime() + dt);
         }
 
-        /// restarts the scheduler
+        /// restarts the scheduler (nb! O(nlogn))
         void reset() 
         {
-            c.resize(0);
+            while (!Queue::empty()) Queue::pop();
             currentTime_ = 0;
         }
 

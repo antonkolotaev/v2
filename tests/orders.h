@@ -14,6 +14,12 @@ namespace order     {
                 LimitOrderBase<SIDE, 
                     LimitOrderT<SIDE> > >    
     {
+        typedef 
+            ExecutionHistory<
+                LimitOrderBase<SIDE, 
+                    LimitOrderT<SIDE> > >    
+            base;
+                
         LimitOrderT(PriceVolume const & x) : base(x) {}
 
         void on_released()
@@ -31,6 +37,12 @@ namespace order     {
                 MarketOrderBase<SIDE, 
                     MarketOrderT<SIDE> > >    
     {
+        typedef 
+            ExecutionHistory<
+                MarketOrderBase<SIDE, 
+                    MarketOrderT<SIDE> > >    
+            base;
+                    
         MarketOrderT(Price x) : base(x) {}
     };
 

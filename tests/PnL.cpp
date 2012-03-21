@@ -33,6 +33,8 @@ namespace {
         template <Side SIDE>
             struct MarketT : MarketOrderBase<SIDE, MarketT<SIDE> >
             {
+                typedef MarketOrderBase<SIDE, MarketT<SIDE> > base;
+                
                 template <typename X>
                     MarketT(Volume v, X) : base(v) {}
             };
@@ -45,6 +47,14 @@ namespace {
                     LimitT          < SIDE
                     > > > > 
             {
+                typedef 
+                    WithLinkToAgent < agent::AgentT<SIDE>*,
+                    InPool          < PlacedInPool, 
+                    LimitOrderBase  < SIDE, 
+                    LimitT          < SIDE
+                    > > > > 
+                     base;
+                                    
                 LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::AgentT<SIDE> * a) 
                     :   base(boost::make_tuple(boost::make_tuple(x, h), a))
                 {}
@@ -99,6 +109,18 @@ namespace {
             AgentBase           < AgentT<SIDE> > 
             > > > > > > > 
         {
+          typedef 
+            OnPartiallyFilled   < history::Collector<PnL, history::InDeque<Price> >,
+            OnPartiallyFilled   < history::Collector<Quantity, history::InDeque<Volume> >,
+            OnPartiallyFilled   < history::Collector<PnL, history::InFile>,  
+            PnL_Holder          <
+            Quantity_Holder     <
+            LinkToOrderBook     < OrderBook*, 
+            PrivateOrderPool    < order::LimitT<SIDE>, 
+            AgentBase           < AgentT<SIDE> > 
+            > > > > > > > 
+             base;   
+                 
 		    AgentT(OrderBook* book) : base(
                 boost::make_tuple(
                     boost::make_tuple(

@@ -22,6 +22,14 @@ namespace {
                     LimitT           < SIDE
                     > > > > 
         {
+            typedef 
+                    InPool           < PlacedInPool, 
+                    ExecutionHistory <
+                    LimitOrderBase   < SIDE, 
+                    LimitT           < SIDE
+                    > > > > 
+                  base;
+                              
             LimitT(Price p, Volume v, object_pool<LimitT> * h) 
                 :   base(boost::make_tuple(pv(p,v), h))
             {}
