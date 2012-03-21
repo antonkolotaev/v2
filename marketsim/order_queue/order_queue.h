@@ -115,7 +115,7 @@ namespace order_queue
 
         /// reaction on order cancellation
         template <typename T>
-            void onOrderCancelled(T x)
+            void onOrderCancelled(T const& x)
             {
                 make_valid();
             }

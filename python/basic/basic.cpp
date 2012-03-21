@@ -425,7 +425,7 @@ namespace basic {
 
    }
 
-    struct ScheduledEvent : EventHandler
+    struct ScheduledEvent : EventHandlerBase
     {
         ScheduledEvent(TimeInterval dt, boost::python::object handler, boost::python::object callback) 
             : handler(handler), callback(callback)
@@ -462,7 +462,7 @@ namespace basic {
         }
     };
 
-    struct Timer : EventHandler
+    struct Timer : EventHandlerBase
     {
         Timer(py_object intervals, py_object handler, py_object callback)
             :   handler  (handler)

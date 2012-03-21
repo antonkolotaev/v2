@@ -14,8 +14,14 @@ namespace marketsim
     /// Base class for events which can be scheduled
     struct IEventHandler : RefCounted<IEventHandler>
     {
+        IEventHandler() : cancelled_(false) {}
+
         /// method to be called when time for the event come
         virtual void process() = 0;
+
+        bool cancelled() const { return cancelled_; }
+
+        void cancel() { cancelled_ = true; }
 
         // this function is non-virtual since it will be called very often 
         // its value must not be changed while the event handler is in the event queue
@@ -32,6 +38,7 @@ namespace marketsim
 
     private:
         Time  actionTime_;
+        bool  cancelled_;
     protected:
         /// changes action time for the event
         void setActionTime(Time t) { actionTime_ = t; }
@@ -93,12 +100,12 @@ namespace marketsim
             instance_->schedule_impl(eh);
         }
 
-        /// cancels an event. warning! it is very inefficient operation O(nlogn)
-        static void cancel(IEventHandlerPtr eh)
+        /// cancels an event. 
+        static void onCancelled(IEventHandlerPtr eh)
         {
             // if there is no scheduler no events are scheduled
             if (instance_)
-                instance_->cancel_impl(eh);
+                instance_->makeValid();
         }
 
         /// \return true iff there are no events
@@ -106,9 +113,16 @@ namespace marketsim
         {
             return Queue::empty();
         }
+    private:
+        void makeValid()
+        {
+            while (!Queue::empty() && Queue::top()->cancelled())
+            {
+                Queue::pop();
+            }
+        }
 
-        /// makes a single simulation step
-        void makeStep() 
+        void makeStep_impl()
         {
             // taking an event with the least time
             IEventHandlerPtr  t = Queue::top();
@@ -119,6 +133,18 @@ namespace marketsim
             // launching the event handler
             t->process();
         }
+    public:
+
+        /// makes a single simulation step
+        void makeStep() 
+        {
+            makeValid();
+
+            if (!Queue::empty())
+            {
+                makeStep_impl();
+            }
+        }
 
         /// advances the simulation while the model time < t
         void workTill(Time t)
@@ -127,8 +153,11 @@ namespace marketsim
             /// while there are event with action time less than t
             while (!Queue::empty() && Queue::top()->getActionTime() < t)
             {
-                /// launch them
-                makeStep();
+                if (Queue::top()->cancelled())
+                    Queue::pop();
+                else
+                    /// launch them
+                    makeStep_impl();
             }
             currentTime_ = t;
         }
@@ -154,6 +183,7 @@ namespace marketsim
             class_<SchedulerT, boost::noncopyable>(name)
                 .def("workTill", &SchedulerT::workTill)
                 .def("currentTime", &SchedulerT::currentTime_impl)
+                .def("advance", &SchedulerT::advance)
                 .def("reset", &SchedulerT::reset)
                 ;
         }
@@ -161,16 +191,6 @@ namespace marketsim
 #endif 
 
     private:
-
-        // O(nlogn)!!!
-        /// Cancels an event
-        void cancel_impl(IEventHandlerPtr eh)
-        {
-            /// remove the event O(n)
-            c.erase(std::remove(c.begin(), c.end(), eh), c.end());
-            /// restore heap order O(nlogn)
-            std::make_heap(c.begin(), c.end(), comp);
-        }
 
         /// schedules an event
         void schedule_impl(IEventHandlerPtr eh)
@@ -198,7 +218,7 @@ namespace marketsim
     typedef SchedulerT<IEventHandlerPtr, IEventHandlerPtrCmp> Scheduler;
 
     /// standard base class class for event handlers
-    struct EventHandler : IEventHandler
+    struct EventHandlerBase : IEventHandler
     {
         /// schedules this class to be fired in dt 
         /// (so at currentTime + dt method process will be called)
@@ -211,7 +231,8 @@ namespace marketsim
         /// cancels this event. warning: O(nlogn)
         void cancel() 
         {
-            Scheduler::cancel(this);
+            IEventHandler::cancel();
+            Scheduler::onCancelled(this);
         }
     };
 
@@ -220,7 +241,7 @@ namespace marketsim
         typename T,             // type which method will be called
         typename DelayGenerator // generates time intervals
     >
-        struct Timer : EventHandler
+        struct Timer : EventHandlerBase
     {       
         typedef void (T::*Handler)();
 

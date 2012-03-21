@@ -16,7 +16,7 @@ namespace {
         using namespace marketsim::order;
 
         template <typename Base>
-            struct WithExpiration : Base, EventHandler
+            struct WithExpiration : Base, EventHandlerBase
             {
                 template <typename T>
                     WithExpiration(T const & x)
@@ -26,6 +26,8 @@ namespace {
                 }
 
                 typedef WithExpiration  base;   // for derived classes
+
+                using Base::cancelled;
 
                 void process()
                 {

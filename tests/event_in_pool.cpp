@@ -9,7 +9,7 @@ namespace {
 
     int g_EEE_counter = 0;
 
-    struct EEE : EventHandler
+    struct EEE : EventHandlerBase
     {
         EEE(object_pool<EEE> *s) : storage_(s), ID_(g_EEE_counter++)
         {
@@ -68,7 +68,7 @@ namespace {
         B::Tag b = p.getX(B::Tag());
     }
 
-    struct FFF : EventHandler
+    struct FFF : EventHandlerBase
     {
         FFF() : counter_(10)
         {
