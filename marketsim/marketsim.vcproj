@@ -302,11 +302,19 @@
 			>
 		</File>
 		<File
+			RelativePath=".\utils\intrusive_ptr_python_helper.h"
+			>
+		</File>
+		<File
 			RelativePath=".\object_pool.h"
 			>
 		</File>
 		<File
 			RelativePath=".\order_book.h"
+			>
+		</File>
+		<File
+			RelativePath=".\py_ref_counted.h"
 			>
 		</File>
 		<File

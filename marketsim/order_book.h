@@ -10,9 +10,10 @@ namespace marketsim
     /// Also it has a tick size (which can be factored out to a another class)
     template <
         typename QueueBuySide,  
-        typename QueueSellSide
+        typename QueueSellSide,
+        typename Base = Empty
     >
-        struct OrderBook
+        struct OrderBook : Base
     {
         OrderBook(Price tickSize = 1) : tick_size_(tickSize) {}
 
@@ -86,6 +87,9 @@ namespace marketsim
         template <typename T>
             static void py_visit(T & class_def)
             {
+                py_register<QueueSellSide>();
+                py_register<QueueBuySide>();
+
                 class_def
                     .def_readonly("asks", &OrderBook::sell_side_)
                     .def_readonly("bids", &OrderBook::buy_side_)

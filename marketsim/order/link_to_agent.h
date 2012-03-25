@@ -27,16 +27,20 @@ namespace order {
             void onMatched(PriceVolume const & x, OtherOrder const &o)
         {
             Base::onMatched(x,o);
-            agent_->onOrderPartiallyFilled(this->self(), x);
-            if (this->filled())
-                agent_->onOrderFilled(this->self());
+            if (agent_)
+            {
+                agent_->onOrderPartiallyFilled(this->self(), x);
+                if (this->filled())
+                    agent_->onOrderFilled(this->self());
+            }
         }
 
         /// Called when order is cancelled
         void onCancelled()
         {
             Base::onCancelled();
-            agent_->onOrderCancelled(this->self());
+            if (agent_)
+                agent_->onOrderCancelled(this->self());
         }
 
         private:

@@ -50,20 +50,22 @@ namespace {
 
         template <Side SIDE>
             struct LimitT : 
-                    WithLinkToAgent < agent::AgentT<SIDE>*,
+                    WithLinkToAgent < weak_intrusive_ptr<agent::AgentT<SIDE> >,
                     InPool          < PlacedInPool, 
                     LimitOrderBase  < SIDE, 
+                    RefCounted      <
                     derived_is      <
                     LimitT          < SIDE
-                    > > > > >
+                    > > > > > >
             {
                 typedef 
-                    WithLinkToAgent < agent::AgentT<SIDE>*,
+                    WithLinkToAgent < weak_intrusive_ptr<agent::AgentT<SIDE> >,
                     InPool          < PlacedInPool, 
                     LimitOrderBase  < SIDE, 
+                    RefCounted      <
                     derived_is      <
                     LimitT          < SIDE
-                    > > > > >
+                    > > > > > >
                      base;
                                     
                 LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::AgentT<SIDE> * a) 
@@ -116,9 +118,10 @@ namespace {
             PnL_Holder          <
             Quantity_Holder     <
             LinkToOrderBook     < OrderBook*, 
-            PrivateOrderPool    < order::LimitT<SIDE>, 
+            SharedOrderPool    < order::LimitT<SIDE>, 
+            HasWeakReferences   <
             AgentBase           < AgentT<SIDE> > 
-            > > > > > > > 
+            > > > > > > > >
         {
           typedef 
             OnPartiallyFilled   < history::Collector<PnL, history::InDeque<Price> >,
@@ -127,9 +130,10 @@ namespace {
             PnL_Holder          <
             Quantity_Holder     <
             LinkToOrderBook     < OrderBook*, 
-            PrivateOrderPool    < order::LimitT<SIDE>, 
+            SharedOrderPool    < order::LimitT<SIDE>, 
+            HasWeakReferences   <
             AgentBase           < AgentT<SIDE> > 
-            > > > > > > > 
+            > > > > > > > >
              base;   
                  
 		    AgentT(OrderBook* book) : base(

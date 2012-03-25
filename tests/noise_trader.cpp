@@ -37,14 +37,17 @@ namespace {
             agent::NoiseTrader          < rng::constant<Time>, NoiseTraderTester&, 
             agent::MarketOrderFactory   < MarketT<Buy>, MarketT<Sell>, 
             agent::LinkToOrderBook      < NoiseTraderTester*, 
+            RefCounted                  <
             agent::AgentBase            < NoiseTraderTester
-            > > > >
+            > > > > >
     {
         NoiseTraderTester()
             :   base(boost::make_tuple(boost::make_tuple(dummy, this), rng::constant<double>(1.), boost::ref(*self())))
             ,   v_(1)
             ,   processed_(0)
         {}
+
+        void on_released() {}
 
         bool processOrder(MarketT<Buy> const & x)
         {

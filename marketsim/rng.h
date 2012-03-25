@@ -13,7 +13,7 @@ namespace marketsim
     {
         /// interface for random number generators managed by boost::intrusive_ptr
 		template <typename T>
-		struct IGenerator : RefCounted<IGenerator<T> >
+		struct IGenerator : RefCounted<derived_is< IGenerator<T> > >
 		{
 			virtual T operator () () = 0;
 			virtual ~IGenerator() {}

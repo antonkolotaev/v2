@@ -36,7 +36,7 @@ namespace order_queue {
                 static void py_visit(T & class_def)
                 {
                     using namespace boost::python;
-                    ::py_register<history::TimeSeries<PriceVolume> >();
+                    py_register<history::TimeSeries<PriceVolume> >();
                     RealBase::py_visit(class_def);        
                     class_def
                         .def("history", &WithHistoryInDeque::getHistory, return_internal_reference<>())

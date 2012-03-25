@@ -4,6 +4,7 @@
 #include <queue>
 #include <boost/intrusive_ptr.hpp>
 #include <marketsim/ref_counted.h>
+#include <marketsim/common/macros.h>
 
 namespace marketsim 
 {
@@ -12,7 +13,7 @@ namespace marketsim
     typedef double TimeInterval;
     
     /// Base class for events which can be scheduled
-    struct IEventHandler : RefCounted<IEventHandler>
+    struct IEventHandler : IRefCounted
     {
         IEventHandler() : cancelled_(false) {}
 
@@ -36,6 +37,12 @@ namespace marketsim
             return lhs.getActionTime() > rhs.getActionTime();
         }
 
+#ifdef MARKETSIM_BOOST_PYTHON
+        void set_pyobject(PyObject *) { assert(0); }
+        void clear_pyobject() { assert(0); }
+        PyObject* get_pyobject() { assert(0); return 0; }
+#endif
+
     private:
         Time  actionTime_;
         bool  cancelled_;
@@ -43,8 +50,8 @@ namespace marketsim
         /// changes action time for the event
         void setActionTime(Time t) { actionTime_ = t; }
         /// called when the event is released
-        virtual void on_released() = 0;
-        friend struct RefCounted<IEventHandler>;
+        ///virtual void on_released() = 0;
+        ///friend struct RefCounted<derived_is<IEventHandler> >;
     };
 
     /// by default, we use boost::intrusive_ptr to store events
@@ -68,6 +75,9 @@ namespace marketsim
     >
         struct SchedulerT
             :  protected std::priority_queue<IEventHandlerPtr, std::vector<IEventHandlerPtr>, IEventHandlerPtrCmp >
+#ifdef MARKETSIM_BOOST_PYTHON
+            ,   PyRefCounted<IRefCounted>
+#endif
     {
         // NOTE: another data structure with priority_queue interface might be chosen here
         typedef 
@@ -101,7 +111,7 @@ namespace marketsim
         }
 
         /// cancels an event. 
-        static void onCancelled(IEventHandlerPtr eh)
+        static void onCancelled()
         {
             // if there is no scheduler no events are scheduled
             if (instance_)
@@ -180,18 +190,21 @@ namespace marketsim
         static void py_register(const char * name)
         {
             using namespace boost::python;
-            class_<SchedulerT, boost::noncopyable>(name)
-                .def("workTill", &SchedulerT::workTill)
+            class_<SchedulerT, boost::intrusive_ptr<SchedulerT>, bases<IRefCounted>, boost::noncopyable> c(name, no_init);
+
+            c   .def("workTill", &SchedulerT::workTill)
                 .def("currentTime", &SchedulerT::currentTime_impl)
                 .def("advance", &SchedulerT::advance)
                 .def("reset", &SchedulerT::reset)
                 ;
+
+            register_0<SchedulerT>(c);
         }
 
 #endif 
 
     private:
-
+    public:
         /// schedules an event
         void schedule_impl(IEventHandlerPtr eh)
         {
@@ -232,9 +245,58 @@ namespace marketsim
         void cancel() 
         {
             IEventHandler::cancel();
-            Scheduler::onCancelled(this);
+            Scheduler::onCancelled();
         }
     };
+
+    template <
+        typename T             // type which method will be called
+    >
+    struct TimeOut : EventHandlerBase
+    {       
+        typedef void (T::*Handler)();
+
+        /// \param parent reference to object which method will be called
+        /// \param h pointer to method to be called
+        /// \param d functor returning time intervals
+        TimeOut(T & parent, Handler h, TimeInterval dt) 
+            : parent_(parent), handler_(h)
+        {
+            schedule(dt);
+        }
+
+        void add_ref()
+        {
+            parent_.add_ref();
+        }
+
+        void release()
+        {
+            parent_.release();
+        }
+
+        /// called from IEventHandler
+        void process()
+        {
+            (parent_.*handler_)();
+        }
+
+        void on_released() 
+        {
+            /// TODO: release for parent
+        }
+
+        /// removes itself from the scheduler
+        ~TimeOut()
+        {
+            cancel();
+        }
+
+    private:
+        T   &           parent_;
+        Handler         handler_;
+    };
+
 
     /// wakes up in intervals defined by DelayGenerator and calls some T's method
     template <
@@ -252,7 +314,16 @@ namespace marketsim
             : parent_(parent), handler_(h), delay_(d)
         {
             schedule(delay_());
-            /// TODO: add_ref for parent
+        }
+
+        void add_ref()
+        {
+            parent_.add_ref();
+        }
+
+        void release()
+        {
+            parent_.release();
         }
 
         /// called from IEventHandler

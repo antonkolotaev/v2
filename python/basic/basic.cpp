@@ -141,9 +141,10 @@ namespace basic {
                     WithLinkToAgent     < agent::IAgentForOrder<LimitT<SIDE> >*,
                     InPool              < PlacedInPool, 
                     LimitOrderBase      < SIDE, 
+                    RefCounted          <
                     derived_is          <
                     LimitT              < SIDE
-                > > > > > >
+                > > > > > > >
             {
                 LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::IAgentForOrder<LimitT<SIDE> > * ag) 
                     :   base(boost::make_tuple(boost::make_tuple(x, h), ag))
@@ -219,7 +220,7 @@ namespace basic {
             PnL_Holder              <
             Quantity_Holder         <
             LinkToOrderBook         < OrderBook*, 
-            PrivateOrderPool        < order::LimitT<SIDE>, 
+            SharedOrderPool        < order::LimitT<SIDE>, 
             AgentBase               < LimitOrderTraderT<SIDE> 
             > > > > > > > >
         {
@@ -263,7 +264,7 @@ namespace basic {
             OrderCanceller      < py_value<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
             PnL_Quantity_History_InDeque <
             LinkToOrderBook     < OrderBook*, 
-            PrivateOrderPool    < order::LimitT<SIDE>, 
+            SharedOrderPool    < order::LimitT<SIDE>, 
             AgentBase           < LiquidityProviderT<SIDE> 
             > > > > > > >
         {
@@ -389,7 +390,10 @@ namespace basic {
             }
         };
 
-        struct Signal : marketsim::agent::Signal<py_value<Time>, py_value<double>, Signal_Trader*>
+        struct Signal : 
+            marketsim::agent::Signal<py_value<Time>, py_value<double>, Signal_Trader*, 
+            derived_is<Signal>
+            >
         {
             Signal(Signal_Trader * trader, py_object updateDist, py_object signalDist)
                 :   base(updateDist, signalDist, trader)

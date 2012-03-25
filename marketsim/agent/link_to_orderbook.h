@@ -39,7 +39,7 @@ namespace agent {
             {
                 using namespace boost::python;
                 Base::py_visit(c);
-                c.def("orderBook", &LinkToOrderBook::getOrderBook, return_internal_reference<>());
+                c.def("orderBook", &LinkToOrderBook::getOrderBook/*, return_internal_reference<>()*/);
             }
 #endif
 

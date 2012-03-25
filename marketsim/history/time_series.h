@@ -21,7 +21,7 @@ namespace history {
             static void py_register(std::string const &name = py_name())
             {
                 using namespace boost::python;
-                ::py_register<TimeStamped<T> >();
+                marketsim::py_register<TimeStamped<T> >();
 
                 class_<TimeSeries>(name.c_str())
                     .def("__iter__", boost::python::iterator<TimeSeries>())

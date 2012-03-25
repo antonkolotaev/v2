@@ -6,8 +6,8 @@
 namespace marketsim {
 namespace agent {
     /// The most base class for agents
-    template <typename Derived>
-        struct AgentBase 
+    template <typename Derived, class Base = Empty>
+    struct AgentBase : Base
     {
         /// no meaningful parameters should be passed here
         AgentBase() {}

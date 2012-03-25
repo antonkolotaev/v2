@@ -48,7 +48,7 @@ namespace marketsim
                 /// if a chunk is not released, call destructor for its value
                 if (chunk.next_free == 0)
                 {
-                    chunk.getValue()->~T();
+                    //chunk.getValue()->~T();
                 }
             }
         }

@@ -36,8 +36,9 @@ namespace {
             agent::TrendFollower       <rng::constant<Time>, rng::constant<Volume>, 
             agent::MarketOrderFactory  <MarketT<Buy>, MarketT<Sell>, 
             agent::LinkToOrderBook     <TrendFollowerTester*, 
+            RefCounted                 <
             agent::AgentBase           <TrendFollowerTester>
-            > > >
+            > > > >
     {
         TrendFollowerTester()
             :   base(
@@ -50,6 +51,8 @@ namespace {
             ,   processed_(0)
         {
         }
+
+        void on_released() {}
 
         bool processOrder(MarketT<Buy> const & x)
         {

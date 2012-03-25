@@ -11,9 +11,10 @@ namespace agent
     template <
         typename IntervalDistr,     // generator of intervals between signal value updates
         typename DeltaDistr,        // generator of deltas for the signal value
-        typename ListenerPtr        // a pointer to a class with onSignal function
+        typename ListenerPtr,        // a pointer to a class with onSignal function
+        typename Base
     >
-        struct Signal 
+        struct Signal : Base
     {
         /// 0-th argument defines intervals between signal updates
         /// 1-th argument is a generator for signal deltas

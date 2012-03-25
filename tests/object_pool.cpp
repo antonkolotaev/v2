@@ -29,6 +29,9 @@ namespace {
             assert(p4->x == 12);
             assert(p5->x == 34);
             assert(g_TestInstances == 3);
+            pool.free(p4);
+            pool.free(p5);
+            pool.free(p3);
         }
         assert(g_TestInstances == 0);
     }

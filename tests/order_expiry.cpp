@@ -16,23 +16,27 @@ namespace {
         using namespace marketsim::order;
 
         template <typename Base>
-            struct WithExpiration : Base, EventHandlerBase
+            struct WithExpiration : Base
             {
                 template <typename T>
                     WithExpiration(T const & x)
                         :   Base(boost::get<0>(x))
+                        ,   timeout_(*this, &WithExpiration::process, boost::get<1>(x))
                 {
-                    schedule(boost::get<1>(x));
                 }
 
                 typedef WithExpiration  base;   // for derived classes
 
                 using Base::cancelled;
+                using Base::derived_t;
+                using Base::self;
 
                 void process()
                 {
                     this->self()->onCancelled();
                 }
+            private:
+                TimeOut<WithExpiration> timeout_;
             };
 
         int g_counter = 0;
@@ -43,18 +47,20 @@ namespace {
                 WithExpiration  <
                 ExecutionHistory<
                 LimitOrderBase  <SIDE, 
+                RefCounted      <
                 derived_is      <
                 LimitT          <SIDE> 
-                > > > > >
+                > > > > > >
             {
                typedef 
                    InPool          <PlacedInPool,
                    WithExpiration  <
                    ExecutionHistory<
                    LimitOrderBase  <SIDE, 
+                   RefCounted      <
                    derived_is      <
                    LimitT          <SIDE> 
-                   > > > > >
+                   > > > > > >
                   base;
                                  
                 LimitT(PriceVolume const & x, TimeInterval life_time, object_pool<LimitT> * h, order_queue::OrderQueue<boost::intrusive_ptr<LimitT> >  * queue)

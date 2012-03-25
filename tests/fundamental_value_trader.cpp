@@ -35,13 +35,16 @@ namespace {
             agent::FundamentalValueTrader   <rng::constant<Time>, rng::constant<Volume>, 
             agent::MarketOrderFactory       <MarketT<Buy>, MarketT<Sell>, 
             agent::LinkToOrderBook          <FundamentalValueTester*, 
-            agent::AgentBase                <FundamentalValueTester> > > >
+            RefCounted                      <
+            agent::AgentBase                <FundamentalValueTester> > > > >
     {
         FundamentalValueTester()
             :   base(boost::make_tuple(boost::make_tuple(dummy, this), rng::constant<Time>(1.), rng::constant<Volume>(1), 100))
             ,   ask_(0), bid_(0)
             ,   processed_(0)
         {}
+
+        void on_released() {}
 
         bool processOrder(MarketT<Buy> const & x)
         {

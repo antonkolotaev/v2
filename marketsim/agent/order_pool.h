@@ -12,14 +12,14 @@ namespace agent
         typename Order,     // type of orders to create
         typename Base
     >
-        struct PrivateOrderPool : Base 
+        struct SharedOrderPool : Base 
     {
         template <typename T>
-            PrivateOrderPool(T const & x) 
+            SharedOrderPool(T const & x) 
                 : Base(x) 
             {}
 
-        DECLARE_BASE(PrivateOrderPool);
+        DECLARE_BASE(SharedOrderPool);
 
         typedef Order  order_type;
         typedef Order* order_ptr_t;
@@ -33,16 +33,16 @@ namespace agent
                 return new (pool_.alloc()) Order(x, &pool_, this->self());
             }
 
-        /// Since all orders a stored in an order queue, we ask the order queue to remove all our orders
-        /// it is reasonable since without agent (which is about to be destroyed) its orders have no sense
-        ~PrivateOrderPool()
-        {
-            this->self()->getOrderBook()->orderQueue(typename order_side<Order>::type()).remove_all_pool_orders(&pool_);
-        }
-
    private:
-       object_pool<Order>   pool_;
+       static object_pool<Order>   pool_;
    };
+
+    template <
+        typename Order,     // type of orders to create
+        typename Base
+    >
+    object_pool<Order>  SharedOrderPool<Order, Base>::pool_;
+
 }}
 
 #endif

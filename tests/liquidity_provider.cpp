@@ -27,16 +27,18 @@ namespace {
            struct LimitT : 
                     InPool        <PlacedInPool, 
                     LimitOrderBase<SIDE,
+                    RefCounted    <
                     derived_is    <
                     LimitT        <SIDE> 
-                    > > >
+                    > > > >
         {
             typedef 
                 InPool        <PlacedInPool, 
                 LimitOrderBase<SIDE,
+                RefCounted    <  
                 derived_is    <
                 LimitT        <SIDE> 
-                > > >
+                > > > >
                 base;
                             
             template <typename X>
@@ -67,16 +69,18 @@ namespace {
        struct LiquidityProviderT : 
                 LiquidityProvider   < rng::constant<Time>, rng::constant<Price>, rng::constant<Volume>,
                 LinkToOrderBook     < OrderBook*, 
-                PrivateOrderPool    < order::LimitT<SIDE>, 
+                SharedOrderPool    < order::LimitT<SIDE>, 
+                RefCounted          <
                 AgentBase           < LiquidityProviderT<SIDE> 
-                > > > >
+                > > > > >
        {
             typedef 
                 LiquidityProvider   < rng::constant<Time>, rng::constant<Price>, rng::constant<Volume>,
                 LinkToOrderBook     < OrderBook*, 
-                PrivateOrderPool    < order::LimitT<SIDE>, 
+                SharedOrderPool    < order::LimitT<SIDE>, 
+                RefCounted          <
                 AgentBase           < LiquidityProviderT<SIDE> 
-                > > > >
+                > > > > >
                 base;
                             
             LiquidityProviderT(OrderBook *book) 
@@ -87,6 +91,7 @@ namespace {
                                          100))
             {}
 
+            void on_released() {}
        };
    }
 

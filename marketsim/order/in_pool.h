@@ -22,7 +22,7 @@ namespace order     {
     /// NB! This class derives from RefCounted -> better design should be proposed to avoid clashing for example with RefCounter in a timer
     /// TODO: derive optionally order base classes from RefCounted
     template <typename HolderPtrF, typename Base> 
-        struct InPool : Base, RefCounted<typename Base::derived_t>
+        struct InPool : Base//, RefCounted<derived_is<typename Base::derived_t> >
         {
             /// 0-th argument is an initializer for the base class
             /// 1-th argument is a pointer to the pool
@@ -38,17 +38,11 @@ namespace order     {
                typename HolderPtrF::template apply<typename Base::derived_t>::type 
                holder_t;
 
-            /// \return true iff the order is allocated in the given pool
-            bool is_in_my_pool(holder_t h) const 
-            {
-                return h == holder_;
-            }
-
             ~InPool() 
             {
                 //std::cout << "~LimitOrder(" << price << ", " << volume << ")" << std::endl;
             }
-        protected:
+        //protected:
             /// called from RefCounted when reference count become 0
             void on_released()
             {
@@ -56,7 +50,7 @@ namespace order     {
                 holder_->free(this->self());
             }
 
-            friend struct RefCounted<typename Base::derived_t>;
+            friend struct RefCounted<derived_is<typename Base::derived_t> >; 
 
         private:
             holder_t  holder_;

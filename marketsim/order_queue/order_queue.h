@@ -191,24 +191,6 @@ namespace order_queue
 			return result;
 		}
         
-        /// functor determining whether an order resides in the given pool
-        template <typename PoolPtr>
-        struct BelongsTo {
-            BelongsTo(PoolPtr a) : a(a) {}
-            template <typename OrderPtr> bool operator () (OrderPtr o) const {
-                return o->is_in_my_pool(a);
-            }
-            PoolPtr a;
-        };
-
-        /// removes all orders residing in the given pool from the queue
-        template <typename PoolPtr>
-            void remove_all_pool_orders(PoolPtr p) 
-            {
-                c.erase(std::remove_if(c.begin(),c.end(),BelongsTo<PoolPtr>(p)), c.end());
-                std::make_heap(c.begin(), c.end(), comp);
-            }
-
         /// reaction on a partial filling of an order
 		template <typename OrderT>
 			void onPartiallyFilled(OrderT const & order, PriceVolume const & trade)

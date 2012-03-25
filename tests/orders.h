@@ -9,19 +9,20 @@ namespace order     {
 
     template <Side SIDE>
         struct LimitOrderT : 
-            RefCounted<LimitOrderT<SIDE> >,
             ExecutionHistory<
             LimitOrderBase  <SIDE, 
+            RefCounted      <
             derived_is      <
             LimitOrderT     <SIDE> 
-            > > >   
+            > > > >  
     {
         typedef 
             ExecutionHistory<
             LimitOrderBase  <SIDE, 
+            RefCounted      <
             derived_is      <
             LimitOrderT     <SIDE> 
-            > > >   
+            > > > >  
             base;
                 
         LimitOrderT(PriceVolume const & x) : base(x) {}

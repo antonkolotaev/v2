@@ -11,7 +11,7 @@ namespace {
 
     struct EEE : EventHandlerBase
     {
-        EEE(object_pool<EEE> *s) : storage_(s), ID_(g_EEE_counter++)
+        EEE(object_pool<EEE> *s) : storage_(s), ID_(g_EEE_counter++), refs_(0)
         {
             schedule(5.);
             //std::cout << "created " << ID_ << std::endl;
@@ -21,6 +21,15 @@ namespace {
         {
             //std::cout << "destroyed " << ID_ << std::endl;
         }
+
+        int refs_;
+        void add_ref() { ++refs_; }
+        void release() 
+        {
+            if (--refs_ == 0)
+                on_released(); 
+        }
+
 
         void process() {}
 
@@ -70,7 +79,7 @@ namespace {
 
     struct FFF : EventHandlerBase
     {
-        FFF() : counter_(10)
+        FFF() : counter_(10), refs_(0)
         {
             schedule(1.);
         }
@@ -87,6 +96,10 @@ namespace {
 
         object_pool<EEE>    storage_;
         int                 counter_;
+
+        int refs_;
+        void add_ref() { ++refs_; }
+        void release() { --refs_; }
     };
 
     TEST_CASE("scheduler", "Testing scheduler events resided in a pool")

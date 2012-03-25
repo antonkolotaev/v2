@@ -69,7 +69,19 @@ namespace {
         Volume getProcessed() const { return processed_; }
 
     private:
-        typedef marketsim::agent::Signal<rng::constant<Time>, SignalTraderTester&, SignalTraderTester*>   signal_t;
+        struct signal_t : 
+            marketsim::agent::Signal    <rng::constant<Time>, SignalTraderTester&, SignalTraderTester*, 
+            RefCounted                  <                                      
+            derived_is                  < signal_t >
+            >  >
+        {
+            template <class T1, class T2, class T3> 
+                signal_t(T1 const &t1, T2 const &t2, T3 const &t3)
+                    :   base(t1,t2,t3)
+                {}
+
+                void on_released() {}
+        };
 
         signal_t    signal_;
         Volume      processed_;

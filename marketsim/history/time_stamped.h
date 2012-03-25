@@ -43,7 +43,7 @@ namespace history {
             {
                 using namespace boost::python;
 
-                ::py_register<T>();
+                marketsim::py_register<T>();
 
                 class_<TimeStamped>(name.c_str(), init<Time, T>())
                     .def_readonly("time",  &TimeStamped::time)

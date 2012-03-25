@@ -28,21 +28,23 @@ namespace {
         template <Side SIDE>
             struct LimitT : 
                     WithCancelPosition  <
-                    WithLinkToAgent     <agent::AgentT<SIDE>*,
+                    WithLinkToAgent     <weak_intrusive_ptr<agent::AgentT<SIDE> >,
                     InPool              <PlacedInPool, 
                     LimitOrderBase      <SIDE, 
+                    RefCounted          <
                     derived_is          <
                     LimitT              <SIDE
-                    > > > > > >
+                    > > > > > > >
             {
                 typedef 
                     WithCancelPosition  <
-                    WithLinkToAgent     <agent::AgentT<SIDE>*,
+                    WithLinkToAgent     <weak_intrusive_ptr<agent::AgentT<SIDE> >,
                     InPool              <PlacedInPool, 
                     LimitOrderBase      <SIDE, 
+                    RefCounted          <
                     derived_is          <
                     LimitT              <SIDE
-                    > > > > > >
+                    > > > > > > >
                      base; 
                                                  
                 LimitT(PriceVolume const &x, object_pool<LimitT> * h, agent::AgentT<SIDE> * a) 
@@ -79,16 +81,20 @@ namespace {
         struct AgentT :
                 OrderCanceller      < rng::Generator<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
                 LinkToOrderBook     < OrderBook*, 
-                PrivateOrderPool    < order::LimitT<SIDE>, 
+                SharedOrderPool    < order::LimitT<SIDE>, 
+                RefCounted          <
+                HasWeakReferences   <
                 AgentBase           < AgentT<SIDE> > 
-                > >, always_0>
+                > > > >, always_0>
         {
             typedef 
                 OrderCanceller      < rng::Generator<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
                 LinkToOrderBook     < OrderBook*, 
-                PrivateOrderPool    < order::LimitT<SIDE>, 
+                SharedOrderPool    < order::LimitT<SIDE>, 
+                RefCounted          <
+                HasWeakReferences   <
                 AgentBase           < AgentT<SIDE> > 
-                > >, always_0>
+                > > > >, always_0>
                   base;
                               
             AgentT(OrderBook * book) 
@@ -103,6 +109,8 @@ namespace {
 
                 return order;
             }
+
+            void on_released() {}
         };
    }
 
