@@ -311,7 +311,7 @@ namespace fast {
                     bases<IPyRefCounted>, 
                     boost::noncopyable
                 > 
-                c(name.c_str(), /*init<OrderBook*, Time, Time, PriceF, VolumeF, Price>()*/no_init);
+                c(name.c_str(), no_init);
 
                 base::py_visit(c);
 
@@ -333,12 +333,12 @@ namespace fast {
             PnL_Quantity_History_InDeque<
             FundamentalValueTrader  <rng::exponential<Time>, rng::exponential<VolumeF>, 
             MarketOrderFactory      <order::MarketT<Buy, FV_Trader*>, order::MarketT<Sell, FV_Trader*>, 
-            LinkToOrderBook         <OrderBook*, 
+            LinkToOrderBook         <boost::intrusive_ptr<OrderBook>, 
             PyRefCounted            <
-            AgentBase               <FV_Trader
+            AgentBase               <FV_Trader, IPyRefCounted
             > > > > > >
         {
-            FV_Trader(OrderBook *book, Price FV, Time creationTime, VolumeF meanVolume)
+            FV_Trader(boost::intrusive_ptr<OrderBook> book, Price FV, Time creationTime, VolumeF meanVolume)
                 :   base(
                         boost::make_tuple(
                             boost::make_tuple(dummy, book), 
@@ -350,8 +350,16 @@ namespace fast {
 
             static void py_register(const char * name)
             {
-                class_<FV_Trader, boost::noncopyable> c(name, init<OrderBook*, Price, Time, VolumeF>());
+                class_<
+                    FV_Trader, 
+                    boost::intrusive_ptr<FV_Trader>,
+                    bases<IPyRefCounted>,
+                    boost::noncopyable
+                > 
+                c(name, no_init);
+
                 base::py_visit(c);
+                register_4<FV_Trader, boost::intrusive_ptr<OrderBook>, Price, Time, VolumeF>(c);
             }
         };
 
@@ -359,12 +367,12 @@ namespace fast {
             PnL_Quantity_History_InDeque<
             SignalTrader        <rng::exponential<VolumeF>, 
             MarketOrderFactory  <order::MarketT<Buy, Signal_Trader*>, order::MarketT<Sell, Signal_Trader*>, 
-            LinkToOrderBook     <OrderBook*,
+            LinkToOrderBook     <boost::intrusive_ptr<OrderBook>,
             PyRefCounted        <
-            AgentBase           <Signal_Trader> 
+            AgentBase           <Signal_Trader, IPyRefCounted> 
             > > > > >
         {
-            Signal_Trader(OrderBook * book, VolumeF meanVolume, double threshold)
+            Signal_Trader(boost::intrusive_ptr<OrderBook> book, VolumeF meanVolume, double threshold)
                 :   base(
                         boost::make_tuple(
                             boost::make_tuple(dummy, book), 
@@ -375,25 +383,41 @@ namespace fast {
 
             static void py_register(const char * name)
             {
-                class_<Signal_Trader, boost::noncopyable> c(name, init<OrderBook*, VolumeF, double>());
+                class_<
+                    Signal_Trader, 
+                    boost::intrusive_ptr<Signal_Trader>,
+                    bases<IPyRefCounted>,
+                    boost::noncopyable
+                > 
+                c(name, no_init);
+
                 base::py_visit(c);
+                register_3<Signal_Trader, boost::intrusive_ptr<OrderBook>, VolumeF, double>(c);
             }
         };
 
         struct Signal : 
-            marketsim::agent::Signal<rng::exponential<Time>, rng::normal<double>, Signal_Trader*,
-            PyRefCounted            <
-            derived_is              <Signal>
+            marketsim::agent::Signal  < rng::exponential<Time>, rng::normal<double>, boost::intrusive_ptr<Signal_Trader>,
+            PyRefCounted              <
+            IPyRefCounted
             > >
         {
-            Signal(Signal_Trader * trader, Time meanUpdateTime, double deltaSigma)
+            Signal(boost::intrusive_ptr<Signal_Trader>  trader, Time meanUpdateTime, double deltaSigma)
                 :   base(rng::exponential<Time>(meanUpdateTime), rng::normal<double>(0., deltaSigma), trader)
             {}
 
             static void py_register(const char * name)
             {
-                class_<Signal, boost::noncopyable> c(name, init<Signal_Trader*, Time, double>());
+                class_<
+                    Signal, 
+                    boost::intrusive_ptr<Signal>,
+                    bases<IPyRefCounted>,
+                    boost::noncopyable
+                > 
+                c(name, no_init);
+
                 base::py_visit(c);
+                register_3<Signal, boost::intrusive_ptr<Signal_Trader>, Time, double>(c);
             }
         };
 
@@ -401,12 +425,12 @@ namespace fast {
             PnL_Quantity_History_InDeque<
             NoiseTrader         < rng::exponential<Time>,     rng::exponential<VolumeF>,
             MarketOrderFactory  < order::MarketT<Buy,Noise_Trader*>, order::MarketT<Sell,Noise_Trader*>, 
-            LinkToOrderBook     < OrderBook*, 
+            LinkToOrderBook     < boost::intrusive_ptr<OrderBook>, 
             PyRefCounted        <
-            AgentBase           < Noise_Trader
+            AgentBase           < Noise_Trader, IPyRefCounted
             > > > > > >
         {
-            Noise_Trader(OrderBook * book, Time meanInterval, VolumeF meanVolume)
+            Noise_Trader(boost::intrusive_ptr<OrderBook> book, Time meanInterval, VolumeF meanVolume)
                 :   base(
                         boost::make_tuple(
                             boost::make_tuple(dummy, book), 
@@ -417,8 +441,16 @@ namespace fast {
 
             static void py_register(const char * name)
             {
-                class_<Noise_Trader, boost::noncopyable> c(name, init<OrderBook*, Time, VolumeF>());
+                class_<
+                    Noise_Trader, 
+                    boost::intrusive_ptr<Noise_Trader>,
+                    bases<IPyRefCounted>,
+                    boost::noncopyable
+                >
+                c(name, no_init);
+
                 base::py_visit(c);
+                register_3<Noise_Trader, boost::intrusive_ptr<OrderBook>, Time, VolumeF>(c);
             }
         };
     }
@@ -427,7 +459,10 @@ namespace fast {
 MARKETSIM_HAS_REFERENCE_TO_PYTHON(marketsim::fast::OrderBook);
 MARKETSIM_HAS_REFERENCE_TO_PYTHON(marketsim::fast::agent::LiquidityProviderT<marketsim::Sell>);
 MARKETSIM_HAS_REFERENCE_TO_PYTHON(marketsim::fast::agent::LiquidityProviderT<marketsim::Buy>);
-
+MARKETSIM_HAS_REFERENCE_TO_PYTHON(marketsim::fast::agent::FV_Trader);
+MARKETSIM_HAS_REFERENCE_TO_PYTHON(marketsim::fast::agent::Signal_Trader);
+MARKETSIM_HAS_REFERENCE_TO_PYTHON(marketsim::fast::agent::Signal);
+MARKETSIM_HAS_REFERENCE_TO_PYTHON(marketsim::fast::agent::Noise_Trader);
 
 BOOST_PYTHON_MODULE(fast)
 {

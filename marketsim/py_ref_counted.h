@@ -115,6 +115,36 @@ namespace marketsim
         return boost::intrusive_ptr<T>(new T());
     }
 
+    template <class T, class A1> 
+        boost::intrusive_ptr<T> New_1(A1 a1)
+    {
+        return boost::intrusive_ptr<T>(new T(a1));
+    }
+
+    template <class T, class A1, class A2> 
+        boost::intrusive_ptr<T> New_2(A1 a1, A2 a2)
+    {
+        return boost::intrusive_ptr<T>(new T(a1, a2));
+    }
+
+    template <class T, class A1, class A2, class A3> 
+        boost::intrusive_ptr<T> New_3(A1 a1, A2 a2, A3 a3)
+    {
+        return boost::intrusive_ptr<T>(new T(a1, a2, a3));
+    }
+
+    template <class T, class A1, class A2, class A3, class A4> 
+        boost::intrusive_ptr<T> New_4(A1 a1, A2 a2, A3 a3, A4 a4)
+    {
+        return boost::intrusive_ptr<T>(new T(a1, a2, a3, a4));
+    }
+
+    template <class T, class A1, class A2, class A3, class A4, class A5> 
+        boost::intrusive_ptr<T> New_5(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5)
+    {
+        return boost::intrusive_ptr<T>(new T(a1, a2, a3, a4, a5));
+    }
+
     template <class T, class A1, class A2, class A3, class A4, class A5, class A6> 
         boost::intrusive_ptr<T> New_6(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5, A6 a6)
     {
@@ -126,6 +156,52 @@ namespace marketsim
     {
         using namespace boost::python;
         object return_value = call_method<object>(py_obj.ptr(), "__cons__");
+        intrusive_ptr_set_pyobject(extract<T*>(py_obj), py_obj.ptr());
+        return return_value;
+    }
+
+    template <class T, class A1>
+        boost::python::object Init_1(boost::python::object py_obj, A1 a1)
+    {
+        using namespace boost::python;
+        object return_value = call_method<object>(py_obj.ptr(), "__cons__", a1);
+        intrusive_ptr_set_pyobject(extract<T*>(py_obj), py_obj.ptr());
+        return return_value;
+    }
+
+
+    template <class T, class A1, class A2>
+        boost::python::object Init_2(boost::python::object py_obj, A1 a1, A2 a2)
+    {
+        using namespace boost::python;
+        object return_value = call_method<object>(py_obj.ptr(), "__cons__", a1, a2);
+        intrusive_ptr_set_pyobject(extract<T*>(py_obj), py_obj.ptr());
+        return return_value;
+    }
+
+    template <class T, class A1, class A2, class A3>
+        boost::python::object Init_3(boost::python::object py_obj, A1 a1, A2 a2, A3 a3)
+    {
+        using namespace boost::python;
+        object return_value = call_method<object>(py_obj.ptr(), "__cons__", a1, a2, a3);
+        intrusive_ptr_set_pyobject(extract<T*>(py_obj), py_obj.ptr());
+        return return_value;
+    }
+
+    template <class T, class A1, class A2, class A3, class A4>
+        boost::python::object Init_4(boost::python::object py_obj, A1 a1, A2 a2, A3 a3, A4 a4)
+    {
+        using namespace boost::python;
+        object return_value = call_method<object>(py_obj.ptr(), "__cons__", a1, a2, a3, a4);
+        intrusive_ptr_set_pyobject(extract<T*>(py_obj), py_obj.ptr());
+        return return_value;
+    }
+
+    template <class T, class A1, class A2, class A3, class A4, class A5>
+        boost::python::object Init_5(boost::python::object py_obj, A1 a1, A2 a2, A3 a3, A4 a4, A5 a5)
+    {
+        using namespace boost::python;
+        object return_value = call_method<object>(py_obj.ptr(), "__cons__", a1, a2, a3, a4, a5);
         intrusive_ptr_set_pyobject(extract<T*>(py_obj), py_obj.ptr());
         return return_value;
     }
@@ -152,6 +228,56 @@ namespace marketsim
     {
         x   .def("__init__", Init_0<T>)
             .def("__cons__", make_constructor(New_0<T>))
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+
+        register_pointer<T>();
+    }
+
+    template <class T, class A1, class ClassDef>
+    void register_2(ClassDef &x)
+    {
+        x   .def("__init__", Init_1<T,A1>)
+            .def("__cons__", make_constructor(New_1<T,A1>))
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+
+        register_pointer<T>();
+    }
+
+    template <class T, class A1, class A2, class ClassDef>
+    void register_2(ClassDef &x)
+    {
+        x   .def("__init__", Init_2<T,A1,A2>)
+            .def("__cons__", make_constructor(New_2<T,A1,A2>))
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+
+        register_pointer<T>();
+    }
+
+    template <class T, class A1, class A2, class A3, class ClassDef>
+    void register_3(ClassDef &x)
+    {
+        x   .def("__init__", Init_3<T,A1,A2,A3>)
+            .def("__cons__", make_constructor(New_3<T,A1,A2,A3>))
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+
+        register_pointer<T>();
+    }
+
+    template <class T, class A1, class A2, class A3, class A4, class ClassDef>
+    void register_4(ClassDef &x)
+    {
+        x   .def("__init__", Init_4<T,A1,A2,A3,A4>)
+            .def("__cons__", make_constructor(New_4<T,A1,A2,A3,A4>))
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+
+        register_pointer<T>();
+    }
+
+    template <class T, class A1, class A2, class A3, class A4, class A5, class ClassDef>
+    void register_5(ClassDef &x)
+    {
+        x   .def("__init__", Init_5<T,A1,A2,A3,A4,A5>)
+            .def("__cons__", make_constructor(New_5<T,A1,A2,A3,A4,A5>))
             .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
 
         register_pointer<T>();
