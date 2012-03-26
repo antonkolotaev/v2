@@ -3,6 +3,8 @@
 #include <set>
 //#define MARKETSIM_BOOST_PYTHON
 
+#include <marketsim/py_ref_counted.h>
+
 #include <marketsim/object_pool.h>
 #include <marketsim/order_book.h>
 
@@ -31,25 +33,6 @@
 #include "with_history_in_deque.h"
 #include "PnL_Quantity_history_in_deque.h"
 
-template <typename T>
-void py_register(const char * name)
-{
-    static bool registered = false;
-    if (!registered) {
-        T::py_register(name);
-        registered = true;
-    }
-}
-
-template <typename T>
-void py_register()
-{
-    static bool registered = false;
-    if (!registered) {
-        T::py_register();
-        registered = true;
-    }
-}
 
 namespace marketsim {
 namespace basic {
@@ -190,8 +173,10 @@ namespace basic {
             };
    }
 
-   struct OrderBook 
-       : marketsim::OrderBook<order_queue::with_callback<Buy>, order_queue::with_callback<Sell> >    
+   struct OrderBook : 
+       marketsim::OrderBook < order_queue::with_callback<Buy>, order_queue::with_callback<Sell>, 
+       PyRefCounted         < IRefCounted >
+       >    
    {
        OrderBook() {}
 
@@ -219,12 +204,12 @@ namespace basic {
             OrdersSubmittedInVector < boost::intrusive_ptr<order::LimitT<SIDE> >, 
             PnL_Holder              <
             Quantity_Holder         <
-            LinkToOrderBook         < OrderBook*, 
-            SharedOrderPool        < order::LimitT<SIDE>, 
+            LinkToOrderBook         < boost::intrusive_ptr<OrderBook>, 
+            SharedOrderPool         < order::LimitT<SIDE>, 
             AgentBase               < LimitOrderTraderT<SIDE> 
             > > > > > > > >
         {
-		    LimitOrderTraderT(OrderBook * book) 
+            LimitOrderTraderT(boost::intrusive_ptr<OrderBook> book) 
                 : base(
                         boost::make_tuple(
                             boost::make_tuple(dummy, book), 
@@ -263,12 +248,13 @@ namespace basic {
             LiquidityProvider   < py_value<Time>, py_value<PriceF>, py_value<VolumeF>, 
             OrderCanceller      < py_value<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
             PnL_Quantity_History_InDeque <
-            LinkToOrderBook     < OrderBook*, 
-            SharedOrderPool    < order::LimitT<SIDE>, 
-            AgentBase           < LiquidityProviderT<SIDE> 
-            > > > > > > >
+            LinkToOrderBook     < boost::intrusive_ptr<OrderBook>, 
+            SharedOrderPool     < order::LimitT<SIDE>, 
+            PyRefCounted        <
+            AgentBase           < LiquidityProviderT<SIDE>, IRefCounted
+            > > > > > > > >
         {
-		    LiquidityProviderT( OrderBook * book, 
+            LiquidityProviderT( boost::intrusive_ptr<OrderBook> book, 
                     py_object   creationTimeDistr, 
                     py_object   cancelTimeDistr, 
                     py_object   priceDistr,
@@ -344,8 +330,9 @@ namespace basic {
             FundamentalValueTrader  < py_value<Time>, py_value<VolumeF>, 
             MarketOrderFactory      < order::MarketT<Buy, FV_Trader*>, order::MarketT<Sell, FV_Trader*>, 
             LinkToOrderBook         < OrderBook*, 
-            AgentBase               < FV_Trader
-            > > > > > >
+            PyRefCounted            <
+            AgentBase               < FV_Trader, IRefCounted
+            > > > > > > >
         {
             FV_Trader(OrderBook *book, Price FV, py_object intervalDist, py_object volumeDist)
                 :   base(
@@ -391,8 +378,8 @@ namespace basic {
         };
 
         struct Signal : 
-            marketsim::agent::Signal<py_value<Time>, py_value<double>, Signal_Trader*, 
-            derived_is<Signal>
+            marketsim::agent::Signal < py_value<Time>, py_value<double>, Signal_Trader*, 
+            PyRefCounted             < IRefCounted >
             >
         {
             Signal(Signal_Trader * trader, py_object updateDist, py_object signalDist)
@@ -411,8 +398,9 @@ namespace basic {
             NoiseTrader         < py_value<Time>, py_value<VolumeF>,
             MarketOrderFactory  < order::MarketT<Buy,Noise_Trader*>, order::MarketT<Sell,Noise_Trader*>, 
             LinkToOrderBook     < OrderBook*, 
-            AgentBase           < Noise_Trader
-            > > > > >
+            PyRefCounted        <
+            AgentBase           < Noise_Trader, IRefCounted
+            > > > > > >
         {
             Noise_Trader(OrderBook * book, py_object interval, py_object meanVolume)
                 :   base(
@@ -432,7 +420,7 @@ namespace basic {
 
    }
 
-    struct ScheduledEvent : EventHandlerBase
+    struct ScheduledEvent : PyRefCounted<EventHandlerBase>
     {
         ScheduledEvent(TimeInterval dt, boost::python::object handler, boost::python::object callback) 
             : handler(handler), callback(callback)
@@ -469,7 +457,7 @@ namespace basic {
         }
     };
 
-    struct Timer : EventHandlerBase
+    struct Timer : PyRefCounted<EventHandlerBase>
     {
         Timer(py_object intervals, py_object handler, py_object callback)
             :   handler  (handler)
@@ -516,6 +504,7 @@ namespace basic {
 BOOST_PYTHON_MODULE(basic)
 {
 	using namespace marketsim::basic;
+    using marketsim::py_register;
 
     py_register<marketsim::Scheduler>("Scheduler");
     py_register<marketsim::PriceVolume>();

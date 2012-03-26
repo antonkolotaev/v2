@@ -5,6 +5,7 @@
 
 #include <marketsim/order/volume_holder.h>
 #include <marketsim/order/side.h>
+#include <marketsim/order/limit_order_base.h>
 #include <marketsim/common/macros.h>
 
 namespace marketsim {

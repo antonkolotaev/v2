@@ -96,15 +96,6 @@ namespace marketsim
         std::deque<Chunk>  chunks_;
         Chunk   *          first_free_chunk_;
     };
-
-    struct PlacedInPool
-    {
-        template <typename T>
-            struct apply 
-            {
-                typedef object_pool<T>*     type;
-            };
-    };
 }
 
 #endif

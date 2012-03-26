@@ -4,6 +4,7 @@
 #include <queue>
 #include <algorithm>
 #include <boost/mpl/if.hpp>
+#include <boost/foreach.hpp>
 
 #include <boost/optional.hpp>
 

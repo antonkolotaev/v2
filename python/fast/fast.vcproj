@@ -169,28 +169,6 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\dllmain.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-					CompileAsManaged="0"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="0"
-					CompileAsManaged="0"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
 			RelativePath=".\fast.cpp"
 			>
 			<FileConfiguration
@@ -203,7 +181,43 @@
 			</FileConfiguration>
 		</File>
 		<File
+			RelativePath=".\fv_trader.h"
+			>
+		</File>
+		<File
+			RelativePath=".\limit_order.h"
+			>
+		</File>
+		<File
+			RelativePath=".\liquidity_provider.h"
+			>
+		</File>
+		<File
+			RelativePath=".\market_order.h"
+			>
+		</File>
+		<File
+			RelativePath=".\noise_trader.h"
+			>
+		</File>
+		<File
+			RelativePath=".\order_book.h"
+			>
+		</File>
+		<File
+			RelativePath=".\order_queue.h"
+			>
+		</File>
+		<File
 			RelativePath=".\PnL_Quantity_history_in_deque.h"
+			>
+		</File>
+		<File
+			RelativePath=".\signal.h"
+			>
+		</File>
+		<File
+			RelativePath=".\signal_trader.h"
 			>
 		</File>
 		<File

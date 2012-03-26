@@ -4,6 +4,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <marketsim/common_types.h>
 #include <marketsim/ref_counted.h>
+#include <marketsim/object_pool.h>
 
 namespace marketsim {
 namespace order     {
@@ -55,6 +56,16 @@ namespace order     {
         private:
             holder_t  holder_;
         };
+
+        struct PlacedInPool
+        {
+            template <typename T>
+            struct apply 
+            {
+                typedef object_pool<T>*     type;
+            };
+        };
+
 }}
 
 #endif

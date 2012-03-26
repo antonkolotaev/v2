@@ -2,9 +2,21 @@
 #define marketsim_py_ref_counted_h_included
 
 #include <boost/python.hpp>
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <marketsim/utils/intrusive_ptr_python_helper.h>
 #include <iostream>
+#include <list>
+
+#define MARKETSIM_HAS_REFERENCE_TO_PYTHON(X)\
+namespace boost { namespace python  \
+{                                   \
+    template <>                     \
+    struct has_back_reference<X>    \
+        : mpl::true_                \
+    {};                             \
+}}
 
 namespace marketsim
 {
@@ -226,6 +238,7 @@ namespace marketsim
     template <class T, class ClassDef>
     void register_0(ClassDef &x)
     {
+        using namespace boost::python;
         x   .def("__init__", Init_0<T>)
             .def("__cons__", make_constructor(New_0<T>))
             .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
@@ -236,6 +249,7 @@ namespace marketsim
     template <class T, class A1, class ClassDef>
     void register_2(ClassDef &x)
     {
+        using namespace boost::python;
         x   .def("__init__", Init_1<T,A1>)
             .def("__cons__", make_constructor(New_1<T,A1>))
             .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
@@ -246,6 +260,7 @@ namespace marketsim
     template <class T, class A1, class A2, class ClassDef>
     void register_2(ClassDef &x)
     {
+        using namespace boost::python;
         x   .def("__init__", Init_2<T,A1,A2>)
             .def("__cons__", make_constructor(New_2<T,A1,A2>))
             .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
@@ -256,6 +271,7 @@ namespace marketsim
     template <class T, class A1, class A2, class A3, class ClassDef>
     void register_3(ClassDef &x)
     {
+        using namespace boost::python;
         x   .def("__init__", Init_3<T,A1,A2,A3>)
             .def("__cons__", make_constructor(New_3<T,A1,A2,A3>))
             .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
@@ -266,6 +282,7 @@ namespace marketsim
     template <class T, class A1, class A2, class A3, class A4, class ClassDef>
     void register_4(ClassDef &x)
     {
+        using namespace boost::python;
         x   .def("__init__", Init_4<T,A1,A2,A3,A4>)
             .def("__cons__", make_constructor(New_4<T,A1,A2,A3,A4>))
             .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
@@ -276,6 +293,7 @@ namespace marketsim
     template <class T, class A1, class A2, class A3, class A4, class A5, class ClassDef>
     void register_5(ClassDef &x)
     {
+        using namespace boost::python;
         x   .def("__init__", Init_5<T,A1,A2,A3,A4,A5>)
             .def("__cons__", make_constructor(New_5<T,A1,A2,A3,A4,A5>))
             .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
@@ -286,6 +304,7 @@ namespace marketsim
     template <class T, class A1, class A2, class A3, class A4, class A5, class A6, class ClassDef>
     void register_6(ClassDef &x)
     {
+        using namespace boost::python;
         x   .def("__init__", Init_6<T,A1,A2,A3,A4,A5,A6>)
             .def("__cons__", make_constructor(New_6<T,A1,A2,A3,A4,A5,A6>))
             .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
@@ -312,6 +331,51 @@ namespace marketsim
             registered = true;
         }
     }
+
+    typedef std::list<boost::function<void ()> >  PyRegFunctions;
+
+    PyRegFunctions& pyRegFunctions()
+    {
+        static PyRegFunctions  f;
+        return f;
+    }
+
+    template <class T>
+    struct RegisterInPython 
+    {
+        RegisterInPython()
+        {
+            pyRegFunctions().push_back(reg_0);
+        }
+
+        RegisterInPython(const char * name)
+        {
+            pyRegFunctions().push_back(boost::bind(reg_1, name));
+        }
+
+        static void reg_0()
+        {
+            py_register<T>();
+        }
+
+        static void reg_1(const char * name)
+        {
+            py_register<T>(name);
+        }
+    };
 }
+
+#define CONCATENATE_DETAIL(x, y) x##y
+#define CONCATENATE(x, y) CONCATENATE_DETAIL(x, y)
+#define MAKE_UNIQUE(x) CONCATENATE(x, __COUNTER__)
+
+#define MARKETSIM_PY_REGISTER(T) \
+    MARKETSIM_HAS_REFERENCE_TO_PYTHON(T)    \
+    marketsim::RegisterInPython<T> MAKE_UNIQUE(_py_reg_);
+
+
+#define MARKETSIM_PY_REGISTER_NAME(T, name) \
+    MARKETSIM_HAS_REFERENCE_TO_PYTHON(T)    \
+    marketsim::RegisterInPython<T> MAKE_UNIQUE(_py_reg_)(name);
 
 #endif
