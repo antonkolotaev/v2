@@ -40,7 +40,6 @@ namespace fast {
                 class_<
                     Noise_Trader, 
                     boost::intrusive_ptr<Noise_Trader>,
-                    bases<IRefCounted>,
                     boost::noncopyable
                 >
                 c(name, no_init);

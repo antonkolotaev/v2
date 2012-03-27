@@ -41,7 +41,6 @@ namespace fast {
                 class_<
                     FV_Trader, 
                     boost::intrusive_ptr<FV_Trader>,
-                    bases<IRefCounted>,
                     boost::noncopyable
                 > 
                 c(name, no_init);

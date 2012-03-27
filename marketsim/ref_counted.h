@@ -4,6 +4,10 @@
 #include <boost/noncopyable.hpp>
 #include <marketsim/common_types.h>
 
+#ifdef MARKETSIM_BOOST_PYTHON
+#  include <boost/python.hpp>
+#endif
+
 namespace marketsim
 {
     struct IRefCounted : boost::noncopyable
@@ -14,6 +18,14 @@ namespace marketsim
         virtual void set_pyobject(PyObject *) = 0;
         virtual void clear_pyobject() = 0;
         virtual PyObject* get_pyobject() = 0;
+
+        static void py_register()
+        {
+            using namespace boost::python;
+            class_<IRefCounted, boost::intrusive_ptr<IRefCounted>, boost::noncopyable>
+                ("RefCounted", no_init)
+                ;
+        }
 #endif
         virtual ~IRefCounted() {}
     };
@@ -154,6 +166,8 @@ namespace boost
     inline void intrusive_ptr_set_pyobject(marketsim::IRefCounted * ptr, PyObject * pyobject)  { ptr->set_pyobject(pyobject); }
     inline void intrusive_ptr_clear_pyobject(marketsim::IRefCounted * ptr) { ptr->clear_pyobject(); }
     inline PyObject * intrusive_ptr_get_pyobject(marketsim::IRefCounted * ptr)  { return ptr->get_pyobject(); }
+
+    template <class T> void intrusive_ptr_clear_pyobject_t(T * ptr) { ptr->clear_pyobject(); }
 #endif
 
     template <typename D> void intrusive_ptr_add_ref(marketsim::RefCounted<D> * p) { p->add_ref(); }

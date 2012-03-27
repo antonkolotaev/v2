@@ -21,14 +21,6 @@ MARKETSIM_PY_REGISTER_NAME(marketsim::Scheduler, "Scheduler");
 
 BOOST_PYTHON_MODULE(fast)
 {
-    using marketsim::py_register;
-
-    py::class_<IPyRefCounted, boost::intrusive_ptr<IPyRefCounted>, boost::noncopyable>
-        ("RefCounted", py::no_init)
-        ;
-
-    BOOST_FOREACH(marketsim::PyRegFunctions::reference f, marketsim::pyRegFunctions())
-    {
-        f();
-    }
+    marketsim::py_register<IPyRefCounted>();
+    marketsim::registerClassesInPython();
 }

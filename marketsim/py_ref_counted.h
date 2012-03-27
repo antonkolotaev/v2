@@ -5,6 +5,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/foreach.hpp>
 #include <marketsim/utils/intrusive_ptr_python_helper.h>
 #include <iostream>
 #include <list>
@@ -241,18 +242,18 @@ namespace marketsim
         using namespace boost::python;
         x   .def("__init__", Init_0<T>)
             .def("__cons__", make_constructor(New_0<T>))
-            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject_t<T>);
 
         register_pointer<T>();
     }
 
     template <class T, class A1, class ClassDef>
-    void register_2(ClassDef &x)
+    void register_1(ClassDef &x)
     {
         using namespace boost::python;
         x   .def("__init__", Init_1<T,A1>)
             .def("__cons__", make_constructor(New_1<T,A1>))
-            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject_t<T>);
 
         register_pointer<T>();
     }
@@ -263,7 +264,7 @@ namespace marketsim
         using namespace boost::python;
         x   .def("__init__", Init_2<T,A1,A2>)
             .def("__cons__", make_constructor(New_2<T,A1,A2>))
-            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject_t<T>);
 
         register_pointer<T>();
     }
@@ -274,7 +275,7 @@ namespace marketsim
         using namespace boost::python;
         x   .def("__init__", Init_3<T,A1,A2,A3>)
             .def("__cons__", make_constructor(New_3<T,A1,A2,A3>))
-            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject_t<T>);
 
         register_pointer<T>();
     }
@@ -285,7 +286,7 @@ namespace marketsim
         using namespace boost::python;
         x   .def("__init__", Init_4<T,A1,A2,A3,A4>)
             .def("__cons__", make_constructor(New_4<T,A1,A2,A3,A4>))
-            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject_t<T>);
 
         register_pointer<T>();
     }
@@ -296,7 +297,7 @@ namespace marketsim
         using namespace boost::python;
         x   .def("__init__", Init_5<T,A1,A2,A3,A4,A5>)
             .def("__cons__", make_constructor(New_5<T,A1,A2,A3,A4,A5>))
-            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject_t<T>);
 
         register_pointer<T>();
     }
@@ -307,7 +308,7 @@ namespace marketsim
         using namespace boost::python;
         x   .def("__init__", Init_6<T,A1,A2,A3,A4,A5,A6>)
             .def("__cons__", make_constructor(New_6<T,A1,A2,A3,A4,A5,A6>))
-            .def("__del__",  &boost::intrusive_ptr_clear_pyobject);
+            .def("__del__",  &boost::intrusive_ptr_clear_pyobject_t<T>);
 
         register_pointer<T>();
     }
@@ -363,6 +364,14 @@ namespace marketsim
             py_register<T>(name);
         }
     };
+
+    inline void registerClassesInPython()
+    {
+        BOOST_FOREACH(PyRegFunctions::reference f, pyRegFunctions())
+        {
+            f();
+        }
+    }
 }
 
 #define CONCATENATE_DETAIL(x, y) x##y

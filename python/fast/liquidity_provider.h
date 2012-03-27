@@ -61,7 +61,6 @@ namespace fast {
                 class_<
                     LiquidityProviderT, 
                     boost::intrusive_ptr<LiquidityProviderT>, 
-                    bases<IRefCounted>, 
                     boost::noncopyable
                 > 
                 c(name.c_str(), no_init);

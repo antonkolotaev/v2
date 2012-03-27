@@ -87,8 +87,8 @@ namespace marketsim
         template <typename T>
             static void py_visit(T & class_def)
             {
-                py_register<QueueSellSide>();
-                py_register<QueueBuySide>();
+                marketsim::py_register<QueueSellSide>();
+                marketsim::py_register<QueueBuySide>();
 
                 class_def
                     .def_readonly("asks", &OrderBook::sell_side_)

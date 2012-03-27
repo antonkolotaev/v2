@@ -18,7 +18,12 @@ namespace fast {
         {
             using namespace boost::python;
 
-            class_<OrderBook, boost::intrusive_ptr<OrderBook>, bases<IRefCounted>, boost::noncopyable> c("OrderBook", no_init);
+            class_<
+                OrderBook, 
+                boost::intrusive_ptr<OrderBook>, 
+                boost::noncopyable
+            > 
+            c("OrderBook", no_init);
 
             base::py_visit(c);
 

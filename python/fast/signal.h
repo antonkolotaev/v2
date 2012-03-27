@@ -26,7 +26,6 @@ namespace fast {
                 class_<
                     Signal, 
                     boost::intrusive_ptr<Signal>,
-                    bases<IRefCounted>,
                     boost::noncopyable
                 > 
                 c(name, no_init);
