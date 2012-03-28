@@ -1,5 +1,5 @@
 import sys
-sys.path.append(r'D:\marketsimulator\DevAnton\v2\Debug')
+#sys.path.append(r'D:\marketsimulator\DevAnton\v2\Debug')
 
 from marketsim.fast import *
 

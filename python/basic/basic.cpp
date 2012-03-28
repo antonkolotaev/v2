@@ -486,8 +486,8 @@ namespace basic {
 
     struct ScheduledEvent : PyRefCounted<EventHandlerBase>
     {
-        ScheduledEvent(TimeInterval dt, boost::python::object handler, boost::python::object callback) 
-            : handler(handler), callback(callback)
+        ScheduledEvent(TimeInterval dt, boost::python::object handler) 
+            : handler(handler)
         {
             schedule(dt);
         }
@@ -497,72 +497,68 @@ namespace basic {
             handler();
         }
 
-        void on_released()
-        {
-            callback();
-            // do nothing since it is supposed to be handled by the Python runtime
-            // NB! It is very important to hold a reference to this object in python 
-            // TBD: implement boost::intrusive_ptr support Boost.Python
-        }
-
-        ~ScheduledEvent()
-        {
-            int a = 1;
-        }
-
-        boost::python::object  handler, callback;
+        boost::python::object  handler;
         
         static void py_register()
         {
             using namespace boost::python;
-            class_<ScheduledEvent, boost::noncopyable>("Event", init<TimeInterval, object, object>())
-                .def("cancel", &ScheduledEvent::cancel)
-                ;
+            
+            class_<
+                ScheduledEvent, 
+                boost::intrusive_ptr<ScheduledEvent>,
+                boost::noncopyable
+            > c("Event", no_init);
+
+            c.def("cancel", &ScheduledEvent::cancel);
+
+            register_2<ScheduledEvent, TimeInterval, object>(c);
         }
     };
 
     struct Timer : PyRefCounted<EventHandlerBase>
     {
-        Timer(py_object intervals, py_object handler, py_object callback)
+        Timer(boost::python::object intervals, boost::python::object handler)
             :   handler  (handler)
             ,   intervals(intervals)
-            ,   callback (callback)
         {
             schedule(this->intervals());
         }
 
         void process()
         {
-            handler();
+            boost::python::object res = handler();
+            try {
+                bool cont = extract<bool>(res);
+                if (!cont)
+                    return;
+            } catch (...) {}
             schedule(intervals()); 
-        }
-
-        void on_released()
-        {
-            callback();
-            // do nothing since the object is to be managed by Python run time
-        }
-
-        ~Timer()
-        {
-            // in order to kill a timer cancel() method is to be called
         }
 
         static void py_register()
         {
             using namespace boost::python;
 
-            class_<Timer, boost::noncopyable>("Timer", init<object, object, object>())
-                .def("cancel", &Timer::cancel)
-                ;
+            class_<
+                Timer, 
+                boost::intrusive_ptr<Timer>,
+                boost::noncopyable
+            > c("Timer", no_init);
+
+            c.def("cancel", &Timer::cancel);
+
+            register_2<Timer, object, object>(c);
         }
         
 
-        py_object               handler, callback;
+        boost::python::object   handler;
         py_value<TimeInterval>  intervals;
     };
 
 }}
+
+MARKETSIM_PY_REGISTER(marketsim::basic::ScheduledEvent);
+MARKETSIM_PY_REGISTER(marketsim::basic::Timer);
 
 MARKETSIM_PY_REGISTER_NAME(marketsim::Scheduler, "Scheduler");
 MARKETSIM_PY_REGISTER_NAME(marketsim::basic::OrderBook, "OrderBook");
@@ -625,7 +621,7 @@ BOOST_PYTHON_MODULE(basic)
     py_register<marketsim::history::CollectInDeque<marketsim::py_PnL_Quantity> >();
     py_register<marketsim::history::CollectInDeque<marketsim::order_queue::py_BestPriceAndVolume> >();
 
-    py_register<ScheduledEvent>();
-    py_register<Timer>();
+    //py_register<ScheduledEvent>();
+    //py_register<Timer>();
 }
 
