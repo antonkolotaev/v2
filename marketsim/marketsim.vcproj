@@ -294,7 +294,15 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\python\callback.h"
+			>
+		</File>
+		<File
 			RelativePath=".\common_types.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\basic\fv_trader.h"
 			>
 		</File>
 		<File
@@ -306,11 +314,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\python\intrusive_ptr_python_helper.h"
+			RelativePath=".\utils\intrusive_ptr_python_helper.h"
 			>
 		</File>
 		<File
-			RelativePath=".\utils\intrusive_ptr_python_helper.h"
+			RelativePath=".\python\intrusive_ptr_python_helper.h"
 			>
 		</File>
 		<File
@@ -318,7 +326,15 @@
 			>
 		</File>
 		<File
+			RelativePath=".\python\basic\limit_order_trader.h"
+			>
+		</File>
+		<File
 			RelativePath=".\python\fast\liquidity_provider.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\basic\liquidity_provider.h"
 			>
 		</File>
 		<File
@@ -326,7 +342,15 @@
 			>
 		</File>
 		<File
+			RelativePath=".\python\basic\market_order_trader.h"
+			>
+		</File>
+		<File
 			RelativePath=".\python\fast\noise_trader.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\basic\noise_trader.h"
 			>
 		</File>
 		<File
@@ -338,11 +362,23 @@
 			>
 		</File>
 		<File
+			RelativePath=".\python\basic\order_book.h"
+			>
+		</File>
+		<File
 			RelativePath=".\python\fast\order_book.h"
 			>
 		</File>
 		<File
+			RelativePath=".\python\basic\order_queue.h"
+			>
+		</File>
+		<File
 			RelativePath=".\python\fast\order_queue.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\basic\orders.h"
 			>
 		</File>
 		<File
@@ -370,6 +406,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\python\scheduled_event.h"
+			>
+		</File>
+		<File
 			RelativePath=".\scheduler.h"
 			>
 		</File>
@@ -379,6 +419,14 @@
 		</File>
 		<File
 			RelativePath=".\python\fast\signal_trader.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\basic\signal_trader.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\timer.h"
 			>
 		</File>
 		<File
