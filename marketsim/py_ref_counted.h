@@ -57,7 +57,7 @@ namespace marketsim
 
         void clear_pyobject()
         {
-            std::cout << "[clearing pyobject pointer]" << std::endl;
+            //std::cout << "[clearing pyobject pointer]" << std::endl;
             pyobject = 0;
         }
 
