@@ -27,8 +27,8 @@
 #include <marketsim/history.h>
 #include <marketsim/python/callback.h>
 
-#include "with_history_in_deque.h"
-#include "PnL_Quantity_history_in_deque.h"
+#include <marketsim/python/basic/with_history_in_deque.h>
+#include <marketsim/python/basic/PnL_Quantity_history_in_deque.h>
 
 #include <marketsim/python/basic/orders.h>
 #include <marketsim/python/basic/order_book.h>

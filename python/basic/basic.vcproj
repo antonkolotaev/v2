@@ -180,14 +180,6 @@
 				/>
 			</FileConfiguration>
 		</File>
-		<File
-			RelativePath=".\PnL_Quantity_history_in_deque.h"
-			>
-		</File>
-		<File
-			RelativePath=".\with_history_in_deque.h"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>
