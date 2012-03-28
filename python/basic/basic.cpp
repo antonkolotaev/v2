@@ -3,7 +3,8 @@
 #include <set>
 //#define MARKETSIM_BOOST_PYTHON
 
-#include <marketsim/py_ref_counted.h>
+#include <marketsim/python/py_ref_counted.h>
+#include <marketsim/python/registration.h>
 
 #include <marketsim/object_pool.h>
 #include <marketsim/order_book.h>

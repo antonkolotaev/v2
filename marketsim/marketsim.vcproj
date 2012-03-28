@@ -298,11 +298,35 @@
 			>
 		</File>
 		<File
+			RelativePath=".\python\fast\fv_trader.h"
+			>
+		</File>
+		<File
 			RelativePath=".\history.h"
 			>
 		</File>
 		<File
+			RelativePath=".\python\intrusive_ptr_python_helper.h"
+			>
+		</File>
+		<File
 			RelativePath=".\utils\intrusive_ptr_python_helper.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\fast\limit_order.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\fast\liquidity_provider.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\fast\market_order.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\fast\noise_trader.h"
 			>
 		</File>
 		<File
@@ -314,6 +338,22 @@
 			>
 		</File>
 		<File
+			RelativePath=".\python\fast\order_book.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\fast\order_queue.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\fast\PnL_Quantity_history_in_deque.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\py_ref_counted.h"
+			>
+		</File>
+		<File
 			RelativePath=".\py_ref_counted.h"
 			>
 		</File>
@@ -322,11 +362,27 @@
 			>
 		</File>
 		<File
+			RelativePath=".\python\registration.h"
+			>
+		</File>
+		<File
 			RelativePath=".\rng.h"
 			>
 		</File>
 		<File
 			RelativePath=".\scheduler.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\fast\signal.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\fast\signal_trader.h"
+			>
+		</File>
+		<File
+			RelativePath=".\python\fast\with_history_in_deque.h"
 			>
 		</File>
 	</Files>

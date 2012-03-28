@@ -1,7 +1,7 @@
 #ifndef _marketsim_fast_liquidity_provider_h_included
 #define _marketsim_fast_liquidity_provider_h_included
 
-#include <marketsim/py_ref_counted.h>
+#include <marketsim/python/py_ref_counted.h>
 #include "order_book.h"
 #include <marketsim/agent/base.h>
 #include <marketsim/agent/link_to_orderbook.h>

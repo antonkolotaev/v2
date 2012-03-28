@@ -7,7 +7,7 @@
 #include <marketsim/common/macros.h>
 
 #ifdef MARKETSIM_BOOST_PYTHON
-#  include <marketsim/py_ref_counted.h>
+#  include <marketsim/python/py_ref_counted.h>
 #endif
 
 namespace marketsim 
