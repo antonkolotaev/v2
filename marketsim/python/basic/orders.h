@@ -21,15 +21,15 @@ namespace basic {
     {
         using namespace marketsim::order;
 
-        template <Side SIDE, typename Sender>
+        template <Side SIDE>
             struct MarketT : 
-                WithLinkToAgent <Sender,
+                WithLinkToAgent <agent::IAgentForMarketOrder<MarketT<SIDE> >*,
                 MarketOrderBase <SIDE, 
                 derived_is      <
-                MarketT         <SIDE, Sender> 
+                MarketT         <SIDE> 
                 > > >
             {
-                MarketT(Volume v, Sender s) : base(boost::make_tuple(v,s)) {}
+                MarketT(Volume v, agent::IAgentForMarketOrder<MarketT<SIDE> >* s) : base(boost::make_tuple(v,s)) {}
             };
 
         template <Side SIDE>

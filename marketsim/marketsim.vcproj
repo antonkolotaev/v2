@@ -314,11 +314,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\python\intrusive_ptr_python_helper.h"
+			RelativePath=".\utils\intrusive_ptr_python_helper.h"
 			>
 		</File>
 		<File
-			RelativePath=".\utils\intrusive_ptr_python_helper.h"
+			RelativePath=".\python\intrusive_ptr_python_helper.h"
 			>
 		</File>
 		<File
@@ -342,6 +342,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\agent\market_order_factory_in_pool.h"
+			>
+		</File>
+		<File
 			RelativePath=".\python\basic\market_order_trader.h"
 			>
 		</File>
@@ -358,7 +362,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\order_book.h"
+			RelativePath=".\python\fast\order_book.h"
 			>
 		</File>
 		<File
@@ -366,7 +370,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\python\fast\order_book.h"
+			RelativePath=".\order_book.h"
 			>
 		</File>
 		<File
@@ -382,11 +386,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\python\fast\PnL_Quantity_history_in_deque.h"
+			RelativePath=".\python\basic\PnL_Quantity_history_in_deque.h"
 			>
 		</File>
 		<File
-			RelativePath=".\python\basic\PnL_Quantity_history_in_deque.h"
+			RelativePath=".\python\fast\PnL_Quantity_history_in_deque.h"
 			>
 		</File>
 		<File
@@ -422,11 +426,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\python\basic\signal_trader.h"
+			RelativePath=".\python\fast\signal_trader.h"
 			>
 		</File>
 		<File
-			RelativePath=".\python\fast\signal_trader.h"
+			RelativePath=".\python\basic\signal_trader.h"
 			>
 		</File>
 		<File

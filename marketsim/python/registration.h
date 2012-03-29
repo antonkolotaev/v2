@@ -6,7 +6,7 @@
 #include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/foreach.hpp>
-#include <marketsim/utils/intrusive_ptr_python_helper.h>
+#include <marketsim/python/intrusive_ptr_python_helper.h>
 #include <list>
 
 namespace marketsim

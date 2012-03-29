@@ -21,13 +21,14 @@ namespace basic {
    namespace agent 
    {
         struct Signal_Trader :
+            IAgentForMarketOrderImpl    < order::MarketT<Buy>, order::MarketT<Sell>, 
             PnL_Quantity_History_InDeque<
             SignalTrader                < py_value<VolumeF>, 
-            MarketOrderFactory          < order::MarketT<Buy, Signal_Trader*>, order::MarketT<Sell, Signal_Trader*>, 
+            MarketOrderFactory          < order::MarketT<Buy>, order::MarketT<Sell>, 
             LinkToOrderBook             < boost::intrusive_ptr<OrderBook>, 
             PyRefCounted                <
             AgentBase                   < Signal_Trader, IRefCounted> 
-            > > > > >
+            > > > > > >
         {
             Signal_Trader(boost::intrusive_ptr<OrderBook> book, py_object volumeDist, double threshold)
                 :   base(

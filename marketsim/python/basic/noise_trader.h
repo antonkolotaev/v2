@@ -22,13 +22,14 @@ namespace basic {
    namespace agent 
    {
         struct Noise_Trader :
+            IAgentForMarketOrderImpl    < order::MarketT<Buy>, order::MarketT<Sell>, 
             PnL_Quantity_History_InDeque<
-            NoiseTrader         < py_value<Time>, py_value<VolumeF>,
-            MarketOrderFactory  < order::MarketT<Buy,Noise_Trader*>, order::MarketT<Sell,Noise_Trader*>, 
-            LinkToOrderBook     < boost::intrusive_ptr<OrderBook>, 
-            PyRefCounted        <
-            AgentBase           < Noise_Trader, IRefCounted
-            > > > > > >
+            NoiseTrader                 < py_value<Time>, py_value<VolumeF>,
+            MarketOrderFactory          < order::MarketT<Buy>, order::MarketT<Sell>, 
+            LinkToOrderBook             < boost::intrusive_ptr<OrderBook>, 
+            PyRefCounted                <
+            AgentBase                   < Noise_Trader, IRefCounted
+            > > > > > > >
         {
             Noise_Trader(boost::intrusive_ptr<OrderBook> book, py_object interval, py_object meanVolume)
                 :   base(

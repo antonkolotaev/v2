@@ -22,14 +22,15 @@ namespace basic {
        using namespace marketsim::agent;
 
         struct MarketOrderTrader :
+            IAgentForMarketOrderImpl< order::MarketT<Buy>, order::MarketT<Sell>, 
             OnPartiallyFilled       < py_callback,
             PnL_Holder              <
             Quantity_Holder         <
-            MarketOrderFactory      < order::MarketT<Buy, MarketOrderTrader*>, order::MarketT<Sell, MarketOrderTrader*>, 
+            MarketOrderFactory      < order::MarketT<Buy>, order::MarketT<Sell>, 
             LinkToOrderBook         < boost::intrusive_ptr<OrderBook>,
             PyRefCounted            <
             AgentBase               < MarketOrderTrader, IRefCounted
-            > > > > > > >
+            > > > > > > > >
         {
             MarketOrderTrader(boost::intrusive_ptr<OrderBook> book)
                 :   base(boost::make_tuple(boost::make_tuple(dummy, book), dummy))
