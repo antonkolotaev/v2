@@ -32,7 +32,7 @@ namespace basic {
             PnL_Holder              <
             Quantity_Holder         <
             LinkToOrderBook         < boost::intrusive_ptr<OrderBook>, 
-            SharedOrderPool         < order::LimitT<SIDE>, 
+            SharedOrderPool         < boost::intrusive_ptr<order::LimitT<SIDE> >, 
             PyRefCounted            <
             AgentBase               < LimitOrderTraderT<SIDE>, IRefCounted
             > > > > > > > > >
@@ -69,7 +69,7 @@ namespace basic {
             {
                 if (v > 0)
                 {
-                    order::LimitT<SIDE> * order = base::createOrder(pv(p,v));
+                    boost::intrusive_ptr<order::LimitT<SIDE> > order = base::createOrder(pv(p,v));
 
                     base::processOrder(order);
                 }

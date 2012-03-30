@@ -22,14 +22,14 @@ namespace basic {
    namespace agent 
    {
         struct FV_Trader :
-            IAgentForMarketOrderImpl< order::MarketT<Buy>, order::MarketT<Sell>,
-            OnPartiallyFilled       < py_callback,
+            IAgentForMarketOrderImpl    < order::MarketT<Buy>, order::MarketT<Sell>,
+            OnPartiallyFilled           < py_callback,
             PnL_Quantity_History_InDeque<
-            FundamentalValueTrader  < py_value<Time>, py_value<VolumeF>, 
-            MarketOrderFactory      < order::MarketT<Buy>, order::MarketT<Sell>, 
-            LinkToOrderBook         < boost::intrusive_ptr<OrderBook>, 
-            PyRefCounted            <
-            AgentBase               < FV_Trader, IRefCounted
+            FundamentalValueTrader      < py_value<Time>, py_value<VolumeF>, 
+            MarketOrderFactoryInPool    < MarketBuyPtr, MarketSellPtr, 
+            LinkToOrderBook             < boost::intrusive_ptr<OrderBook>, 
+            PyRefCounted                <
+            AgentBase                   < FV_Trader, IRefCounted
             > > > > > > > >
         {
             FV_Trader(boost::intrusive_ptr<OrderBook> book, Price FV, py_object intervalDist, py_object volumeDist)

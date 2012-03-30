@@ -386,15 +386,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\python\basic\PnL_Quantity_history_in_deque.h"
-			>
-		</File>
-		<File
 			RelativePath=".\python\fast\PnL_Quantity_history_in_deque.h"
 			>
 		</File>
 		<File
-			RelativePath=".\py_ref_counted.h"
+			RelativePath=".\python\basic\PnL_Quantity_history_in_deque.h"
 			>
 		</File>
 		<File

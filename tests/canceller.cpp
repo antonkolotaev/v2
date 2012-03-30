@@ -81,7 +81,7 @@ namespace {
         struct AgentT :
                 OrderCanceller      < rng::Generator<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
                 LinkToOrderBook     < OrderBook*, 
-                SharedOrderPool    < order::LimitT<SIDE>, 
+                SharedOrderPool     < boost::intrusive_ptr<order::LimitT<SIDE> >, 
                 RefCounted          <
                 HasWeakReferences   <
                 AgentBase           < AgentT<SIDE> > 
@@ -90,7 +90,7 @@ namespace {
             typedef 
                 OrderCanceller      < rng::Generator<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
                 LinkToOrderBook     < OrderBook*, 
-                SharedOrderPool    < order::LimitT<SIDE>, 
+                SharedOrderPool     < boost::intrusive_ptr< order::LimitT<SIDE> >, 
                 RefCounted          <
                 HasWeakReferences   <
                 AgentBase           < AgentT<SIDE> > 
@@ -101,9 +101,9 @@ namespace {
                 : base(boost::make_tuple(boost::make_tuple(dummy, book), new rng::constant<Time, rng::IGenerator<Time> >(1.))) 
             {}
 
-            order::LimitT<SIDE> * sendOrder(Price p, Volume v)
+            boost::intrusive_ptr<order::LimitT<SIDE> > sendOrder(Price p, Volume v)
             {
-                order::LimitT<SIDE> * order = base::createOrder(pv(p,v));
+                boost::intrusive_ptr<order::LimitT<SIDE> > order = base::createOrder(pv(p,v));
 
                 base::processOrder(order);
 

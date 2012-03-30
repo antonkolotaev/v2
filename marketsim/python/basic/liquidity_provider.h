@@ -31,7 +31,7 @@ namespace basic {
             OrderCanceller      < py_value<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
             PnL_Quantity_History_InDeque <
             LinkToOrderBook     < boost::intrusive_ptr<OrderBook>, 
-            SharedOrderPool     < order::LimitT<SIDE>, 
+            SharedOrderPool     < boost::intrusive_ptr<order::LimitT<SIDE> >, 
             PyRefCounted        <
             AgentBase           < LiquidityProviderT<SIDE>, IRefCounted
             > > > > > > > >
@@ -81,7 +81,7 @@ namespace basic {
             {
                 if (v > 0)
                 {
-                    order::LimitT<SIDE> * o = base::createOrder(pv(p,v));
+                    boost::intrusive_ptr<order::LimitT<SIDE> > o = base::createOrder(pv(p,v));
 
                     base::processOrder(o);
                 }

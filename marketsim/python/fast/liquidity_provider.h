@@ -26,7 +26,7 @@ namespace fast {
             OrderCanceller      < rng::exponential<Time>, boost::intrusive_ptr<order::LimitT<SIDE> >, 
             PnL_Quantity_History_InDeque <
             LinkToOrderBook     < boost::intrusive_ptr<OrderBook>, 
-            SharedOrderPool     < order::LimitT<SIDE>, 
+            SharedOrderPool     < boost::intrusive_ptr<order::LimitT<SIDE> >, 
             PyRefCounted        <
             HasWeakReferences   <
             AgentBase           < LiquidityProviderT<SIDE>, IRefCounted 
@@ -75,7 +75,7 @@ namespace fast {
 
             void sendOrder(Price p, Volume v)
             {
-                order::LimitT<SIDE> * o= base::createOrder(pv(p,v));
+                boost::intrusive_ptr<order::LimitT<SIDE> > o= base::createOrder(pv(p,v));
 
                 base::processOrder(o);
             }

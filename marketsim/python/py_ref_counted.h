@@ -107,5 +107,14 @@ namespace marketsim
     };
 }
 
+namespace boost
+{
+    template <typename D> void intrusive_ptr_set_pyobject(marketsim::PyRefCounted<D>* ptr, PyObject * pyobject)  { ptr->set_pyobject(pyobject); }
+    template <typename D> void intrusive_ptr_clear_pyobject(marketsim::PyRefCounted<D> * ptr) { ptr->clear_pyobject(); }
+    template <typename D> PyObject * intrusive_ptr_get_pyobject(marketsim::PyRefCounted<D> * ptr)  { return ptr->get_pyobject(); }
+
+    template <typename D> void intrusive_ptr_add_ref(marketsim::PyRefCounted<D> * p) { p->add_ref(); }
+    template <typename D> void intrusive_ptr_release(marketsim::PyRefCounted<D> * p) { p->release(); }
+}
 
 #endif

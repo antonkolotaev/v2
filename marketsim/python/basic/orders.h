@@ -24,12 +24,16 @@ namespace basic {
         template <Side SIDE>
             struct MarketT : 
                 WithLinkToAgent <agent::IAgentForMarketOrder<MarketT<SIDE> >*,
+                InPool          <PlacedInPool,
                 MarketOrderBase <SIDE, 
+                PyRefCounted    <
                 derived_is      <
                 MarketT         <SIDE> 
-                > > >
+                > > > > >
             {
-                MarketT(Volume v, agent::IAgentForMarketOrder<MarketT<SIDE> >* s) : base(boost::make_tuple(v,s)) {}
+                MarketT(Volume v, object_pool<MarketT> * h, agent::IAgentForMarketOrder<MarketT>* ag) 
+                    : base(boost::make_tuple(boost::make_tuple(v, h), ag))
+                {}
             };
 
         template <Side SIDE>
@@ -38,7 +42,7 @@ namespace basic {
                     WithLinkToAgent     < agent::IAgentForOrder<LimitT<SIDE> >*,
                     InPool              < PlacedInPool, 
                     LimitOrderBase      < SIDE, 
-                    RefCounted          <
+                    PyRefCounted        <
                     derived_is          <
                     LimitT              < SIDE
                 > > > > > > >
@@ -50,7 +54,13 @@ namespace basic {
                 // we don't export LimitT to Python since it seems to be not useful for fast simulation
             };
     }
-            
+
+    typedef order::MarketT<Buy>     MarketBuy;
+    typedef order::MarketT<Sell>    MarketSell;
+
+    typedef boost::intrusive_ptr<MarketBuy>   MarketBuyPtr;
+    typedef boost::intrusive_ptr<MarketSell>  MarketSellPtr;
+
     typedef order::LimitT<Buy>     LimitBuy;
     typedef order::LimitT<Sell>    LimitSell;
 

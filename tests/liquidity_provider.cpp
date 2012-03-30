@@ -69,7 +69,7 @@ namespace {
        struct LiquidityProviderT : 
                 LiquidityProvider   < rng::constant<Time>, rng::constant<Price>, rng::constant<Volume>,
                 LinkToOrderBook     < OrderBook*, 
-                SharedOrderPool    < order::LimitT<SIDE>, 
+                SharedOrderPool     < boost::intrusive_ptr<order::LimitT<SIDE> >, 
                 RefCounted          <
                 AgentBase           < LiquidityProviderT<SIDE> 
                 > > > > >
@@ -77,7 +77,7 @@ namespace {
             typedef 
                 LiquidityProvider   < rng::constant<Time>, rng::constant<Price>, rng::constant<Volume>,
                 LinkToOrderBook     < OrderBook*, 
-                SharedOrderPool    < order::LimitT<SIDE>, 
+                SharedOrderPool     < boost::intrusive_ptr<order::LimitT<SIDE> >, 
                 RefCounted          <
                 AgentBase           < LiquidityProviderT<SIDE> 
                 > > > > >

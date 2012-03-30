@@ -118,7 +118,7 @@ namespace {
             PnL_Holder          <
             Quantity_Holder     <
             LinkToOrderBook     < OrderBook*, 
-            SharedOrderPool    < order::LimitT<SIDE>, 
+            SharedOrderPool     < boost::intrusive_ptr<order::LimitT<SIDE> >, 
             HasWeakReferences   <
             AgentBase           < AgentT<SIDE> > 
             > > > > > > > >
@@ -130,7 +130,7 @@ namespace {
             PnL_Holder          <
             Quantity_Holder     <
             LinkToOrderBook     < OrderBook*, 
-            SharedOrderPool    < order::LimitT<SIDE>, 
+            SharedOrderPool     < boost::intrusive_ptr<order::LimitT<SIDE> >, 
             HasWeakReferences   <
             AgentBase           < AgentT<SIDE> > 
             > > > > > > > >
@@ -153,9 +153,9 @@ namespace {
 				    return getHandler((history::Collector<TAG, history::InDeque<typename TAG::ValueType> >*)0).getHistory();
 			    }
 
-            order::LimitT<SIDE> * sendOrder(Price p, Volume v)
+            boost::intrusive_ptr<order::LimitT<SIDE> > sendOrder(Price p, Volume v)
             {
-                order::LimitT<SIDE> * o = base::createOrder(pv(p,v));
+                boost::intrusive_ptr<order::LimitT<SIDE> > o = base::createOrder(pv(p,v));
 
                 base::processOrder(o);
 

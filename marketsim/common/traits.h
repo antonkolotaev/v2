@@ -49,6 +49,7 @@ namespace marketsim
 
     /// category of a pointer to order is the category of the order itself
     template <typename Order> struct order_category<Order*> : order_category<Order> {};
+    template <typename Order> struct order_category<boost::intrusive_ptr<Order> > : order_category<Order> {};
 }
 
 #endif

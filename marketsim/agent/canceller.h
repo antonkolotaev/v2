@@ -13,14 +13,13 @@ namespace agent     {
     /// This vector can be used, for example, to cancel arbitrary orders
     /// Orders must provide functions (set/get)CancelPosition in order to speed up look up (see order::WithCancelPosition)
     /// \param Order type for storing a pointer to order (usually boost::intrusive_ptr<Order>)
-    template <typename Order, typename Base>
+    template <typename OrderPtr, typename Base>
         struct OrdersSubmittedInVector : Base 
     {
         template <typename T> OrdersSubmittedInVector(T const & x) : Base(x) {}
 
         /// remembers an order just created
-        template <typename OrderT>
-            void processOrder(OrderT order)
+        void processOrder(OrderPtr order)
         {
             assert(!order->cancelled());
             // store its position in our vector
@@ -32,16 +31,14 @@ namespace agent     {
         }
 
         /// removes order from the vector
-        template <typename OrderT>
-            void onOrderFilled(OrderT order)
+        void onOrderFilled(OrderPtr order)
         {
             removeOrder(order);
             Base::onOrderFilled(order);
         }
 
         /// removes order from the vector
-        template <typename OrderT>
-            void onOrderCancelled(OrderT order)
+        void onOrderCancelled(OrderPtr order)
         {
             removeOrder(order);
             Base::onOrderCancelled(order);
@@ -56,7 +53,7 @@ namespace agent     {
         }
 
         /// Getting access to an order with 'idx' position 
-        Order& getIssuedOrder(size_t idx) 
+        OrderPtr& getIssuedOrder(size_t idx) 
         {
             return orders_issued_[idx];
         }
@@ -69,8 +66,7 @@ namespace agent     {
 
         /// removes order from the vector
         /// it must be in the vector
-        template <typename OrderT>
-            void removeOrder(OrderT order)
+        void removeOrder(OrderPtr order)
         {
             size_t pos = order->getCancelPosition();
 
@@ -117,25 +113,25 @@ namespace agent     {
         /// Checking that all orders in the vector are not cancelled
         void check_all_orders_in_queue()
         {
-            BOOST_FOREACH(Order order, orders_issued_)
+            BOOST_FOREACH(OrderPtr order, orders_issued_)
             {
                 typename order_side<Order>::type  tag;
                 assert(Base::getOrderBook()->orderQueue(tag).contains(order));
             }
         }
     private:
-        std::vector<Order>     orders_issued_;
+        std::vector<OrderPtr>     orders_issued_;
     };
 
     /// Base class for agents implementing random order cancellation
     /// In moments of time given by CancelInterval distribution 
     /// it chooses an integer i using IndexChooser distribution
     /// and sends a cancellation signal for i-th order
-    template <typename CancelInterval, typename Order, typename Base, typename IndexChooser = rng::uniform_smallint<> >
-        struct OrderCanceller : OrdersSubmittedInVector<Order, Base>
+    template <typename CancelInterval, typename OrderPtr, typename Base, typename IndexChooser = rng::uniform_smallint<> >
+        struct OrderCanceller : OrdersSubmittedInVector<OrderPtr, Base>
     {
-        typedef Timer<OrderCanceller, CancelInterval>   timer_t;
-        typedef OrdersSubmittedInVector<Order, Base>    RealBase;
+        typedef Timer<OrderCanceller, CancelInterval>       timer_t;
+        typedef OrdersSubmittedInVector<OrderPtr, Base>     RealBase;
 
         /// 0-th argument is passed to the base class
         /// 1-th argument defines interval distribution between order cancellations

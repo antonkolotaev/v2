@@ -8,32 +8,44 @@ namespace agent
 {
     
     template <
-        typename MarketBuy,     // type of market buy orders to create. it should have a ctor(T const&, AgentType*)
-        typename MarketSell,    // type of market sell orders to create. it should have a ctor(T const&, AgentType*)
+        typename MarketBuyPtr,     // type of market buy orders to create. it should have a ctor(T const&, AgentType*)
+        typename MarketSellPtr,    // type of market sell orders to create. it should have a ctor(T const&, AgentType*)
         typename Base
     >
-        struct MarketOrderFactoryInSharedPool 
+        struct MarketOrderFactoryInPool 
             :   Base 
-            ,   private SharedOrderPool<MarketBuy, derived_is<typename Base::derived_t> >
-            ,   private SharedOrderPool<MarketSell,derived_is<typename Base::derived_t> >
+            ,   private SharedOrderPool<
+                    MarketBuyPtr, 
+                    derived_is<typename Base::derived_t> 
+                >
+            ,   private SharedOrderPool<
+                    MarketSellPtr,
+                    derived_is<typename Base::derived_t> 
+                >
         {
-            template <typename T> MarketOrderFactoryInSharedPool(T const x) : Base(x) {}
+            template <typename T> MarketOrderFactoryInPool(T const x) : Base(x) {}
+
+            typedef typename boost::iterator_value<MarketBuyPtr> ::type  MarketBuy;
+            typedef typename boost::iterator_value<MarketSellPtr>::type  MarketSell;
 
             /// creates a buy market order
             /// \param T usually it is order volume
             template <typename T>
-                MarketBuy*  createOrder(T const &x, buy_tag) 
+                MarketBuyPtr  createOrder(T const &x, buy_tag) 
                 { 
-                    return SharedOrderPool<MarketBuy, derived_is<typename Base::derived_t> >::createOrder(x); 
+                    return SharedOrderPool<MarketBuyPtr, derived_is<typename Base::derived_t> >::createOrder(x); 
                 }
 
             /// creates a sell market order
             /// \param T usually it is order volume
             template <typename T>
-                MarketSell* createOrder(T const &x, sell_tag) 
+                MarketSellPtr createOrder(T const &x, sell_tag) 
                 { 
-                    return SharedOrderPool<MarketSell, derived_is<typename Base::derived_t> >::createOrder(x); 
+                    return SharedOrderPool<MarketSellPtr, derived_is<typename Base::derived_t> >::createOrder(x); 
                 }
+
+                using Base::derived_t;
+                using Base::self;
 
             /// a shortcut for sending market orders of the given volume
             template <Side SIDE>
@@ -47,10 +59,12 @@ namespace agent
             template <typename T>
                 static void py_visit(T & c)
                 {
-                    c.def("sendBuyOrder", &MarketOrderFactoryInSharedPool::sendMarketOrder<Buy>);
-                    c.def("sendSellOrder",&MarketOrderFactoryInSharedPool::sendMarketOrder<Sell>);
+                    c.def("sendBuyOrder", &MarketOrderFactoryInPool::sendMarketOrder<Buy>);
+                    c.def("sendSellOrder",&MarketOrderFactoryInPool::sendMarketOrder<Sell>);
                 }
 
 #endif
         };
 }}
+
+#endif

@@ -24,7 +24,7 @@ namespace basic {
             IAgentForMarketOrderImpl    < order::MarketT<Buy>, order::MarketT<Sell>, 
             PnL_Quantity_History_InDeque<
             SignalTrader                < py_value<VolumeF>, 
-            MarketOrderFactory          < order::MarketT<Buy>, order::MarketT<Sell>, 
+            MarketOrderFactoryInPool    < MarketBuyPtr, MarketSellPtr, 
             LinkToOrderBook             < boost::intrusive_ptr<OrderBook>, 
             PyRefCounted                <
             AgentBase                   < Signal_Trader, IRefCounted> 

@@ -48,6 +48,7 @@ namespace marketsim
                 /// if a chunk is not released, call destructor for its value
                 if (chunk.next_free == 0)
                 {
+                    std::cerr << "memory leak!" << std::endl;
                     //chunk.getValue()->~T();
                 }
             }

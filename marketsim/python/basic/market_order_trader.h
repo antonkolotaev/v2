@@ -6,7 +6,7 @@
 #include <marketsim/agent/PnL.h>
 #include <marketsim/agent/quantity.h>
 #include <marketsim/agent/on_order_partially_filled.h>
-#include <marketsim/agent/market_order_factory.h>
+#include <marketsim/agent/market_order_factory_in_pool.h>
 
 namespace marketsim {
 namespace basic {
@@ -26,7 +26,7 @@ namespace basic {
             OnPartiallyFilled       < py_callback,
             PnL_Holder              <
             Quantity_Holder         <
-            MarketOrderFactory      < order::MarketT<Buy>, order::MarketT<Sell>, 
+            MarketOrderFactoryInPool< MarketBuyPtr, MarketSellPtr, 
             LinkToOrderBook         < boost::intrusive_ptr<OrderBook>,
             PyRefCounted            <
             AgentBase               < MarketOrderTrader, IRefCounted
