@@ -9,6 +9,21 @@ class OrderQueue(object):
       self._elements = []
       self._tickSize = tickSize
       self._counter = 0
+      self.on_best_changed = set()
+      self._lastBest = None
+
+   def notifyIfBestChanged(self):
+      if self._elements == []:
+         if self._lastBest <> None:
+            for x in self.on_best_changed:
+               x(self, None)
+      else:
+         best = self._elements[0][1]
+         bestpv = (best.price, best.volume)
+         if self._lastBest <> bestpv:
+            self._lastBest = bestpv
+            for x in self.on_best_changed:
+               x(self, best)
 
    def __str__(self):
       return type(self).__name__ + "(" + str(self._elements) + ")"
@@ -16,13 +31,13 @@ class OrderQueue(object):
    def __repr__(self):
       return self.__str__()
 
-   def pushImpl(self, key, order):
-      ticks = self.ticks(order.price)
-      corrected = ticks * self._tickSize
+   def push(self, order):
+      (ticks, corrected) = self.ticks(order.price)
       if order.price <> corrected:
          order.price = corrected
       heapq.heappush(self._elements, ((ticks, self._counter), order))
       self._counter += 1
+      self.notifyIfBestChanged()
 
    def makeValid(self):
       while self._elements <> []:
@@ -51,7 +66,8 @@ class OrderQueue(object):
          if top.matchWith(other):
             heapq.heappop(self._elements)
          else:
-            return other.empty
+            break
+      self.notifyIfBestChanged()
       return other.empty
 
    def withPricesBetterThen(self, limit, idx=0):
@@ -71,11 +87,9 @@ class Bids(OrderQueue):
    def __init__(self, tickSize=1):
       OrderQueue.__init__(self, tickSize)
 
-   def push(self, order):
-      self.pushImpl(-order.price, order)
-
    def ticks(self, price):
-      return int(math.floor(price / self._tickSize))
+      ticks = int(math.floor(price / self._tickSize))
+      return (-ticks, ticks*self._tickSize)
 
    @staticmethod
    def better(x,y):
@@ -87,11 +101,9 @@ class Asks(OrderQueue):
    def __init__(self, tickSize=1):
       OrderQueue.__init__(self, tickSize)
 
-   def push(self, order):
-      self.pushImpl(order.price, order)
-
    def ticks(self, price):
-      return int(math.ceil(price / self._tickSize))
+      ticks = int(math.ceil(price / self._tickSize))
+      return (ticks, ticks*self._tickSize)
 
    @staticmethod
    def better(x,y):

@@ -128,8 +128,8 @@ class Signal(object):
 
    def __init__(self,
                 initialValue=0,
-                deltaDistr=random.normalvariate(0.,1.),
-                intervalDistr=random.expovariate(1.)):
+                deltaDistr=(lambda: random.normalvariate(0.,1.)),
+                intervalDistr=(lambda: random.expovariate(1.))):
 
       self.on_changed = set()
       self.value = initialValue
@@ -146,14 +146,14 @@ class SignalTrader(TraderBase):
    def __init__(self,
                 book,
                 signal,
-                threshold,
+                threshold=0.7,
                 orderFactory=MarketOrderT,
                 volumeDistr=(lambda: random.expovariate(1.))):
 
       TraderBase.__init__(self)
       def onSignalChanged(value):
          side = Side.Buy if value > threshold else Side.Sell if value < -threshold else None
-         if side:
+         if side<>None:
             self.send(book, orderFactory(side)(volumeDistr()))
 
       signal.on_changed.add(onSignalChanged)
