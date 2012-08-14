@@ -3,7 +3,28 @@ from marketsim.scheduler import world
 from marketsim import Side
 from marketsim.order import *
 
-class LiquidityProvider(object):
+class TraderBase(object):
+
+   def __init__(self):
+      self._PnL = 0
+      self.on_order_sent = set()
+
+   def onOrderMatched(self, order, other, (price, volume)):
+       pv = price*volume
+       if order.side == Side.Buy:
+          pv = -pv
+       self._PnL += pv
+
+   @property
+   def PnL(self):
+       return self._PnL
+
+   def send(self, book, order):
+      order.on_matched.add(self.onOrderMatched)
+      book.process(order)
+      for x in self.on_order_sent: x(order)
+
+class LiquidityProvider(TraderBase):
 
    def __init__(self,
                 orderBook,
@@ -14,14 +35,11 @@ class LiquidityProvider(object):
                 priceDistr=(lambda: random.lognormvariate(0., .1)),
                 volumeDistr=(lambda: random.expovariate(.1))):
 
+      TraderBase.__init__(self)
+
       orderFactory = orderFactoryT(side)
 
-      self._PnL = 0
       self._side = side
-      self.on_order_sent = set()
-
-      def onOrderMatched(order, other, (price, volume)):
-          self._PnL += price*volume
 
       def wakeUp():
          queue = orderBook.queue(side)
@@ -29,23 +47,21 @@ class LiquidityProvider(object):
          price = currentPrice * priceDistr()
          volume = int(volumeDistr())
          order = orderFactory(price,volume)
-         order.on_matched.add(onOrderMatched)
-         orderBook.process(order)
-         for x in self.on_order_sent: x(order)
+         self.send(orderBook, order)
 
       world.process(creationIntervalDistr, wakeUp)
-
-   @property
-   def PnL(self):
-      return self._PnL if self._side==Side.Sell else -self._PnL
 
 class Canceller(object):
 
    def __init__(self,
+                source=None,
                 cancellationIntervalDistr=(lambda: random.expovariate(1.)),
                 choiceFunc=lambda N: random.randint(0,N-1)):
 
       self._elements = []
+
+      if source:
+         source.on_order_sent.add(self.process)
 
       def wakeUp():
          while self._elements <> []:
@@ -64,3 +80,80 @@ class Canceller(object):
 
    def process(self, order):
       self._elements.append(order)
+
+class FVTrader(TraderBase):
+
+   def __init__(self,
+                book,
+                orderFactory=MarketOrderT,
+                fundamentalValue=100,
+                volumeDistr=(lambda: random.expovariate(.1)),
+                creationIntervalDistr=(lambda: random.expovariate(1.))):
+
+      TraderBase.__init__(self)
+
+      def wakeUp():
+         side = None
+         if not book.asks.empty and book.asks.best.price < fundamentalValue:
+            side = Side.Buy
+         if not book.bids.empty and book.bids.best.price > fundamentalValue:
+            side = Side.Sell
+         if side <> None:
+            volume = int(volumeDistr())
+            order = orderFactory(side)(volume)
+            self.send(book, order)
+
+      world.process(creationIntervalDistr, wakeUp)
+
+class NoiseTrader(TraderBase):
+
+   def __init__(self,
+                book,
+                orderFactory=MarketOrderT,
+                sideDistr=(lambda: random.randint(0,1)),
+                volumeDistr=(lambda: random.expovariate(.1)),
+                creationIntervalDistr=(lambda: random.expovariate(1.))):
+
+      TraderBase.__init__(self)
+
+      def wakeUp():
+         side = sideDistr()
+         volume = int(volumeDistr())
+         order = orderFactory(side)(volume)
+         self.send(book, order)
+
+      world.process(creationIntervalDistr, wakeUp)
+
+class Signal(object):
+
+   def __init__(self,
+                initialValue=0,
+                deltaDistr=random.normalvariate(0.,1.),
+                intervalDistr=random.expovariate(1.)):
+
+      self.on_changed = set()
+      self.value = initialValue
+
+      def wakeUp():
+         self.value += deltaDistr()
+         for x in self.on_changed:
+             x(self.value)
+
+      world.process(intervalDistr, wakeUp)
+
+class SignalTrader(TraderBase):
+
+   def __init__(self,
+                book,
+                signal,
+                threshold,
+                orderFactory=MarketOrderT,
+                volumeDistr=(lambda: random.expovariate(1.))):
+
+      TraderBase.__init__(self)
+      def onSignalChanged(value):
+         side = Side.Buy if value > threshold else Side.Sell if value < -threshold else None
+         if side:
+            self.send(book, orderFactory(side)(volumeDistr()))
+
+      signal.on_changed.add(onSignalChanged)

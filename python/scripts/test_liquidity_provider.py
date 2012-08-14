@@ -6,6 +6,14 @@ from marketsim.trader import *
 
 book = OrderBook(tickSize=.001)
 
+"""
+t = LiquidityProvider(book)
+c = Canceller()
+t.on_order_sent.add(c.process)
+
+world.workTill(1000.)
+"""
+
 trader = LiquidityProvider(book,
                            side=Side.Sell,
                            creationIntervalDistr=(lambda: 1),
@@ -34,8 +42,7 @@ assert trader.PnL == 32*10 + 64*5
 assert book.asks.best.price == 64
 assert book.asks.best.volume == 5
 
-canceller = Canceller(cancellationIntervalDistr=(lambda: .2), choiceFunc=(lambda N: 0))
-trader.on_order_sent.add(canceller.process)
+canceller = Canceller(source=trader,cancellationIntervalDistr=(lambda: .2), choiceFunc=(lambda N: 0))
 
 world.workTill(3.05)
 

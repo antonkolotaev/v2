@@ -112,10 +112,13 @@ class MarketOrderBuy(MarketOrderBase, BuySideOrderBase):
    def __init__(self, volume):
       MarketOrderBase.__init__(self, volume)
 
-class MarketOrderSell(OrderBase, SellSideOrderBase):
+class MarketOrderSell(MarketOrderBase, SellSideOrderBase):
 
    def __init__(self, volume):
       MarketOrderBase.__init__(self, volume)
+
+def MarketOrderT(side):
+    return MarketOrderSell if side==Side.Sell else MarketOrderBuy
 
 class LimitOrderBuy(LimitOrderBase, BuySideOrderBase):
 
